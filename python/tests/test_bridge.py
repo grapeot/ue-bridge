@@ -2,8 +2,10 @@
 
 import pytest
 from unittest.mock import patch
+from typing import Optional
 
 from ue_bridge import UEBridge, UECommandError
+from ue_bridge.errors import UEConnectionError
 
 
 def make_bridge_with_mock():
@@ -257,3 +259,153 @@ class TestParameterPassing:
 
         params = mock.send_command.call_args[0][1]
         assert params == {"blueprint_name": "BP_Test", "mode": "all"}
+
+    def test_is_ready_uses_expected_command(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True, "ready": True}
+
+        result = ue.is_ready()
+
+        assert result["ready"] is True
+        assert mock.send_command.call_args[0] == ("is_ready", None)
+
+    def test_get_editor_logs_sends_optional_filters(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True, "lines": []}
+
+        ue.get_editor_logs(count=25, category="LogTemp", min_verbosity="Warning")
+
+        assert mock.send_command.call_args[0] == (
+            "get_editor_logs",
+            {"count": 25, "category": "LogTemp", "min_verbosity": "Warning"},
+        )
+
+    def test_get_unreal_logs_sends_filters(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True, "content": ""}
+
+        ue.get_unreal_logs(
+            tail_lines=120,
+            max_bytes=20480,
+            include_meta=False,
+            require_recent=True,
+            recent_window_seconds=5.0,
+            filter_contains="error",
+            filter_category="LogBlueprint",
+        )
+
+        assert mock.send_command.call_args[0] == (
+            "get_unreal_logs",
+            {
+                "tail_lines": 120,
+                "max_bytes": 20480,
+                "include_meta": False,
+                "require_recent": True,
+                "recent_window_seconds": 5.0,
+                "filter_contains": "error",
+                "filter_category": "LogBlueprint",
+            },
+        )
+
+
+class TestWorkflowADiagnostics:
+    def test_doctor_reports_ready_when_all_required_checks_pass(self):
+        ue, _mock = make_bridge_with_mock()
+
+        ue.ping = lambda: True
+        ue.get_context = lambda: {"project_name": "Foo"}
+        ue.is_ready = lambda: {"ready": True, "editor_valid": True}
+
+        def fake_get_editor_logs(count: int = 100, category: Optional[str] = None, min_verbosity: Optional[str] = None):
+            return {"total": 3, "capturing": True}
+
+        def fake_get_unreal_logs(
+            tail_lines: int = 200,
+            max_bytes: int = 65536,
+            include_meta: bool = True,
+            require_recent: bool = False,
+            recent_window_seconds: float = 2.0,
+            filter_contains: Optional[str] = None,
+            filter_category: Optional[str] = None,
+        ):
+            return {"cursor": "live:123", "linesReturned": 8, "truncated": False}
+
+        ue.get_editor_logs = fake_get_editor_logs
+        ue.get_unreal_logs = fake_get_unreal_logs
+
+        result = ue.doctor()
+
+        assert result["ok"] is True
+        assert result["status"] == "ready"
+        assert result["checks"]["ping"]["ok"] is True
+        assert result["checks"]["context"]["ok"] is True
+        assert result["checks"]["editor_ready"]["ok"] is True
+
+    def test_doctor_returns_connection_error_without_raising(self):
+        ue, _mock = make_bridge_with_mock()
+        ue.ping = lambda: (_ for _ in ()).throw(UEConnectionError("cannot connect"))
+
+        result = ue.doctor()
+
+        assert result["ok"] is False
+        assert result["status"] == "connection_error"
+        assert result["checks"]["ping"]["ok"] is False
+        assert "cannot connect" in result["checks"]["ping"]["error"]
+
+    def test_doctor_marks_not_ready_when_editor_ready_is_false(self):
+        ue, _mock = make_bridge_with_mock()
+
+        ue.ping = lambda: True
+        ue.get_context = lambda: {"project_name": "Foo"}
+        ue.is_ready = lambda: {"ready": False, "editor_valid": True, "world_ready": False}
+
+        def fake_get_editor_logs(count: int = 100, category: Optional[str] = None, min_verbosity: Optional[str] = None):
+            return {"total": 1, "capturing": True}
+
+        def fake_get_unreal_logs(
+            tail_lines: int = 200,
+            max_bytes: int = 65536,
+            include_meta: bool = True,
+            require_recent: bool = False,
+            recent_window_seconds: float = 2.0,
+            filter_contains: Optional[str] = None,
+            filter_category: Optional[str] = None,
+        ):
+            return {"cursor": "live:12", "linesReturned": 4, "truncated": False}
+
+        ue.get_editor_logs = fake_get_editor_logs
+        ue.get_unreal_logs = fake_get_unreal_logs
+
+        result = ue.doctor()
+
+        assert result["ok"] is False
+        assert result["status"] == "needs_attention"
+        assert result["checks"]["editor_ready"]["ok"] is False
+
+    def test_verify_installation_uses_doctor_required_checks(self):
+        ue, _mock = make_bridge_with_mock()
+
+        def fake_doctor(
+            editor_log_count: int = 50,
+            unreal_tail_lines: int = 80,
+            require_recent_live_logs: bool = False,
+        ):
+            return {
+            "ok": False,
+            "checks": {
+                "ping": {"ok": True},
+                "context": {"ok": True},
+                "editor_ready": {"ok": False},
+            },
+        }
+
+        ue.doctor = fake_doctor
+
+        result = ue.verify_installation()
+
+        assert result["verified"] is False
+        assert result["required_checks"] == {
+            "ping": True,
+            "context": True,
+            "editor_ready": False,
+        }

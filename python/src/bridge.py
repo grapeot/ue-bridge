@@ -75,8 +75,148 @@ class UEBridge:
     def get_context(self) -> dict:
         return self._cmd("get_context")
 
+    def is_ready(self) -> dict:
+        return self._cmd("is_ready")
+
     def save_all(self) -> dict:
         return self._cmd("save_all")
+
+    def get_editor_logs(
+        self,
+        count: int = 100,
+        category: str | None = None,
+        min_verbosity: str | None = None,
+    ) -> dict:
+        params: dict[str, Any] = {"count": count}
+        if category:
+            params["category"] = category
+        if min_verbosity:
+            params["min_verbosity"] = min_verbosity
+        return self._cmd("get_editor_logs", params)
+
+    def get_unreal_logs(
+        self,
+        tail_lines: int = 200,
+        max_bytes: int = 65536,
+        include_meta: bool = True,
+        require_recent: bool = False,
+        recent_window_seconds: float = 2.0,
+        filter_contains: str | None = None,
+        filter_category: str | None = None,
+    ) -> dict:
+        params: dict[str, Any] = {
+            "tail_lines": tail_lines,
+            "max_bytes": max_bytes,
+            "include_meta": include_meta,
+            "require_recent": require_recent,
+            "recent_window_seconds": recent_window_seconds,
+        }
+        if filter_contains:
+            params["filter_contains"] = filter_contains
+        if filter_category:
+            params["filter_category"] = filter_category
+        return self._cmd("get_unreal_logs", params)
+
+    def doctor(
+        self,
+        editor_log_count: int = 50,
+        unreal_tail_lines: int = 80,
+        require_recent_live_logs: bool = False,
+    ) -> dict:
+        report: dict[str, Any] = {
+            "ok": False,
+            "status": "starting",
+            "summary": [],
+            "checks": {},
+        }
+
+        try:
+            pong = self.ping()
+            report["checks"]["ping"] = {"ok": pong, "pong": pong}
+            if not pong:
+                report["status"] = "connection_unhealthy"
+                report["summary"].append("ping returned false")
+                return report
+        except UEConnectionError as exc:
+            report["status"] = "connection_error"
+            report["summary"].append(str(exc))
+            report["checks"]["ping"] = {"ok": False, "error": str(exc)}
+            return report
+
+        try:
+            context = self.get_context()
+            report["checks"]["context"] = {"ok": True, "data": context}
+        except (UEConnectionError, UECommandError) as exc:
+            report["checks"]["context"] = {"ok": False, "error": str(exc)}
+            report["summary"].append(f"context unavailable: {exc}")
+
+        try:
+            ready = self.is_ready()
+            ready_ok = bool(ready.get("ready", False))
+            report["checks"]["editor_ready"] = {"ok": ready_ok, "data": ready}
+            if not ready_ok:
+                report["summary"].append("editor is reachable but not fully ready")
+        except (UEConnectionError, UECommandError) as exc:
+            report["checks"]["editor_ready"] = {"ok": False, "error": str(exc)}
+            report["summary"].append(f"editor readiness check failed: {exc}")
+
+        try:
+            editor_logs = self.get_editor_logs(count=editor_log_count)
+            report["checks"]["editor_logs"] = {
+                "ok": True,
+                "total": editor_logs.get("total"),
+                "capturing": editor_logs.get("capturing"),
+            }
+        except UECommandError as exc:
+            report["checks"]["editor_logs"] = {
+                "ok": False,
+                "error": str(exc),
+                "error_type": exc.error_type,
+            }
+            report["summary"].append(f"editor logs unavailable: {exc}")
+
+        try:
+            unreal_logs = self.get_unreal_logs(
+                tail_lines=unreal_tail_lines,
+                require_recent=require_recent_live_logs,
+            )
+            report["checks"]["unreal_logs"] = {
+                "ok": True,
+                "cursor": unreal_logs.get("cursor"),
+                "linesReturned": unreal_logs.get("linesReturned"),
+                "truncated": unreal_logs.get("truncated"),
+            }
+        except UECommandError as exc:
+            report["checks"]["unreal_logs"] = {
+                "ok": False,
+                "error": str(exc),
+                "error_type": exc.error_type,
+            }
+            report["summary"].append(f"live unreal logs unavailable: {exc}")
+
+        required_checks = [
+            report["checks"].get("ping", {}).get("ok", False),
+            report["checks"].get("context", {}).get("ok", False),
+            report["checks"].get("editor_ready", {}).get("ok", False),
+        ]
+        report["ok"] = all(required_checks)
+        report["status"] = "ready" if report["ok"] else "needs_attention"
+        if report["ok"] and not report["summary"]:
+            report["summary"].append("editor bridge is reachable and ready")
+        return report
+
+    def verify_installation(self) -> dict:
+        doctor_report = self.doctor(require_recent_live_logs=False)
+        required = {
+            "ping": doctor_report["checks"].get("ping", {}).get("ok", False),
+            "context": doctor_report["checks"].get("context", {}).get("ok", False),
+            "editor_ready": doctor_report["checks"].get("editor_ready", {}).get("ok", False),
+        }
+        return {
+            "verified": all(required.values()),
+            "required_checks": required,
+            "doctor": doctor_report,
+        }
 
     # -------------------------------------------------------------------------
     # Assets
