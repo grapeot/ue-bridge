@@ -4,6 +4,9 @@
 
 ### 2026-03-25
 
+- Extracted the monolithic `UMCPBridge::RegisterActions()` body into a dedicated `FUEEditorActionRegistry` composition layer (`ActionRegistry.h/.cpp`)
+- Verified the `ActionRegistry` refactor is behavior-preserving: `UEBridgeHost` still passes the 6-test Workflow A suite and the `UEEditorMCP.Blueprint.WorkflowA.CreateAndCompile` contract test with exit code 0
+- Confirmed the first structural de-MCP step can proceed under existing coverage without changing transport or public command semantics
 - Expanded the Unreal Automation baseline from 4 tests to 6 deterministic Workflow A tests across both `UEBridgeHost` and `CharacterActionRoom`
 - Added `UEEditorMCP.Health.WorkflowA.GetPIEStateStopped` and `UEEditorMCP.Health.WorkflowA.LogControlSurface`
 - Verified the expanded Workflow A batch passes in both hosts: 6 passed, 0 failed, exit code 0
@@ -55,3 +58,4 @@
 - A two-host strategy is now justified: one tiny host for deterministic automation, one real example project for smoke coverage. That should remain the testing architecture unless Unreal CI requirements force a different split
 - Build and automation execution for the same host must be serialized, not parallelized. Running the editor before the project plugin dylib is deployed can produce false "module could not be found" failures that look like product bugs but are really orchestration mistakes
 - For Blueprint contract tests, a unique per-run asset name is safer than create-then-delete on the same static path. Immediate deletion caused noisy AssetRegistry warnings; unique names kept the test signal clean enough for automation
+- The right first refactor target was not `MCPServer`, but the oversized `RegisterActions()` composition point. Extracting registration into a dedicated registry improved maintainability without reopening transport risk or forcing a naming migration too early
