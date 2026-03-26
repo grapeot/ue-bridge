@@ -2,7 +2,7 @@
 UEBridge — Main API class for Unreal Editor automation.
 
 Usage:
-    from ue_bridge.src import UEBridge
+    from ue_bridge import UEBridge
 
     ue = UEBridge()
     ue.ping()

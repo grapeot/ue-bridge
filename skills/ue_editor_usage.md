@@ -6,8 +6,8 @@
 
 **Two usage surfaces:**
 
-- **CLI** (`ue-bridge <command>`) — for simple, one-off tasks: ping, list actors, compile a Blueprint, spawn an actor.
-- **Python library** (`from src import UEBridge`) — for multi-step workflows: creating Blueprints, wiring nodes, configuring input systems, batch operations.
+- **CLI** (`ue-bridge <command>`) — for simple, one-off tasks: ping, inspect context, query actors, create basic assets, compile a Blueprint, spawn an actor.
+- **Python library** (`from ue_bridge import UEBridge`) — for multi-step workflows: creating Blueprints, wiring nodes, configuring input systems, batch operations.
 
 Use CLI when a single command suffices. Use the library when you need sequencing, conditionals, or access to node IDs returned by earlier calls.
 
@@ -15,27 +15,33 @@ Use CLI when a single command suffices. Use the library when you need sequencing
 
 ```bash
 ue-bridge ping
+ue-bridge get-context
 ue-bridge save
 ue-bridge get-actors
+ue-bridge find-actors --pattern "Wall*"
 ue-bridge list-assets --path /Game/ThirdPerson/
 ue-bridge compile --blueprint BP_ThirdPersonCharacter
 ue-bridge summary --blueprint BP_ThirdPersonCharacter
+ue-bridge create-blueprint --name BP_Test --parent-class Character --path /Game/Test
 ue-bridge create-input-action --name IA_Foo
+ue-bridge create-input-mapping-context --name IMC_Default
 ue-bridge add-key-mapping --context IMC_Default --action IA_Foo --key F
 ue-bridge spawn-actor --type StaticMeshActor --name Wall_01 --location 100,0,0
+ue-bridge spawn-blueprint-actor --blueprint BP_Test --name BP_Test_01 --location 0,0,100
 ue-bridge delete-actor --name Wall_01
+ue-bridge auto-layout --blueprint BP_Test
 ue-bridge raw get_context
 ue-bridge raw compile_blueprint --params '{"blueprint_name":"BP_Foo"}'
 ```
 
-Alternatively, from the `python/` directory: `python3 -m src <command>` (same arguments).
+Alternatively, from the `python/` directory: `python3 -m ue_bridge <command>` (canonical) or `python3 -m src <command>` (legacy compatibility).
 
 ## Python API Quick Reference
 
 ### Connection
 
 ```python
-from src import UEBridge
+from ue_bridge import UEBridge
 
 with UEBridge() as ue:
     ue.ping()          # -> True
@@ -147,7 +153,7 @@ ue.raw_command("remove_key_mapping_from_context", {
 `UECommandError` contains error message and error_type. Use try/except:
 
 ```python
-from src.errors import UECommandError
+from ue_bridge.errors import UECommandError
 
 try:
     ue.compile("BP_NonExistent")
@@ -181,7 +187,7 @@ Different GameModes use different Character Blueprints. Check World Settings or 
 ## Complete Example: Add Crouch to a Character
 
 ```python
-from src import UEBridge
+from ue_bridge import UEBridge
 
 with UEBridge() as ue:
     bp = "BP_ThirdPersonCharacter"

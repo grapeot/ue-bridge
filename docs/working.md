@@ -4,6 +4,14 @@
 
 ### 2026-03-25
 
+- Started Phase 2/3 contract-hardening branch after merging Phase 1 into master
+- Added canonical `python/ue_bridge/` package surface while keeping `python/src/` as a compatibility layer
+- Updated `pyproject.toml` so the `ue-bridge` console script points at `ue_bridge.cli:main` and editable installs include both `ue_bridge*` and `src*`
+- Expanded the CLI for the primary one-off workflow: get-context, find-actors, create-blueprint, spawn-blueprint-actor, create-input-mapping-context, auto-layout
+- Added contract tests for canonical imports, legacy import compatibility, CLI parser coverage, CLI runtime behavior, and additional bridge/connection parameter paths
+- Ran local unit suite successfully: 56 passed, 8 deselected
+- Added `.github/workflows/ci.yml` to run the non-integration contract suite on push and pull request
+- Verified editable install + canonical entrypoint smoke test: `from ue_bridge import UEBridge` and `python -m ue_bridge ping`
 - Phase 1 kickoff: AI-first documentation surface — docs-only changes, no code changes, non-breaking
 - Rewrote README.md: replaced combat_game-centric README with a standalone project README covering architecture, quick start, key features, project structure, test instructions, and credits
 - Rewrote skills/ue_editor_installation.md: self-contained installation guide with repo layout, 4-step setup (plugin install, verify, Python install, ping), and troubleshooting section. Removed all `combat_game/tools/ue_editor` paths and `sys.path.insert` hacks
@@ -17,3 +25,6 @@
 - The original skill docs assumed you were working from within the combat_game project and used `sys.path.insert(0, "tools/ue_editor")` to import the library. After extracting ue_bridge into its own directory, all path guidance needed rewriting to be self-contained (`cd ue_bridge_skill/python && pip install -e .`)
 - AI-facing docs (skills/) should be structured for the AI's workflow: prerequisites first, then step-by-step installation, then usage patterns with copy-pasteable code blocks. Avoid narrative — use headings and code fences as the primary navigation surface
 - Phase 1 (docs-only) is a safe first step because it changes zero runtime behavior. This lets us validate the directory structure and documentation quality before touching code or build scripts in later phases
+- A compatibility shim is much cheaper than a full package rename when the repo is still young. Adding a canonical `ue_bridge` package while preserving `src` lets us stabilize the public contract without forcing an all-at-once migration
+- For this repo, the right testing bar is contract coverage, not UE-heavy end-to-end coverage. The local fast suite is what should drive GitHub Actions, while UE integration remains opt-in
+- The correct CI scope for this repo is the Python contract surface, not Unreal-dependent integration flows. Shipping a small reliable workflow now is better than waiting for a full UE-capable pipeline

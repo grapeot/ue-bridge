@@ -58,9 +58,9 @@ pip install -e ".[dev]"
 
 This installs the `ue-bridge` package in editable mode with test dependencies. It provides:
 
-- **Python import**: `from src import UEBridge`
+- **Python import**: `from ue_bridge import UEBridge`
 - **CLI command**: `ue-bridge` (available after install)
-- **Module invocation**: `python3 -m src` (from the `python/` directory)
+- **Module invocation**: `python3 -m ue_bridge` (canonical) or `python3 -m src` (legacy compatibility)
 
 ### Step 4: Confirm end-to-end connectivity
 
@@ -76,7 +76,7 @@ Returns `{"pong": true}` if Python -> TCP -> UE Plugin is working. This is the s
 
 **"Connection refused on port 55558"**: The plugin's TCP server may not have started. Search for "MCP" in UE's Output Log.
 
-**Python import errors**: Ensure you ran `pip install -e .` from the `python/` directory. The package name is `ue-bridge` and the import is `from src import UEBridge`.
+**Python import errors**: Ensure you ran `pip install -e .` from the `python/` directory. The package name is `ue-bridge` and the canonical import is `from ue_bridge import UEBridge`.
 
 **macOS RTTI build error**: The setup script patches `bUseRTTI=false` automatically. If building manually, ensure `.uplugin` or `.Build.cs` has `bUseRTTI = false`.
 

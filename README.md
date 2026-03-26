@@ -42,10 +42,12 @@ cd python
 pip install -e ".[dev]"
 ```
 
+The canonical Python package is `ue_bridge`. The older `src` package remains as a compatibility shim for existing callers.
+
 ### 4. Run a Python script
 
 ```python
-from src import UEBridge
+from ue_bridge import UEBridge
 
 with UEBridge() as ue:
     print(ue.ping())  # True
@@ -71,7 +73,9 @@ Or use the CLI:
 
 ```bash
 ue-bridge ping
+ue-bridge get-context
 ue-bridge get-actors
+ue-bridge find-actors --pattern "Wall*"
 ue-bridge compile --blueprint BP_ThirdPersonCharacter
 ```
 
@@ -105,7 +109,8 @@ ue_bridge_skill/
     Source/          Plugin source code
     UEEditorMCP.uplugin
   python/            Python library (pip install -e .)
-    src/             Package: UEBridge, Connection, CLI, errors
+    ue_bridge/       Canonical package surface
+    src/             Compatibility package surface
     tests/           Unit and integration tests
     pyproject.toml
   skills/            AI-facing installation and usage docs
@@ -128,9 +133,14 @@ cd python
 # Unit tests (no UE Editor needed)
 python3 -m pytest tests/ -v -k "not integration"
 
+# Contract suite with coverage
+python3 -m pytest tests/ -v -k "not integration" --cov=ue_bridge --cov=src --cov-report=term-missing
+
 # Integration tests (requires UE Editor running with plugin enabled)
 python3 -m pytest tests/test_integration.py -v -m integration
 ```
+
+GitHub Actions runs the non-integration test suite on every push and pull request.
 
 ## Credits
 
