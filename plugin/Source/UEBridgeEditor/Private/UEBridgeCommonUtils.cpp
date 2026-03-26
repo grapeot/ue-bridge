@@ -408,6 +408,18 @@ bool FUEBridgeCommonUtils::SetObjectProperty(UObject* Object, const FString& Pro
 					return true;
 				}
 			}
+			else if (Value->Type == EJson::Object)
+			{
+				const TSharedPtr<FJsonObject>& Obj = Value->AsObject();
+				if (Obj.IsValid() && Obj->HasField(TEXT("X")) && Obj->HasField(TEXT("Y")) && Obj->HasField(TEXT("Z")))
+				{
+					FVector* VecPtr = (FVector*)PropertyAddr;
+					VecPtr->X = Obj->GetNumberField(TEXT("X"));
+					VecPtr->Y = Obj->GetNumberField(TEXT("Y"));
+					VecPtr->Z = Obj->GetNumberField(TEXT("Z"));
+					return true;
+				}
+			}
 		}
 		else if (StructProp->Struct == TBaseStructure<FRotator>::Get())
 		{
@@ -420,6 +432,18 @@ bool FUEBridgeCommonUtils::SetObjectProperty(UObject* Object, const FString& Pro
 					RotPtr->Pitch = Arr[0]->AsNumber();
 					RotPtr->Yaw = Arr[1]->AsNumber();
 					RotPtr->Roll = Arr[2]->AsNumber();
+					return true;
+				}
+			}
+			else if (Value->Type == EJson::Object)
+			{
+				const TSharedPtr<FJsonObject>& Obj = Value->AsObject();
+				if (Obj.IsValid() && Obj->HasField(TEXT("Pitch")) && Obj->HasField(TEXT("Yaw")) && Obj->HasField(TEXT("Roll")))
+				{
+					FRotator* RotPtr = (FRotator*)PropertyAddr;
+					RotPtr->Pitch = Obj->GetNumberField(TEXT("Pitch"));
+					RotPtr->Yaw = Obj->GetNumberField(TEXT("Yaw"));
+					RotPtr->Roll = Obj->GetNumberField(TEXT("Roll"));
 					return true;
 				}
 			}
