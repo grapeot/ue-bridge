@@ -298,6 +298,66 @@ class TestParameterPassing:
         params = mock.send_command.call_args[0][1]
         assert params == {"blueprint_name": "BP_Test", "mode": "all"}
 
+    def test_start_pie_default_mode(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True, "mode": "SelectedViewport",
+            "message": "PIE session requested", "is_async": True,
+        }
+
+        result = ue.start_pie()
+
+        assert mock.send_command.call_args[0] == ("start_pie", {"mode": "SelectedViewport"})
+        assert result["mode"] == "SelectedViewport"
+        assert result["is_async"] is True
+
+    def test_start_pie_simulate_mode(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True, "mode": "Simulate",
+            "message": "PIE session requested", "is_async": True,
+        }
+
+        ue.start_pie(mode="Simulate")
+
+        assert mock.send_command.call_args[0][1]["mode"] == "Simulate"
+
+    def test_stop_pie_sends_correct_command(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True, "state": "stop_requested",
+            "message": "PIE stop requested",
+        }
+
+        result = ue.stop_pie()
+
+        assert mock.send_command.call_args[0] == ("stop_pie", None)
+        assert result["state"] == "stop_requested"
+
+    def test_get_pie_state_running(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True, "state": "Running",
+            "world_name": "UEDPIE_0_TestMap",
+            "is_paused": False, "is_simulating": False,
+        }
+
+        result = ue.get_pie_state()
+
+        assert mock.send_command.call_args[0] == ("get_pie_state", None)
+        assert result["state"] == "Running"
+        assert result["is_paused"] is False
+
+    def test_get_pie_state_stopped(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True, "state": "Stopped",
+        }
+
+        result = ue.get_pie_state()
+
+        assert result["state"] == "Stopped"
+
     def test_is_ready_uses_expected_command(self):
         ue, mock = make_bridge_with_mock()
         mock.send_command.return_value = {"success": True, "ready": True}
