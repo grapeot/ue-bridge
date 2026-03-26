@@ -17,7 +17,7 @@
 // FCreateInputMappingAction - Legacy input mapping
 // =============================================================================
 
-bool FCreateInputMappingAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateInputMappingAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("action_name")))
 	{
@@ -32,7 +32,7 @@ bool FCreateInputMappingAction::Validate(const TSharedPtr<FJsonObject>& Params, 
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCreateInputMappingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateInputMappingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActionName = Params->GetStringField(TEXT("action_name"));
 	FString Key = Params->GetStringField(TEXT("key"));
@@ -109,7 +109,7 @@ TSharedPtr<FJsonObject> FCreateInputMappingAction::ExecuteInternal(const TShared
 // FCreateInputActionAction - Enhanced Input Action asset
 // =============================================================================
 
-bool FCreateInputActionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateInputActionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("name")))
 	{
@@ -119,7 +119,7 @@ bool FCreateInputActionAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCreateInputActionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateInputActionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Name = Params->GetStringField(TEXT("name"));
 
@@ -238,7 +238,7 @@ TSharedPtr<FJsonObject> FCreateInputActionAction::ExecuteInternal(const TSharedP
 // FCreateInputMappingContextAction - Input Mapping Context asset
 // =============================================================================
 
-bool FCreateInputMappingContextAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateInputMappingContextAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("name")))
 	{
@@ -248,7 +248,7 @@ bool FCreateInputMappingContextAction::Validate(const TSharedPtr<FJsonObject>& P
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCreateInputMappingContextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateInputMappingContextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Name = Params->GetStringField(TEXT("name"));
 
@@ -310,7 +310,7 @@ TSharedPtr<FJsonObject> FCreateInputMappingContextAction::ExecuteInternal(const 
 // FAddKeyMappingToContextAction - Add key to IMC with modifiers
 // =============================================================================
 
-bool FAddKeyMappingToContextAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddKeyMappingToContextAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("context_name")))
 	{
@@ -330,7 +330,7 @@ bool FAddKeyMappingToContextAction::Validate(const TSharedPtr<FJsonObject>& Para
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddKeyMappingToContextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddKeyMappingToContextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ContextName = Params->GetStringField(TEXT("context_name"));
 	FString ActionName = Params->GetStringField(TEXT("action_name"));
@@ -428,7 +428,7 @@ TSharedPtr<FJsonObject> FAddKeyMappingToContextAction::ExecuteInternal(const TSh
 // FReadIMCAction - Read all mappings from an Input Mapping Context
 // =============================================================================
 
-bool FReadIMCAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FReadIMCAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("context_name")))
 	{
@@ -438,7 +438,7 @@ bool FReadIMCAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FReadIMCAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FReadIMCAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ContextName = Params->GetStringField(TEXT("context_name"));
 
@@ -534,7 +534,7 @@ TSharedPtr<FJsonObject> FReadIMCAction::ExecuteInternal(const TSharedPtr<FJsonOb
 // FRemoveKeyMappingFromContextAction - Remove mapping(s) from IMC
 // =============================================================================
 
-bool FRemoveKeyMappingFromContextAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRemoveKeyMappingFromContextAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("context_name")))
 	{
@@ -550,7 +550,7 @@ bool FRemoveKeyMappingFromContextAction::Validate(const TSharedPtr<FJsonObject>&
 	return true;
 }
 
-TSharedPtr<FJsonObject> FRemoveKeyMappingFromContextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRemoveKeyMappingFromContextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ContextName = Params->GetStringField(TEXT("context_name"));
 

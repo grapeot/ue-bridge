@@ -11,7 +11,7 @@
 // FMCPClientHandler - per-client thread
 // =============================================================================
 
-FMCPClientHandler::FMCPClientHandler(FSocket* InClientSocket, UMCPBridge* InBridge, TAtomic<bool>& InServerStopping)
+FMCPClientHandler::FMCPClientHandler(FSocket* InClientSocket, UUEEditorBridge* InBridge, TAtomic<bool>& InServerStopping)
 	: ClientSocket(InClientSocket)
 	, Bridge(InBridge)
 	, Thread(nullptr)
@@ -246,7 +246,7 @@ FString FMCPClientHandler::ExecuteOnGameThread(const FString& CommandType, TShar
 // FMCPServer - accept loop, spawns FMCPClientHandler per connection
 // =============================================================================
 
-FMCPServer::FMCPServer(UMCPBridge* InBridge, int32 InPort)
+FMCPServer::FMCPServer(UUEEditorBridge* InBridge, int32 InPort)
 	: Bridge(InBridge)
 	, ListenerSocket(nullptr)
 	, Port(InPort)

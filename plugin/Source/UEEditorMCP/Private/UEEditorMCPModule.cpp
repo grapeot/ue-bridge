@@ -992,7 +992,7 @@ static void ExecuteMaterialAutoLayout()
 		OriginalMaterial->EditorX = TargetMaterial->EditorX;
 		OriginalMaterial->EditorY = TargetMaterial->EditorY;
 
-		UMCPBridge* Bridge = GEditor ? GEditor->GetEditorSubsystem<UMCPBridge>() : nullptr;
+		UUEEditorBridge* Bridge = GEditor ? GEditor->GetEditorSubsystem<UUEEditorBridge>() : nullptr;
 		if (Bridge)
 		{
 			TSharedPtr<FJsonObject> Params = MakeShared<FJsonObject>();

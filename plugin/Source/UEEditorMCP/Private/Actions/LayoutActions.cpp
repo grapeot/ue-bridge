@@ -2113,13 +2113,13 @@ int32 FBlueprintAutoLayout::LayoutNodes(
 // FAutoLayoutSelectedAction
 // ============================================================================
 
-bool FAutoLayoutSelectedAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAutoLayoutSelectedAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// mode is optional, defaults to "selected"
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAutoLayoutSelectedAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAutoLayoutSelectedAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Mode = TEXT("selected");
 	if (Params->HasField(TEXT("mode")))
@@ -2297,13 +2297,13 @@ TSharedPtr<FJsonObject> FAutoLayoutSelectedAction::ExecuteInternal(const TShared
 // FAutoLayoutSubtreeAction
 // ============================================================================
 
-bool FAutoLayoutSubtreeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAutoLayoutSubtreeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// root_node_id is required unless we have a single selected node via editor
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAutoLayoutSubtreeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAutoLayoutSubtreeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FBlueprintEditor* BPEditor = nullptr;
 	UEdGraph* Graph = ResolveGraph(Params, BPEditor);
@@ -2386,12 +2386,12 @@ TSharedPtr<FJsonObject> FAutoLayoutSubtreeAction::ExecuteInternal(const TSharedP
 // FAutoLayoutBlueprintAction
 // ============================================================================
 
-bool FAutoLayoutBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAutoLayoutBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAutoLayoutBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAutoLayoutBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	// 1. Resolve the Blueprint
 	UBlueprint* Blueprint = nullptr;
@@ -2497,7 +2497,7 @@ TSharedPtr<FJsonObject> FAutoLayoutBlueprintAction::ExecuteInternal(const TShare
 // FLayoutAndCommentAction
 // ============================================================================
 
-bool FLayoutAndCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FLayoutAndCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const TArray<TSharedPtr<FJsonValue>>* GroupsArray = nullptr;
 	if (!Params->TryGetArrayField(TEXT("groups"), GroupsArray) || !GroupsArray || GroupsArray->Num() == 0)
@@ -2533,7 +2533,7 @@ bool FLayoutAndCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FM
 	return true;
 }
 
-TSharedPtr<FJsonObject> FLayoutAndCommentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FLayoutAndCommentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	// ================================================================
 	// 0. Resolve graph

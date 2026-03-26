@@ -25,7 +25,7 @@ protected:
 	UMaterial* FindMaterial(const FString& MaterialName, FString& OutError) const;
 
 	/** Get Material by name, or use current from context if name is empty */
-	UMaterial* GetMaterialByNameOrCurrent(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) const;
+	UMaterial* GetMaterialByNameOrCurrent(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) const;
 
 	/** Clean up existing material with same name */
 	void CleanupExistingMaterial(const FString& MaterialName, const FString& PackagePath) const;
@@ -34,7 +34,7 @@ protected:
 	UClass* ResolveExpressionClass(const FString& ExpressionClassName) const;
 
 	/** Mark material as modified and trigger recompilation */
-	void MarkMaterialModified(UMaterial* Material, FMCPEditorContext& Context) const;
+	void MarkMaterialModified(UMaterial* Material, FUEEditorContext& Context) const;
 };
 
 
@@ -59,10 +59,10 @@ protected:
 class UEEDITORMCP_API FCreateMaterialAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("create_material"); }
 
 private:
@@ -96,10 +96,10 @@ private:
 class UEEDITORMCP_API FAddMaterialExpressionAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_material_expression"); }
 
 private:
@@ -128,10 +128,10 @@ private:
 class UEEDITORMCP_API FConnectMaterialExpressionsAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("connect_material_expressions"); }
 
 private:
@@ -159,10 +159,10 @@ private:
 class UEEDITORMCP_API FConnectToMaterialOutputAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("connect_to_material_output"); }
 
 private:
@@ -190,10 +190,10 @@ private:
 class UEEDITORMCP_API FSetMaterialExpressionPropertyAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_material_expression_property"); }
 
 private:
@@ -220,10 +220,10 @@ private:
 class UEEDITORMCP_API FCompileMaterialAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("compile_material"); }
 	virtual bool RequiresSave() const override { return true; } // Save after successful compilation
 };
@@ -249,10 +249,10 @@ protected:
 class UEEDITORMCP_API FCreateMaterialInstanceAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("create_material_instance"); }
 };
 
@@ -283,10 +283,10 @@ protected:
 class UEEDITORMCP_API FSetMaterialPropertyAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_material_property"); }
 
 private:
@@ -316,10 +316,10 @@ private:
 class UEEDITORMCP_API FCreatePostProcessVolumeAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("create_post_process_volume"); }
 
 private:
@@ -345,10 +345,10 @@ private:
 class UEEDITORMCP_API FGetMaterialSummaryAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("get_material_summary"); }
 	virtual bool RequiresSave() const override { return false; }
 
@@ -381,10 +381,10 @@ private:
 class UEEDITORMCP_API FRemoveMaterialExpressionAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("remove_material_expression"); }
 };
 
@@ -407,10 +407,10 @@ protected:
 class UEEDITORMCP_API FAutoLayoutMaterialAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("auto_layout_material"); }
 	virtual bool RequiresSave() const override { return false; }
 
@@ -455,10 +455,10 @@ private:
 class UEEDITORMCP_API FAutoCommentMaterialAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("auto_comment_material"); }
 };
 
@@ -480,10 +480,10 @@ protected:
 class UEEDITORMCP_API FGetMaterialSelectedNodesAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("get_material_selected_nodes"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -510,10 +510,10 @@ protected:
 class UEEDITORMCP_API FApplyMaterialToComponentAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("apply_material_to_component"); }
 };
 
@@ -537,10 +537,10 @@ protected:
 class UEEDITORMCP_API FApplyMaterialToActorAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("apply_material_to_actor"); }
 };
 
@@ -565,10 +565,10 @@ protected:
 class UEEDITORMCP_API FRefreshMaterialEditorAction : public FMaterialAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("refresh_material_editor"); }
 	virtual bool RequiresSave() const override { return false; }
 };

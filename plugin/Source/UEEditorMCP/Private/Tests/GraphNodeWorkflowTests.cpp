@@ -12,9 +12,9 @@ namespace UEEditorMCP::NodeTests
 {
 constexpr auto EditorOnlyFlags = EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter;
 
-UMCPBridge* GetBridge()
+UUEEditorBridge* GetBridge()
 {
-	return GEditor ? GEditor->GetEditorSubsystem<UMCPBridge>() : nullptr;
+	return GEditor ? GEditor->GetEditorSubsystem<UUEEditorBridge>() : nullptr;
 }
 
 const TSharedPtr<FJsonObject>& GetFlatSuccessObject(FAutomationTestBase& Test, const TSharedPtr<FJsonObject>& Response)
@@ -50,7 +50,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPGraphNodeWorkflowTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::NodeTests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::NodeTests::GetBridge();
 	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
 	{
 		return false;

@@ -168,7 +168,7 @@ TSharedPtr<FJsonObject> FPatchOpResult::ToJson() const
 // P3.1 — FGraphDescribeEnhancedAction
 // ============================================================================
 
-bool FGraphDescribeEnhancedAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGraphDescribeEnhancedAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
@@ -418,7 +418,7 @@ TSharedPtr<FJsonObject> FGraphDescribeEnhancedAction::SerializePinCompact(
 }
 
 TSharedPtr<FJsonObject> FGraphDescribeEnhancedAction::ExecuteInternal(
-	const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+	const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
@@ -544,7 +544,7 @@ TSharedPtr<FJsonObject> FGraphDescribeEnhancedAction::ExecuteInternal(
 // P3.3 — FApplyPatchAction
 // ============================================================================
 
-bool FApplyPatchAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FApplyPatchAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateGraph(Params, Context, OutError))
 	{
@@ -777,7 +777,7 @@ FPatchOpResult FApplyPatchAction::ValidateOp(const FPatchOp& Op, UBlueprint* Blu
 }
 
 FPatchOpResult FApplyPatchAction::ExecuteOp(const FPatchOp& Op, UBlueprint* Blueprint,
-	UEdGraph* Graph, TMap<FString, FGuid>& TempIdMap, FMCPEditorContext& Context) const
+	UEdGraph* Graph, TMap<FString, FGuid>& TempIdMap, FUEEditorContext& Context) const
 {
 	switch (Op.OpType)
 	{
@@ -812,7 +812,7 @@ FPatchOpResult FApplyPatchAction::ExecuteOp(const FPatchOp& Op, UBlueprint* Blue
 // -- Individual op executors --
 
 FPatchOpResult FApplyPatchAction::ExecuteAddNode(const FPatchOp& Op, UBlueprint* Blueprint,
-	UEdGraph* Graph, TMap<FString, FGuid>& TempIdMap, FMCPEditorContext& Context) const
+	UEdGraph* Graph, TMap<FString, FGuid>& TempIdMap, FUEEditorContext& Context) const
 {
 	FPatchOpResult Result;
 	Result.OpIndex = Op.OpIndex;
@@ -1745,7 +1745,7 @@ FPatchOpResult FApplyPatchAction::ExecuteSetPinDefault(const FPatchOp& Op, UEdGr
 }
 
 TSharedPtr<FJsonObject> FApplyPatchAction::ExecuteInternal(
-	const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+	const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
@@ -1906,7 +1906,7 @@ TSharedPtr<FJsonObject> FApplyPatchAction::ExecuteInternal(
 // P3.4 — FValidatePatchAction
 // ============================================================================
 
-bool FValidatePatchAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FValidatePatchAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateGraph(Params, Context, OutError))
 	{
@@ -1924,7 +1924,7 @@ bool FValidatePatchAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPE
 }
 
 TSharedPtr<FJsonObject> FValidatePatchAction::ExecuteInternal(
-	const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+	const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
@@ -1994,7 +1994,7 @@ TSharedPtr<FJsonObject> FValidatePatchAction::ExecuteInternal(
 
 // --- export_nodes_to_text ---
 
-bool FExportNodesToTextAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FExportNodesToTextAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// node_ids is required (array of GUID strings)
 	const TArray<TSharedPtr<FJsonValue>>* NodeIdsArr = nullptr;
@@ -2006,7 +2006,7 @@ bool FExportNodesToTextAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FExportNodesToTextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FExportNodesToTextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
@@ -2095,14 +2095,14 @@ TSharedPtr<FJsonObject> FExportNodesToTextAction::ExecuteInternal(const TSharedP
 
 // --- import_nodes_from_text ---
 
-bool FImportNodesFromTextAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FImportNodesFromTextAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ExportedText;
 	if (!GetRequiredString(Params, TEXT("exported_text"), ExportedText, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FImportNodesFromTextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FImportNodesFromTextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ExportedText = Params->GetStringField(TEXT("exported_text"));
 

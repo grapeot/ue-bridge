@@ -9,16 +9,16 @@
 #include "Materials/MaterialExpression.h"
 
 /**
- * FMCPEditorContext
+ * FUEEditorContext
  *
  * Tracks the current editing context across MCP commands.
  * This allows commands to reference the "current" blueprint/graph
  * without specifying it each time.
  */
-struct UEEDITORMCP_API FMCPEditorContext
+struct UEEDITORMCP_API FUEEditorContext
 {
 public:
-	FMCPEditorContext();
+	FUEEditorContext();
 
 	// =========================================================================
 	// Current Focus

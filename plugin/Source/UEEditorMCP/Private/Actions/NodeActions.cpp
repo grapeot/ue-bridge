@@ -62,7 +62,7 @@
 // Graph Operations (connect, find, delete, inspect)
 // ============================================================================
 
-bool FConnectBlueprintNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FConnectBlueprintNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString SourceNodeId, TargetNodeId, SourcePin, TargetPin;
 	if (!GetRequiredString(Params, TEXT("source_node_id"), SourceNodeId, OutError)) return false;
@@ -72,7 +72,7 @@ bool FConnectBlueprintNodesAction::Validate(const TSharedPtr<FJsonObject>& Param
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FConnectBlueprintNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FConnectBlueprintNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString SourceNodeId = Params->GetStringField(TEXT("source_node_id"));
 	FString TargetNodeId = Params->GetStringField(TEXT("target_node_id"));
@@ -166,12 +166,12 @@ TSharedPtr<FJsonObject> FConnectBlueprintNodesAction::ExecuteInternal(const TSha
 }
 
 
-bool FFindBlueprintNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FFindBlueprintNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FFindBlueprintNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FFindBlueprintNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString NodeType = GetOptionalString(Params, TEXT("node_type"));
 	FString EventName = GetOptionalString(Params, TEXT("event_name"));
@@ -250,14 +250,14 @@ TSharedPtr<FJsonObject> FFindBlueprintNodesAction::ExecuteInternal(const TShared
 }
 
 
-bool FDeleteBlueprintNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDeleteBlueprintNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString NodeId;
 	if (!GetRequiredString(Params, TEXT("node_id"), NodeId, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FDeleteBlueprintNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDeleteBlueprintNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString NodeId = Params->GetStringField(TEXT("node_id"));
 
@@ -301,14 +301,14 @@ TSharedPtr<FJsonObject> FDeleteBlueprintNodeAction::ExecuteInternal(const TShare
 }
 
 
-bool FGetNodePinsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetNodePinsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString NodeId;
 	if (!GetRequiredString(Params, TEXT("node_id"), NodeId, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FGetNodePinsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetNodePinsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString NodeId = Params->GetStringField(TEXT("node_id"));
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
@@ -376,7 +376,7 @@ TSharedPtr<FJsonObject> FGetNodePinsAction::ExecuteInternal(const TSharedPtr<FJs
 // Event Nodes
 // ============================================================================
 
-bool FAddBlueprintEventNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintEventNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// Support both "event_name" (canonical) and "event_type" (alias)
 	FString EventName;
@@ -391,7 +391,7 @@ bool FAddBlueprintEventNodeAction::Validate(const TSharedPtr<FJsonObject>& Param
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintEventNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintEventNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	// Support both "event_name" (canonical) and "event_type" (alias)
 	FString EventName;
@@ -437,14 +437,14 @@ TSharedPtr<FJsonObject> FAddBlueprintEventNodeAction::ExecuteInternal(const TSha
 }
 
 
-bool FAddBlueprintInputActionNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintInputActionNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ActionName;
 	if (!GetRequiredString(Params, TEXT("action_name"), ActionName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintInputActionNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintInputActionNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActionName = Params->GetStringField(TEXT("action_name"));
 	FVector2D Position = GetNodePosition(Params);
@@ -467,14 +467,14 @@ TSharedPtr<FJsonObject> FAddBlueprintInputActionNodeAction::ExecuteInternal(cons
 }
 
 
-bool FAddEnhancedInputActionNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddEnhancedInputActionNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ActionName;
 	if (!GetRequiredString(Params, TEXT("action_name"), ActionName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddEnhancedInputActionNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddEnhancedInputActionNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActionName = Params->GetStringField(TEXT("action_name"));
 	FString ActionPath = GetOptionalString(Params, TEXT("action_path"), TEXT("/Game/Input"));
@@ -506,14 +506,14 @@ TSharedPtr<FJsonObject> FAddEnhancedInputActionNodeAction::ExecuteInternal(const
 }
 
 
-bool FAddBlueprintCustomEventAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintCustomEventAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString EventName;
 	if (!GetRequiredString(Params, TEXT("event_name"), EventName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintCustomEventAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintCustomEventAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString EventName = Params->GetStringField(TEXT("event_name"));
 	FVector2D Position = GetNodePosition(Params);
@@ -611,7 +611,7 @@ UClass* FAddCustomEventForDelegateAction::ResolveClass(const FString& ClassName)
 	return nullptr;
 }
 
-bool FAddCustomEventForDelegateAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddCustomEventForDelegateAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString EventName;
 	if (!GetRequiredString(Params, TEXT("event_name"), EventName, OutError)) return false;
@@ -630,7 +630,7 @@ bool FAddCustomEventForDelegateAction::Validate(const TSharedPtr<FJsonObject>& P
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddCustomEventForDelegateAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddCustomEventForDelegateAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString EventName = Params->GetStringField(TEXT("event_name"));
 	FString DelegateClassName = GetOptionalString(Params, TEXT("delegate_class"));
@@ -881,7 +881,7 @@ TSharedPtr<FJsonObject> FAddCustomEventForDelegateAction::ExecuteInternal(const 
 // Variable Nodes
 // ============================================================================
 
-bool FAddBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString VariableName, VariableType;
 	if (!GetRequiredString(Params, TEXT("variable_name"), VariableName, OutError)) return false;
@@ -889,7 +889,7 @@ bool FAddBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString VariableName = Params->GetStringField(TEXT("variable_name"));
 	FString VariableType = Params->GetStringField(TEXT("variable_type"));
@@ -932,14 +932,14 @@ TSharedPtr<FJsonObject> FAddBlueprintVariableAction::ExecuteInternal(const TShar
 }
 
 
-bool FAddBlueprintVariableGetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintVariableGetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString VariableName;
 	if (!GetRequiredString(Params, TEXT("variable_name"), VariableName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintVariableGetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintVariableGetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString VariableName = Params->GetStringField(TEXT("variable_name"));
 	FVector2D Position = GetNodePosition(Params);
@@ -997,14 +997,14 @@ TSharedPtr<FJsonObject> FAddBlueprintVariableGetAction::ExecuteInternal(const TS
 }
 
 
-bool FAddBlueprintVariableSetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintVariableSetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString VariableName;
 	if (!GetRequiredString(Params, TEXT("variable_name"), VariableName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintVariableSetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintVariableSetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString VariableName = Params->GetStringField(TEXT("variable_name"));
 	FVector2D Position = GetNodePosition(Params);
@@ -1062,7 +1062,7 @@ TSharedPtr<FJsonObject> FAddBlueprintVariableSetAction::ExecuteInternal(const TS
 }
 
 
-bool FSetNodePinDefaultAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetNodePinDefaultAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString NodeId, PinName, DefaultValue;
 	if (!GetRequiredString(Params, TEXT("node_id"), NodeId, OutError)) return false;
@@ -1071,7 +1071,7 @@ bool FSetNodePinDefaultAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FSetNodePinDefaultAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetNodePinDefaultAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString NodeId = Params->GetStringField(TEXT("node_id"));
 	FString PinName = Params->GetStringField(TEXT("pin_name"));
@@ -1138,7 +1138,7 @@ TSharedPtr<FJsonObject> FSetNodePinDefaultAction::ExecuteInternal(const TSharedP
 // Function Nodes
 // ============================================================================
 
-bool FAddBlueprintFunctionNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintFunctionNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Target, FunctionName;
 	if (!GetRequiredString(Params, TEXT("target"), Target, OutError)) return false;
@@ -1146,7 +1146,7 @@ bool FAddBlueprintFunctionNodeAction::Validate(const TSharedPtr<FJsonObject>& Pa
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintFunctionNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintFunctionNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Target = Params->GetStringField(TEXT("target"));
 	FString FunctionName = Params->GetStringField(TEXT("function_name"));
@@ -1519,12 +1519,12 @@ TSharedPtr<FJsonObject> FAddBlueprintFunctionNodeAction::ExecuteInternal(const T
 }
 
 
-bool FAddBlueprintSelfReferenceAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintSelfReferenceAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintSelfReferenceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintSelfReferenceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FVector2D Position = GetNodePosition(Params);
 
@@ -1546,14 +1546,14 @@ TSharedPtr<FJsonObject> FAddBlueprintSelfReferenceAction::ExecuteInternal(const 
 }
 
 
-bool FAddBlueprintGetSelfComponentReferenceAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintGetSelfComponentReferenceAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ComponentName;
 	if (!GetRequiredString(Params, TEXT("component_name"), ComponentName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintGetSelfComponentReferenceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintGetSelfComponentReferenceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ComponentName = Params->GetStringField(TEXT("component_name"));
 	FVector2D Position = GetNodePosition(Params);
@@ -1576,12 +1576,12 @@ TSharedPtr<FJsonObject> FAddBlueprintGetSelfComponentReferenceAction::ExecuteInt
 }
 
 
-bool FAddBlueprintBranchNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintBranchNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintBranchNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintBranchNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FVector2D Position = GetNodePosition(Params);
 
@@ -1601,14 +1601,14 @@ TSharedPtr<FJsonObject> FAddBlueprintBranchNodeAction::ExecuteInternal(const TSh
 }
 
 
-bool FAddBlueprintCastNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintCastNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString TargetClass;
 	if (!GetRequiredString(Params, TEXT("target_class"), TargetClass, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintCastNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintCastNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString TargetClassName = Params->GetStringField(TEXT("target_class"));
 	bool bPureCast = GetOptionalBool(Params, TEXT("pure_cast"), false);
@@ -1694,14 +1694,14 @@ TSharedPtr<FJsonObject> FAddBlueprintCastNodeAction::ExecuteInternal(const TShar
 // Subsystem Nodes
 // =============================================================================
 
-bool FAddBlueprintGetSubsystemNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintGetSubsystemNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString SubsystemClass;
 	if (!GetRequiredString(Params, TEXT("subsystem_class"), SubsystemClass, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintGetSubsystemNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintGetSubsystemNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString SubsystemClassName = Params->GetStringField(TEXT("subsystem_class"));
 	FVector2D Position = GetNodePosition(Params);
@@ -1842,14 +1842,14 @@ TSharedPtr<FJsonObject> FAddBlueprintGetSubsystemNodeAction::ExecuteInternal(con
 // Blueprint Function Graph
 // ============================================================================
 
-bool FCreateBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString FunctionName;
 	if (!GetRequiredString(Params, TEXT("function_name"), FunctionName, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FCreateBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString FunctionName = Params->GetStringField(TEXT("function_name"));
 	bool bIsPure = GetOptionalBool(Params, TEXT("is_pure"), false);
@@ -1983,14 +1983,14 @@ TSharedPtr<FJsonObject> FCreateBlueprintFunctionAction::ExecuteInternal(const TS
 // Event Dispatchers
 // ============================================================================
 
-bool FAddEventDispatcherAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddEventDispatcherAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString DispatcherName;
 	if (!GetRequiredString(Params, TEXT("dispatcher_name"), DispatcherName, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddEventDispatcherAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddEventDispatcherAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString DispatcherName = Params->GetStringField(TEXT("dispatcher_name"));
 
@@ -2076,14 +2076,14 @@ TSharedPtr<FJsonObject> FAddEventDispatcherAction::ExecuteInternal(const TShared
 }
 
 
-bool FCallEventDispatcherAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCallEventDispatcherAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString DispatcherName;
 	if (!GetRequiredString(Params, TEXT("dispatcher_name"), DispatcherName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FCallEventDispatcherAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCallEventDispatcherAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString DispatcherName = Params->GetStringField(TEXT("dispatcher_name"));
 	FVector2D Position = GetNodePosition(Params);
@@ -2116,14 +2116,14 @@ TSharedPtr<FJsonObject> FCallEventDispatcherAction::ExecuteInternal(const TShare
 }
 
 
-bool FBindEventDispatcherAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FBindEventDispatcherAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString DispatcherName;
 	if (!GetRequiredString(Params, TEXT("dispatcher_name"), DispatcherName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FBindEventDispatcherAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FBindEventDispatcherAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString DispatcherName = Params->GetStringField(TEXT("dispatcher_name"));
 	FString TargetBlueprintName = GetOptionalString(Params, TEXT("target_blueprint"));
@@ -2322,14 +2322,14 @@ TSharedPtr<FJsonObject> FBindEventDispatcherAction::ExecuteInternal(const TShare
 // Create Event Delegate (K2Node_CreateDelegate)
 // ============================================================================
 
-bool FCreateEventDelegateAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateEventDelegateAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString FunctionName;
 	if (!GetRequiredString(Params, TEXT("function_name"), FunctionName, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FCreateEventDelegateAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateEventDelegateAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString FunctionName = Params->GetStringField(TEXT("function_name"));
 	FString ConnectToNodeId = GetOptionalString(Params, TEXT("connect_to_node_id"));
@@ -2438,7 +2438,7 @@ TSharedPtr<FJsonObject> FCreateEventDelegateAction::ExecuteInternal(const TShare
 // Component Bound Event (bind component delegates like OnTTSEnvelope)
 // ============================================================================
 
-bool FBindComponentEventAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FBindComponentEventAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ComponentName, EventName;
 	if (!GetRequiredString(Params, TEXT("component_name"), ComponentName, OutError)) return false;
@@ -2446,7 +2446,7 @@ bool FBindComponentEventAction::Validate(const TSharedPtr<FJsonObject>& Params, 
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FBindComponentEventAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FBindComponentEventAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ComponentName = Params->GetStringField(TEXT("component_name"));
 	FString EventName = Params->GetStringField(TEXT("event_name"));
@@ -2590,14 +2590,14 @@ TSharedPtr<FJsonObject> FBindComponentEventAction::ExecuteInternal(const TShared
 // Spawn Actor Nodes
 // ============================================================================
 
-bool FAddSpawnActorFromClassNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddSpawnActorFromClassNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ClassToSpawn;
 	if (!GetRequiredString(Params, TEXT("class_to_spawn"), ClassToSpawn, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddSpawnActorFromClassNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddSpawnActorFromClassNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ClassToSpawn = Params->GetStringField(TEXT("class_to_spawn"));
 	FVector2D Position = GetNodePosition(Params);
@@ -2676,7 +2676,7 @@ TSharedPtr<FJsonObject> FAddSpawnActorFromClassNodeAction::ExecuteInternal(const
 }
 
 
-bool FCallBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCallBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString TargetBlueprint, FunctionName;
 	if (!GetRequiredString(Params, TEXT("target_blueprint"), TargetBlueprint, OutError)) return false;
@@ -2684,7 +2684,7 @@ bool FCallBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Param
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FCallBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCallBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString TargetBlueprintName = Params->GetStringField(TEXT("target_blueprint"));
 	FString FunctionName = Params->GetStringField(TEXT("function_name"));
@@ -2776,7 +2776,7 @@ TSharedPtr<FJsonObject> FCallBlueprintFunctionAction::ExecuteInternal(const TSha
 // External Object Property Nodes
 // ============================================================================
 
-bool FSetObjectPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetObjectPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString PropertyName, OwnerClass;
 	if (!GetRequiredString(Params, TEXT("property_name"), PropertyName, OutError)) return false;
@@ -2784,7 +2784,7 @@ bool FSetObjectPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FSetObjectPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetObjectPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString PropertyName = Params->GetStringField(TEXT("property_name"));
 	FString OwnerClassName = Params->GetStringField(TEXT("owner_class"));
@@ -2837,12 +2837,12 @@ TSharedPtr<FJsonObject> FSetObjectPropertyAction::ExecuteInternal(const TSharedP
 // Sequence Node
 // ============================================================================
 
-bool FAddSequenceNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddSequenceNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddSequenceNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddSequenceNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FVector2D Position = GetNodePosition(Params);
 
@@ -2885,7 +2885,7 @@ UEdGraph* FAddMacroInstanceNodeAction::FindMacroGraph(const FString& MacroName) 
 	return nullptr;
 }
 
-bool FAddMacroInstanceNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddMacroInstanceNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MacroName;
 	if (!GetRequiredString(Params, TEXT("macro_name"), MacroName, OutError)) return false;
@@ -2897,7 +2897,7 @@ bool FAddMacroInstanceNodeAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddMacroInstanceNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddMacroInstanceNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString MacroName = Params->GetStringField(TEXT("macro_name"));
 	UEdGraph* MacroGraph = FindMacroGraph(MacroName);
@@ -2923,14 +2923,14 @@ TSharedPtr<FJsonObject> FAddMacroInstanceNodeAction::ExecuteInternal(const TShar
 // Struct Nodes
 // ============================================================================
 
-bool FAddMakeStructNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddMakeStructNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString StructType;
 	if (!GetRequiredString(Params, TEXT("struct_type"), StructType, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddMakeStructNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddMakeStructNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString StructType = Params->GetStringField(TEXT("struct_type"));
 	FVector2D Position = GetNodePosition(Params);
@@ -3029,14 +3029,14 @@ TSharedPtr<FJsonObject> FAddMakeStructNodeAction::ExecuteInternal(const TSharedP
 }
 
 
-bool FAddBreakStructNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBreakStructNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString StructType;
 	if (!GetRequiredString(Params, TEXT("struct_type"), StructType, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBreakStructNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBreakStructNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString StructType = Params->GetStringField(TEXT("struct_type"));
 	FVector2D Position = GetNodePosition(Params);
@@ -3119,12 +3119,12 @@ TSharedPtr<FJsonObject> FAddBreakStructNodeAction::ExecuteInternal(const TShared
 // Switch Nodes
 // ============================================================================
 
-bool FAddSwitchOnStringNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddSwitchOnStringNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddSwitchOnStringNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddSwitchOnStringNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FVector2D Position = GetNodePosition(Params);
 
@@ -3178,12 +3178,12 @@ TSharedPtr<FJsonObject> FAddSwitchOnStringNodeAction::ExecuteInternal(const TSha
 }
 
 
-bool FAddSwitchOnIntNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddSwitchOnIntNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddSwitchOnIntNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddSwitchOnIntNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FVector2D Position = GetNodePosition(Params);
 
@@ -3241,7 +3241,7 @@ TSharedPtr<FJsonObject> FAddSwitchOnIntNodeAction::ExecuteInternal(const TShared
 // Local Variables
 // ============================================================================
 
-bool FAddFunctionLocalVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddFunctionLocalVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString FunctionName, VariableName, VariableType;
 	if (!GetRequiredString(Params, TEXT("function_name"), FunctionName, OutError)) return false;
@@ -3250,7 +3250,7 @@ bool FAddFunctionLocalVariableAction::Validate(const TSharedPtr<FJsonObject>& Pa
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddFunctionLocalVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddFunctionLocalVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString FunctionName = Params->GetStringField(TEXT("function_name"));
 	FString VariableName = Params->GetStringField(TEXT("variable_name"));
@@ -3327,7 +3327,7 @@ TSharedPtr<FJsonObject> FAddFunctionLocalVariableAction::ExecuteInternal(const T
 // Variable Default Values
 // ============================================================================
 
-bool FSetBlueprintVariableDefaultAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetBlueprintVariableDefaultAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString VariableName, DefaultValue;
 	if (!GetRequiredString(Params, TEXT("variable_name"), VariableName, OutError)) return false;
@@ -3335,7 +3335,7 @@ bool FSetBlueprintVariableDefaultAction::Validate(const TSharedPtr<FJsonObject>&
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FSetBlueprintVariableDefaultAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetBlueprintVariableDefaultAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString VariableName = Params->GetStringField(TEXT("variable_name"));
 	FString DefaultValue = Params->GetStringField(TEXT("default_value"));
@@ -3371,14 +3371,14 @@ TSharedPtr<FJsonObject> FSetBlueprintVariableDefaultAction::ExecuteInternal(cons
 // Comment Nodes
 // ============================================================================
 
-bool FAddBlueprintCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString CommentText;
 	if (!GetRequiredString(Params, TEXT("comment_text"), CommentText, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintCommentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintCommentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString CommentText = Params->GetStringField(TEXT("comment_text"));
 
@@ -3444,7 +3444,7 @@ TSharedPtr<FJsonObject> FAddBlueprintCommentAction::ExecuteInternal(const TShare
 // Auto Comment — auto-sized comment wrapping specified nodes
 // ============================================================================
 
-bool FAutoCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAutoCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString CommentText;
 	if (!GetRequiredString(Params, TEXT("comment_text"), CommentText, OutError)) return false;
@@ -3454,7 +3454,7 @@ bool FAutoCommentAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEdi
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAutoCommentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAutoCommentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString CommentText = Params->GetStringField(TEXT("comment_text"));
 
@@ -3717,14 +3717,14 @@ TSharedPtr<FJsonObject> FAutoCommentAction::ExecuteInternal(const TSharedPtr<FJs
 // P1 — Variable & Function Management
 // ============================================================================
 
-bool FDeleteBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDeleteBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString VariableName;
 	if (!GetRequiredString(Params, TEXT("variable_name"), VariableName, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FDeleteBlueprintVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDeleteBlueprintVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString VariableName = Params->GetStringField(TEXT("variable_name"));
 
@@ -3756,7 +3756,7 @@ TSharedPtr<FJsonObject> FDeleteBlueprintVariableAction::ExecuteInternal(const TS
 }
 
 
-bool FRenameBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRenameBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString OldName, NewName;
 	if (!GetRequiredString(Params, TEXT("old_name"), OldName, OutError)) return false;
@@ -3764,7 +3764,7 @@ bool FRenameBlueprintVariableAction::Validate(const TSharedPtr<FJsonObject>& Par
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FRenameBlueprintVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRenameBlueprintVariableAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString OldName = Params->GetStringField(TEXT("old_name"));
 	FString NewName = Params->GetStringField(TEXT("new_name"));
@@ -3806,14 +3806,14 @@ TSharedPtr<FJsonObject> FRenameBlueprintVariableAction::ExecuteInternal(const TS
 }
 
 
-bool FSetVariableMetadataAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetVariableMetadataAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString VariableName;
 	if (!GetRequiredString(Params, TEXT("variable_name"), VariableName, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FSetVariableMetadataAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetVariableMetadataAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString VariableName = Params->GetStringField(TEXT("variable_name"));
 
@@ -3959,14 +3959,14 @@ TSharedPtr<FJsonObject> FSetVariableMetadataAction::ExecuteInternal(const TShare
 }
 
 
-bool FDeleteBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDeleteBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString FunctionName;
 	if (!GetRequiredString(Params, TEXT("function_name"), FunctionName, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FDeleteBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDeleteBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString FunctionName = Params->GetStringField(TEXT("function_name"));
 
@@ -4006,7 +4006,7 @@ TSharedPtr<FJsonObject> FDeleteBlueprintFunctionAction::ExecuteInternal(const TS
 	return CreateSuccessResponse(ResultData);
 }
 
-bool FRenameBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRenameBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString FunctionName;
 	FString NewName;
@@ -4015,7 +4015,7 @@ bool FRenameBlueprintFunctionAction::Validate(const TSharedPtr<FJsonObject>& Par
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FRenameBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRenameBlueprintFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	const FString FunctionName = Params->GetStringField(TEXT("function_name"));
 	const FString NewName = Params->GetStringField(TEXT("new_name"));
@@ -4091,7 +4091,7 @@ TSharedPtr<FJsonObject> FRenameBlueprintFunctionAction::ExecuteInternal(const TS
 // FRenameBlueprintMacroAction — macro.rename
 // ============================================================================
 
-bool FRenameBlueprintMacroAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRenameBlueprintMacroAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MacroName;
 	FString NewName;
@@ -4100,7 +4100,7 @@ bool FRenameBlueprintMacroAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FRenameBlueprintMacroAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRenameBlueprintMacroAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	const FString MacroName = Params->GetStringField(TEXT("macro_name"));
 	const FString NewName = Params->GetStringField(TEXT("new_name"));
@@ -4171,7 +4171,7 @@ TSharedPtr<FJsonObject> FRenameBlueprintMacroAction::ExecuteInternal(const TShar
 // P2 — Graph Operation Enhancements
 // ============================================================================
 
-bool FDisconnectBlueprintPinAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDisconnectBlueprintPinAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString NodeId, PinName;
 	if (!GetRequiredString(Params, TEXT("node_id"), NodeId, OutError)) return false;
@@ -4179,7 +4179,7 @@ bool FDisconnectBlueprintPinAction::Validate(const TSharedPtr<FJsonObject>& Para
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FDisconnectBlueprintPinAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDisconnectBlueprintPinAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString NodeId = Params->GetStringField(TEXT("node_id"));
 	FString PinName = Params->GetStringField(TEXT("pin_name"));
@@ -4239,14 +4239,14 @@ TSharedPtr<FJsonObject> FDisconnectBlueprintPinAction::ExecuteInternal(const TSh
 }
 
 
-bool FMoveNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FMoveNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString NodeId;
 	if (!GetRequiredString(Params, TEXT("node_id"), NodeId, OutError)) return false;
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FMoveNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FMoveNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString NodeId = Params->GetStringField(TEXT("node_id"));
 	FVector2D NewPosition = GetNodePosition(Params);
@@ -4291,12 +4291,12 @@ TSharedPtr<FJsonObject> FMoveNodeAction::ExecuteInternal(const TSharedPtr<FJsonO
 }
 
 
-bool FAddRerouteNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddRerouteNodeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddRerouteNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddRerouteNodeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FVector2D Position = GetNodePosition(Params);
 
@@ -4326,7 +4326,7 @@ TSharedPtr<FJsonObject> FAddRerouteNodeAction::ExecuteInternal(const TSharedPtr<
 // Graph Topology — FDescribeGraphAction (P2.1)
 // ============================================================================
 
-bool FDescribeGraphAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDescribeGraphAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	return ValidateGraph(Params, Context, OutError);
 }
@@ -4386,7 +4386,7 @@ TSharedPtr<FJsonObject> FDescribeGraphAction::SerializePinToJson(const UEdGraphP
 	return PinObj;
 }
 
-TSharedPtr<FJsonObject> FDescribeGraphAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDescribeGraphAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
 	if (!TargetGraph)
@@ -4483,20 +4483,20 @@ TSharedPtr<FJsonObject> FDescribeGraphAction::ExecuteInternal(const TSharedPtr<F
 
 // GetActiveBlueprintEditorForAction removed — use FMCPCommonUtils::GetActiveBlueprintEditor() instead.
 
-bool FGetSelectedNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetSelectedNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// No required params — works with editor selection or optional blueprint_name
 	return true;
 }
 
-bool FCollapseSelectionToFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCollapseSelectionToFunctionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// No required params — action works on current selection in focused Blueprint editor.
 	// Optional: blueprint_name to target a specific open Blueprint editor.
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCollapseSelectionToFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCollapseSelectionToFunctionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 
@@ -4600,14 +4600,14 @@ TSharedPtr<FJsonObject> FCollapseSelectionToFunctionAction::ExecuteInternal(cons
 // FCollapseSelectionToMacroAction
 // ============================================================================
 
-bool FCollapseSelectionToMacroAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCollapseSelectionToMacroAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// No required params — action works on current selection in focused Blueprint editor.
 	// Optional: blueprint_name to target a specific open Blueprint editor.
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCollapseSelectionToMacroAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCollapseSelectionToMacroAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 
@@ -4706,7 +4706,7 @@ TSharedPtr<FJsonObject> FCollapseSelectionToMacroAction::ExecuteInternal(const T
 // Graph Selection Write — FSetSelectedNodesAction / FBatchSelectAndActAction
 // ============================================================================
 
-bool FSetSelectedNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetSelectedNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const TArray<TSharedPtr<FJsonValue>>* NodeIdsArray = nullptr;
 	if (!Params->TryGetArrayField(TEXT("node_ids"), NodeIdsArray) || !NodeIdsArray || NodeIdsArray->Num() == 0)
@@ -4788,7 +4788,7 @@ static bool SetSelectionByNodeIds(
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetSelectedNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetSelectedNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
@@ -4861,7 +4861,7 @@ TSharedPtr<FJsonObject> FSetSelectedNodesAction::ExecuteInternal(const TSharedPt
 // FBatchSelectAndActAction
 // ============================================================================
 
-bool FBatchSelectAndActAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FBatchSelectAndActAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const TArray<TSharedPtr<FJsonValue>>* GroupsArray = nullptr;
 	if (!Params->TryGetArrayField(TEXT("groups"), GroupsArray) || !GroupsArray || GroupsArray->Num() == 0)
@@ -4897,7 +4897,7 @@ bool FBatchSelectAndActAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return true;
 }
 
-TSharedPtr<FJsonObject> FBatchSelectAndActAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FBatchSelectAndActAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
@@ -4947,8 +4947,8 @@ TSharedPtr<FJsonObject> FBatchSelectAndActAction::ExecuteInternal(const TSharedP
 	}
 
 	// Get the MCPBridge to dispatch sub-actions
-	UMCPBridge* Bridge = nullptr;
-	for (TObjectIterator<UMCPBridge> It; It; ++It)
+	UUEEditorBridge* Bridge = nullptr;
+	for (TObjectIterator<UUEEditorBridge> It; It; ++It)
 	{
 		Bridge = *It;
 		break;
@@ -5077,7 +5077,7 @@ TSharedPtr<FJsonObject> FBatchSelectAndActAction::ExecuteInternal(const TSharedP
 }
 
 
-TSharedPtr<FJsonObject> FGetSelectedNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetSelectedNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	// Resolve which editor to inspect
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));

@@ -4,6 +4,9 @@
 
 ### 2026-03-25
 
+- Renamed the core editor-domain types from `UMCPBridge` to `UUEEditorBridge` and `FMCPEditorContext` to `FUEEditorContext` across the plugin source while leaving transport behavior unchanged
+- Verified the domain rename is behavior-preserving on the checked-in host: Workflow A health (including PIE smoke), Blueprint create/compile, and graph create/connect/delete still pass after the migration
+- Confirmed that MCP is no longer embedded in the primary editor-domain type names; remaining MCP usage is now concentrated in transport/module/file legacy layers
 - Added `UEEditorMCP.Health.WorkflowA.PIESmokeLifecycle` and verified a non-destructive runtime lifecycle path on the checked-in host (start PIE → observe running → stop PIE → observe quiesced state)
 - Added a direct raw-socket representative case to `python/tests/test_integration_workflow_a.py` so the end-to-end integration flow now checks the length-prefixed JSON protocol, not just the Python wrapper
 - Verified the repo-contained integration flow now passes 5 Python integration tests end-to-end, including the raw socket ping/close path
@@ -81,6 +84,7 @@
 - The right first refactor target was not `MCPServer`, but the oversized `RegisterActions()` composition point. Extracting registration into a dedicated registry improved maintainability without reopening transport risk or forcing a naming migration too early
 - After `ActionRegistry`, the next safe de-MCP step was not a transport rewrite but shrinking direct state reach-through in `MCPContext`. Replacing field pokes with explicit context methods gave us a cleaner boundary without triggering a semantic migration
 - After `MCPContext`, the next safe step was to extract the game-thread execution logic out of `MCPServer` rather than rewriting the transport. That preserved the local TCP model while still shrinking MCP-shaped responsibilities inside the server implementation
+- Once health, blueprint, graph, PIE, and raw-socket seams were all protected, a true internal domain rename became tractable. The safe pattern was to rename domain types first while deliberately leaving transport/file/module legacy names for a later layer
 - A self-contained host only becomes real when it is versioned inside the plugin repo and the integration script can launch it from a clean shell. Creating a smallest host outside the repo was a useful proof, but checking it into `hosts/UEBridgeHost` was the point where it became a maintainable product asset
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
 - The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front

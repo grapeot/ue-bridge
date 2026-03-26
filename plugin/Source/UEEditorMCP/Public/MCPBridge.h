@@ -13,18 +13,18 @@ class FMCPServer;
 class FEditorAction;
 
 /**
- * UMCPBridge
+ * UUEEditorBridge
  *
  * Editor subsystem that manages the MCP server and routes commands
  * to appropriate action handlers.
  */
 UCLASS()
-class UEEDITORMCP_API UMCPBridge : public UEditorSubsystem
+class UEEDITORMCP_API UUEEditorBridge : public UEditorSubsystem
 {
 	GENERATED_BODY()
 
 public:
-	UMCPBridge();
+	UUEEditorBridge();
 
 	// =========================================================================
 	// UEditorSubsystem Interface
@@ -58,8 +58,8 @@ public:
 	// =========================================================================
 
 	/** Get the current editor context */
-	FMCPEditorContext& GetContext() { return Context; }
-	const FMCPEditorContext& GetContext() const { return Context; }
+	FUEEditorContext& GetContext() { return Context; }
+	const FUEEditorContext& GetContext() const { return Context; }
 
 	// =========================================================================
 	// Response Helpers
@@ -85,7 +85,7 @@ private:
 	FMCPServer* Server;
 
 	/** Editor context (persists across commands) */
-	FMCPEditorContext Context;
+	FUEEditorContext Context;
 
 	/** Map of command types to action handlers */
 	TMap<FString, TSharedRef<FEditorAction>> ActionHandlers;

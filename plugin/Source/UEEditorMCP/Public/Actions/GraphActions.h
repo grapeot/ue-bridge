@@ -30,10 +30,10 @@ class UBlueprint;
 class UEEDITORMCP_API FGraphDescribeEnhancedAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("describe_graph_enhanced"); }
 	virtual bool RequiresSave() const override { return false; }
 
@@ -139,10 +139,10 @@ class UEEDITORMCP_API FApplyPatchAction : public FBlueprintNodeAction
 	friend class FValidatePatchAction;
 
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("apply_graph_patch"); }
 
 private:
@@ -155,11 +155,11 @@ private:
 
 	/** Execute a single op */
 	FPatchOpResult ExecuteOp(const FPatchOp& Op, UBlueprint* Blueprint, UEdGraph* Graph,
-		TMap<FString, FGuid>& TempIdMap, FMCPEditorContext& Context) const;
+		TMap<FString, FGuid>& TempIdMap, FUEEditorContext& Context) const;
 
 	// -- Individual op executors --
 	FPatchOpResult ExecuteAddNode(const FPatchOp& Op, UBlueprint* Blueprint, UEdGraph* Graph,
-		TMap<FString, FGuid>& TempIdMap, FMCPEditorContext& Context) const;
+		TMap<FString, FGuid>& TempIdMap, FUEEditorContext& Context) const;
 	FPatchOpResult ExecuteRemoveNode(const FPatchOp& Op, UBlueprint* Blueprint, UEdGraph* Graph,
 		const TMap<FString, FGuid>& TempIdMap) const;
 	FPatchOpResult ExecuteSetNodeProperty(const FPatchOp& Op, UEdGraph* Graph,
@@ -198,10 +198,10 @@ private:
 class UEEDITORMCP_API FValidatePatchAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("validate_graph_patch"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -229,10 +229,10 @@ protected:
 class UEEDITORMCP_API FExportNodesToTextAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("export_nodes_to_text"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -252,9 +252,9 @@ protected:
 class UEEDITORMCP_API FImportNodesFromTextAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("import_nodes_from_text"); }
 };

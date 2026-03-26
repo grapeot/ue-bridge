@@ -3,11 +3,11 @@
 #include "CoreMinimal.h"
 
 class FJsonObject;
-class UMCPBridge;
+class UUEEditorBridge;
 
 class FEditorCommandExecutor
 {
 public:
-	static FString ExecuteGetContext(UMCPBridge* Bridge);
-	static FString ExecuteCommand(UMCPBridge* Bridge, const FString& CommandType, TSharedPtr<FJsonObject> Params);
+	static FString ExecuteGetContext(UUEEditorBridge* Bridge);
+	static FString ExecuteCommand(UUEEditorBridge* Bridge, const FString& CommandType, TSharedPtr<FJsonObject> Params);
 };

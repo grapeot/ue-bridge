@@ -19,7 +19,7 @@ DEFINE_LOG_CATEGORY(LogMCP);
 // FEditorAction Implementation
 // ============================================================================
 
-TSharedPtr<FJsonObject> FEditorAction::Execute(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FEditorAction::Execute(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -78,7 +78,7 @@ struct FSEHCallContext
 {
 	FEditorAction* Action;
 	const TSharedPtr<FJsonObject>* Params;
-	FMCPEditorContext* Context;
+	FUEEditorContext* Context;
 	TSharedPtr<FJsonObject>* OutResult;
 };
 
@@ -106,7 +106,7 @@ static DWORD SEH_TryCall(void (*Func)(void*), void* UserData)
 #pragma warning(pop)
 #endif
 
-TSharedPtr<FJsonObject> FEditorAction::ExecuteWithCrashProtection(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FEditorAction::ExecuteWithCrashProtection(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 #if PLATFORM_WINDOWS && defined(_MSC_VER)
 	TSharedPtr<FJsonObject> OutResult;
@@ -314,7 +314,7 @@ UEdGraphNode* FEditorAction::FindNode(UEdGraph* Graph, const FGuid& NodeId, FStr
 // FBlueprintAction Implementation
 // ============================================================================
 
-bool FBlueprintAction::ValidateBlueprint(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FBlueprintAction::ValidateBlueprint(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 	UBlueprint* BP = Context.GetBlueprintByNameOrCurrent(BlueprintName);
@@ -336,13 +336,13 @@ bool FBlueprintAction::ValidateBlueprint(const TSharedPtr<FJsonObject>& Params, 
 	return true;
 }
 
-UBlueprint* FBlueprintAction::GetTargetBlueprint(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) const
+UBlueprint* FBlueprintAction::GetTargetBlueprint(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) const
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 	return Context.GetBlueprintByNameOrCurrent(BlueprintName);
 }
 
-void FBlueprintAction::MarkBlueprintModified(UBlueprint* Blueprint, FMCPEditorContext& Context) const
+void FBlueprintAction::MarkBlueprintModified(UBlueprint* Blueprint, FUEEditorContext& Context) const
 {
 	if (Blueprint)
 	{
@@ -404,7 +404,7 @@ bool FBlueprintAction::CompileBlueprint(UBlueprint* Blueprint, FString& OutError
 // FBlueprintNodeAction Implementation
 // ============================================================================
 
-bool FBlueprintNodeAction::ValidateGraph(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FBlueprintNodeAction::ValidateGraph(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// First validate Blueprint
 	if (!ValidateBlueprint(Params, Context, OutError))
@@ -425,7 +425,7 @@ bool FBlueprintNodeAction::ValidateGraph(const TSharedPtr<FJsonObject>& Params, 
 	return true;
 }
 
-UEdGraph* FBlueprintNodeAction::GetTargetGraph(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) const
+UEdGraph* FBlueprintNodeAction::GetTargetGraph(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) const
 {
 	FString GraphName = GetOptionalString(Params, TEXT("graph_name"));
 	UBlueprint* BP = GetTargetBlueprint(Params, Context);
@@ -433,7 +433,7 @@ UEdGraph* FBlueprintNodeAction::GetTargetGraph(const TSharedPtr<FJsonObject>& Pa
 	return FindGraph(BP, GraphName, Error);
 }
 
-void FBlueprintNodeAction::RegisterCreatedNode(UEdGraphNode* Node, FMCPEditorContext& Context) const
+void FBlueprintNodeAction::RegisterCreatedNode(UEdGraphNode* Node, FUEEditorContext& Context) const
 {
 	if (Node)
 	{

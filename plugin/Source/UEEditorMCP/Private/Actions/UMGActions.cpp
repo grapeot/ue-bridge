@@ -217,7 +217,7 @@ static void EnsureWidgetVariableGuids(UWidgetBlueprint* WidgetBlueprint)
 	});
 }
 
-static void MarkWidgetBlueprintDirty(UWidgetBlueprint* WidgetBlueprint, FMCPEditorContext& Context)
+static void MarkWidgetBlueprintDirty(UWidgetBlueprint* WidgetBlueprint, FUEEditorContext& Context)
 {
 	if (!WidgetBlueprint)
 	{
@@ -249,7 +249,7 @@ static void MarkWidgetBlueprintDirty(UWidgetBlueprint* WidgetBlueprint, FMCPEdit
 // FCreateUMGWidgetBlueprintAction
 // =============================================================================
 
-bool FCreateUMGWidgetBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateUMGWidgetBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -259,7 +259,7 @@ bool FCreateUMGWidgetBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Pa
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCreateUMGWidgetBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateUMGWidgetBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 
@@ -379,7 +379,7 @@ TSharedPtr<FJsonObject> FCreateUMGWidgetBlueprintAction::ExecuteInternal(const T
 // FAddTextBlockToWidgetAction
 // =============================================================================
 
-bool FAddTextBlockToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddTextBlockToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -394,7 +394,7 @@ bool FAddTextBlockToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddTextBlockToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddTextBlockToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("text_block_name"));
@@ -455,7 +455,7 @@ TSharedPtr<FJsonObject> FAddTextBlockToWidgetAction::ExecuteInternal(const TShar
 // FAddButtonToWidgetAction
 // =============================================================================
 
-bool FAddButtonToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddButtonToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -470,7 +470,7 @@ bool FAddButtonToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddButtonToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddButtonToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("button_name"));
@@ -541,7 +541,7 @@ TSharedPtr<FJsonObject> FAddButtonToWidgetAction::ExecuteInternal(const TSharedP
 // FAddImageToWidgetAction
 // =============================================================================
 
-bool FAddImageToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddImageToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -556,7 +556,7 @@ bool FAddImageToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FM
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddImageToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddImageToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("image_name"));
@@ -670,7 +670,7 @@ TSharedPtr<FJsonObject> FAddImageToWidgetAction::ExecuteInternal(const TSharedPt
 // FAddBorderToWidgetAction
 // =============================================================================
 
-bool FAddBorderToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBorderToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -685,7 +685,7 @@ bool FAddBorderToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddBorderToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBorderToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("border_name"));
@@ -731,7 +731,7 @@ TSharedPtr<FJsonObject> FAddBorderToWidgetAction::ExecuteInternal(const TSharedP
 // FAddOverlayToWidgetAction
 // =============================================================================
 
-bool FAddOverlayToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddOverlayToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -746,7 +746,7 @@ bool FAddOverlayToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, 
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddOverlayToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddOverlayToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("overlay_name"));
@@ -786,7 +786,7 @@ TSharedPtr<FJsonObject> FAddOverlayToWidgetAction::ExecuteInternal(const TShared
 // FAddHorizontalBoxToWidgetAction
 // =============================================================================
 
-bool FAddHorizontalBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddHorizontalBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -801,7 +801,7 @@ bool FAddHorizontalBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Pa
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddHorizontalBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddHorizontalBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("horizontal_box_name"));
@@ -841,7 +841,7 @@ TSharedPtr<FJsonObject> FAddHorizontalBoxToWidgetAction::ExecuteInternal(const T
 // FAddVerticalBoxToWidgetAction
 // =============================================================================
 
-bool FAddVerticalBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddVerticalBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -856,7 +856,7 @@ bool FAddVerticalBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Para
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddVerticalBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddVerticalBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("vertical_box_name"));
@@ -896,7 +896,7 @@ TSharedPtr<FJsonObject> FAddVerticalBoxToWidgetAction::ExecuteInternal(const TSh
 // FAddSliderToWidgetAction
 // =============================================================================
 
-bool FAddSliderToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddSliderToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -911,7 +911,7 @@ bool FAddSliderToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddSliderToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddSliderToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("slider_name"));
@@ -957,7 +957,7 @@ TSharedPtr<FJsonObject> FAddSliderToWidgetAction::ExecuteInternal(const TSharedP
 // FAddProgressBarToWidgetAction
 // =============================================================================
 
-bool FAddProgressBarToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddProgressBarToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -972,7 +972,7 @@ bool FAddProgressBarToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Para
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddProgressBarToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddProgressBarToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("progress_bar_name"));
@@ -1024,7 +1024,7 @@ TSharedPtr<FJsonObject> FAddProgressBarToWidgetAction::ExecuteInternal(const TSh
 // FAddSizeBoxToWidgetAction
 // =============================================================================
 
-bool FAddSizeBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddSizeBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1039,7 +1039,7 @@ bool FAddSizeBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, 
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddSizeBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddSizeBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("size_box_name"));
@@ -1086,7 +1086,7 @@ TSharedPtr<FJsonObject> FAddSizeBoxToWidgetAction::ExecuteInternal(const TShared
 // FAddScaleBoxToWidgetAction
 // =============================================================================
 
-bool FAddScaleBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddScaleBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1101,7 +1101,7 @@ bool FAddScaleBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddScaleBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddScaleBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("scale_box_name"));
@@ -1141,7 +1141,7 @@ TSharedPtr<FJsonObject> FAddScaleBoxToWidgetAction::ExecuteInternal(const TShare
 // FAddCanvasPanelToWidgetAction
 // =============================================================================
 
-bool FAddCanvasPanelToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddCanvasPanelToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1156,7 +1156,7 @@ bool FAddCanvasPanelToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Para
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddCanvasPanelToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddCanvasPanelToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("canvas_panel_name"));
@@ -1196,7 +1196,7 @@ TSharedPtr<FJsonObject> FAddCanvasPanelToWidgetAction::ExecuteInternal(const TSh
 // FAddComboBoxToWidgetAction
 // =============================================================================
 
-bool FAddComboBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddComboBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1211,7 +1211,7 @@ bool FAddComboBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddComboBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddComboBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("combo_box_name"));
@@ -1272,7 +1272,7 @@ TSharedPtr<FJsonObject> FAddComboBoxToWidgetAction::ExecuteInternal(const TShare
 // FAddCheckBoxToWidgetAction
 // =============================================================================
 
-bool FAddCheckBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddCheckBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1287,7 +1287,7 @@ bool FAddCheckBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddCheckBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddCheckBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("check_box_name"));
@@ -1346,7 +1346,7 @@ TSharedPtr<FJsonObject> FAddCheckBoxToWidgetAction::ExecuteInternal(const TShare
 // FAddSpinBoxToWidgetAction
 // =============================================================================
 
-bool FAddSpinBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddSpinBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1361,7 +1361,7 @@ bool FAddSpinBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, 
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddSpinBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddSpinBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("spin_box_name"));
@@ -1425,7 +1425,7 @@ TSharedPtr<FJsonObject> FAddSpinBoxToWidgetAction::ExecuteInternal(const TShared
 // FAddEditableTextBoxToWidgetAction
 // =============================================================================
 
-bool FAddEditableTextBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddEditableTextBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1440,7 +1440,7 @@ bool FAddEditableTextBoxToWidgetAction::Validate(const TSharedPtr<FJsonObject>& 
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddEditableTextBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddEditableTextBoxToWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("editable_text_box_name"));
@@ -1498,7 +1498,7 @@ TSharedPtr<FJsonObject> FAddEditableTextBoxToWidgetAction::ExecuteInternal(const
 // FBindWidgetEventAction
 // =============================================================================
 
-bool FBindWidgetEventAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FBindWidgetEventAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1518,7 +1518,7 @@ bool FBindWidgetEventAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FBindWidgetEventAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FBindWidgetEventAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetComponentName = Params->GetStringField(TEXT("widget_component_name"));
@@ -1644,7 +1644,7 @@ TSharedPtr<FJsonObject> FBindWidgetEventAction::ExecuteInternal(const TSharedPtr
 // FAddWidgetToViewportAction
 // =============================================================================
 
-bool FAddWidgetToViewportAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddWidgetToViewportAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1654,7 +1654,7 @@ bool FAddWidgetToViewportAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddWidgetToViewportAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddWidgetToViewportAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 
@@ -1687,7 +1687,7 @@ TSharedPtr<FJsonObject> FAddWidgetToViewportAction::ExecuteInternal(const TShare
 // FSetTextBlockBindingAction
 // =============================================================================
 
-bool FSetTextBlockBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetTextBlockBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1707,7 +1707,7 @@ bool FSetTextBlockBindingAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetTextBlockBindingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetTextBlockBindingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("text_block_name"));
@@ -1787,7 +1787,7 @@ TSharedPtr<FJsonObject> FSetTextBlockBindingAction::ExecuteInternal(const TShare
 // FListWidgetComponentsAction
 // =============================================================================
 
-bool FListWidgetComponentsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FListWidgetComponentsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1797,7 +1797,7 @@ bool FListWidgetComponentsAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return true;
 }
 
-TSharedPtr<FJsonObject> FListWidgetComponentsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FListWidgetComponentsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 
@@ -1852,7 +1852,7 @@ static UClass* ResolveContainerClass(const FString& ContainerType)
 	return nullptr;
 }
 
-bool FReparentWidgetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FReparentWidgetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -1867,7 +1867,7 @@ bool FReparentWidgetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FReparentWidgetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FReparentWidgetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString TargetContainerName = Params->GetStringField(TEXT("target_container_name"));
@@ -1995,7 +1995,7 @@ TSharedPtr<FJsonObject> FReparentWidgetsAction::ExecuteInternal(const TSharedPtr
 // FSetWidgetPropertiesAction
 // =============================================================================
 
-bool FSetWidgetPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetWidgetPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2010,7 +2010,7 @@ bool FSetWidgetPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetWidgetPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetWidgetPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString TargetName = Params->GetStringField(TEXT("target"));
@@ -2428,7 +2428,7 @@ TSharedPtr<FJsonObject> FSetWidgetPropertiesAction::ExecuteInternal(const TShare
 // FGetWidgetTreeAction
 // =============================================================================
 
-bool FGetWidgetTreeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetWidgetTreeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2571,7 +2571,7 @@ static TSharedPtr<FJsonObject> BuildWidgetNodeJson(UWidget* Widget, UWidgetTree*
 	return NodeObj;
 }
 
-TSharedPtr<FJsonObject> FGetWidgetTreeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetWidgetTreeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 
@@ -2600,7 +2600,7 @@ TSharedPtr<FJsonObject> FGetWidgetTreeAction::ExecuteInternal(const TSharedPtr<F
 // FDeleteWidgetFromBlueprintAction
 // =============================================================================
 
-bool FDeleteWidgetFromBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDeleteWidgetFromBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2615,7 +2615,7 @@ bool FDeleteWidgetFromBlueprintAction::Validate(const TSharedPtr<FJsonObject>& P
 	return true;
 }
 
-TSharedPtr<FJsonObject> FDeleteWidgetFromBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDeleteWidgetFromBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString TargetName = Params->GetStringField(TEXT("target"));
@@ -2660,7 +2660,7 @@ TSharedPtr<FJsonObject> FDeleteWidgetFromBlueprintAction::ExecuteInternal(const 
 // FRenameWidgetInBlueprintAction
 // =============================================================================
 
-bool FRenameWidgetInBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRenameWidgetInBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2680,7 +2680,7 @@ bool FRenameWidgetInBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Par
 	return true;
 }
 
-TSharedPtr<FJsonObject> FRenameWidgetInBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRenameWidgetInBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString TargetName = Params->GetStringField(TEXT("target"));
@@ -2726,7 +2726,7 @@ TSharedPtr<FJsonObject> FRenameWidgetInBlueprintAction::ExecuteInternal(const TS
 // FAddWidgetChildAction
 // =============================================================================
 
-bool FAddWidgetChildAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddWidgetChildAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2746,7 +2746,7 @@ bool FAddWidgetChildAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCP
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddWidgetChildAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddWidgetChildAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString ChildName = Params->GetStringField(TEXT("child"));
@@ -2813,7 +2813,7 @@ TSharedPtr<FJsonObject> FAddWidgetChildAction::ExecuteInternal(const TSharedPtr<
 // FDeleteUMGWidgetBlueprintAction
 // =============================================================================
 
-bool FDeleteUMGWidgetBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDeleteUMGWidgetBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2823,7 +2823,7 @@ bool FDeleteUMGWidgetBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Pa
 	return true;
 }
 
-TSharedPtr<FJsonObject> FDeleteUMGWidgetBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDeleteUMGWidgetBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 
@@ -2856,7 +2856,7 @@ TSharedPtr<FJsonObject> FDeleteUMGWidgetBlueprintAction::ExecuteInternal(const T
 // FSetComboBoxOptionsAction
 // =============================================================================
 
-bool FSetComboBoxOptionsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetComboBoxOptionsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2871,7 +2871,7 @@ bool FSetComboBoxOptionsAction::Validate(const TSharedPtr<FJsonObject>& Params, 
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetComboBoxOptionsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetComboBoxOptionsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString TargetName = Params->GetStringField(TEXT("target"));
@@ -2963,7 +2963,7 @@ TSharedPtr<FJsonObject> FSetComboBoxOptionsAction::ExecuteInternal(const TShared
 // FSetWidgetTextAction
 // =============================================================================
 
-bool FSetWidgetTextAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetWidgetTextAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -2978,7 +2978,7 @@ bool FSetWidgetTextAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPE
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetWidgetTextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetWidgetTextAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString TargetName = Params->GetStringField(TEXT("target"));
@@ -3098,7 +3098,7 @@ TSharedPtr<FJsonObject> FSetWidgetTextAction::ExecuteInternal(const TSharedPtr<F
 // FSetSliderPropertiesAction
 // =============================================================================
 
-bool FSetSliderPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetSliderPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -3113,7 +3113,7 @@ bool FSetSliderPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetSliderPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetSliderPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString TargetName = Params->GetStringField(TEXT("target"));
@@ -3208,7 +3208,7 @@ UClass* FAddGenericWidgetAction::ResolveWidgetClass(const FString& ClassName) co
 	return nullptr;
 }
 
-bool FAddGenericWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddGenericWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -3234,7 +3234,7 @@ bool FAddGenericWidgetAction::Validate(const TSharedPtr<FJsonObject>& Params, FM
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddGenericWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddGenericWidgetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString WidgetName = Params->GetStringField(TEXT("component_name"));
@@ -3372,7 +3372,7 @@ static UClass* ResolveClassByName(const FString& ClassName)
 // FMVVMAddViewModelAction
 // =============================================================================
 
-bool FMVVMAddViewModelAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FMVVMAddViewModelAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -3387,7 +3387,7 @@ bool FMVVMAddViewModelAction::Validate(const TSharedPtr<FJsonObject>& Params, FM
 	return true;
 }
 
-TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString ViewModelClassName = Params->GetStringField(TEXT("viewmodel_class"));
@@ -3511,7 +3511,7 @@ TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPt
 // FMVVMAddBindingAction
 // =============================================================================
 
-bool FMVVMAddBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FMVVMAddBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -3541,7 +3541,7 @@ bool FMVVMAddBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCP
 	return true;
 }
 
-TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString ViewModelName = Params->GetStringField(TEXT("viewmodel_name"));
@@ -3727,7 +3727,7 @@ TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<
 // FMVVMGetBindingsAction
 // =============================================================================
 
-bool FMVVMGetBindingsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FMVVMGetBindingsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -3737,7 +3737,7 @@ bool FMVVMGetBindingsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FMVVMGetBindingsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FMVVMGetBindingsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 
@@ -3871,7 +3871,7 @@ TSharedPtr<FJsonObject> FMVVMGetBindingsAction::ExecuteInternal(const TSharedPtr
 // FMVVMRemoveBindingAction
 // =============================================================================
 
-bool FMVVMRemoveBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FMVVMRemoveBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -3886,7 +3886,7 @@ bool FMVVMRemoveBindingAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 	return true;
 }
 
-TSharedPtr<FJsonObject> FMVVMRemoveBindingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FMVVMRemoveBindingAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString BindingIdStr = Params->GetStringField(TEXT("binding_id"));
@@ -3954,7 +3954,7 @@ TSharedPtr<FJsonObject> FMVVMRemoveBindingAction::ExecuteInternal(const TSharedP
 // FMVVMRemoveViewModelAction
 // =============================================================================
 
-bool FMVVMRemoveViewModelAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FMVVMRemoveViewModelAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("widget_name")))
 	{
@@ -3969,7 +3969,7 @@ bool FMVVMRemoveViewModelAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FMVVMRemoveViewModelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FMVVMRemoveViewModelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = Params->GetStringField(TEXT("widget_name"));
 	FString ViewModelName = Params->GetStringField(TEXT("viewmodel_name"));

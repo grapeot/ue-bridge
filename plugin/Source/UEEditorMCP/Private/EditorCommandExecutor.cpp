@@ -18,7 +18,7 @@ FString SerializeResponseObject(const TSharedPtr<FJsonObject>& Response)
 }
 }
 
-FString FEditorCommandExecutor::ExecuteGetContext(UMCPBridge* Bridge)
+FString FEditorCommandExecutor::ExecuteGetContext(UUEEditorBridge* Bridge)
 {
 	FString Result;
 	FEvent* DoneEvent = FPlatformProcess::GetSynchEventFromPool(false);
@@ -58,7 +58,7 @@ FString FEditorCommandExecutor::ExecuteGetContext(UMCPBridge* Bridge)
 	return Result;
 }
 
-FString FEditorCommandExecutor::ExecuteCommand(UMCPBridge* Bridge, const FString& CommandType, TSharedPtr<FJsonObject> Params)
+FString FEditorCommandExecutor::ExecuteCommand(UUEEditorBridge* Bridge, const FString& CommandType, TSharedPtr<FJsonObject> Params)
 {
 	auto Result = MakeShared<FString>();
 	FEvent* DoneEvent = FPlatformProcess::GetSynchEventFromPool(false);
