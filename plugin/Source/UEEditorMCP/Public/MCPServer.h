@@ -11,16 +11,16 @@
 class UUEEditorBridge;
 
 /**
- * FMCPClientHandler
+ * FEditorCommandClientHandler
  *
  * Handles a single persistent client connection on its own thread.
- * Created by FMCPServer when a new client connects.
+ * Created by FEditorCommandServer when a new client connects.
  */
-class FMCPClientHandler : public FRunnable
+class FEditorCommandClientHandler : public FRunnable
 {
 public:
-	FMCPClientHandler(FSocket* InClientSocket, UUEEditorBridge* InBridge, TAtomic<bool>& InServerStopping);
-	virtual ~FMCPClientHandler();
+	FEditorCommandClientHandler(FSocket* InClientSocket, UUEEditorBridge* InBridge, TAtomic<bool>& InServerStopping);
+	virtual ~FEditorCommandClientHandler();
 
 	// FRunnable Interface
 	virtual bool Init() override { return true; }
@@ -69,13 +69,13 @@ private:
 
 
 /**
- * FMCPServer
+ * FEditorCommandServer
  *
  * TCP server that accepts connections from MCP clients and routes
  * commands to the Bridge for execution.
  *
  * Supports multiple concurrent client connections, each handled on
- * its own thread via FMCPClientHandler.
+ * its own thread via FEditorCommandClientHandler.
  *
  * Key features:
  * - Persistent connections (socket stays open between commands)
@@ -83,11 +83,11 @@ private:
  * - ping/close commands handled without game thread
  * - Timeout handling for stale connections
  */
-class UEEDITORMCP_API FMCPServer : public FRunnable
+class UEEDITORMCP_API FEditorCommandServer : public FRunnable
 {
 public:
-	FMCPServer(UUEEditorBridge* InBridge, int32 InPort = 55558);
-	virtual ~FMCPServer();
+	FEditorCommandServer(UUEEditorBridge* InBridge, int32 InPort = 55558);
+	virtual ~FEditorCommandServer();
 
 	/** Start the server thread */
 	bool Start();
@@ -123,7 +123,7 @@ private:
 	FRunnableThread* Thread;
 
 	/** Active client handlers */
-	TArray<FMCPClientHandler*> ClientHandlers;
+	TArray<FEditorCommandClientHandler*> ClientHandlers;
 
 	/** Mutex for ClientHandlers array */
 	FCriticalSection HandlersLock;

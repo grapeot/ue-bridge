@@ -9,7 +9,7 @@
 #include "MCPBridge.generated.h"
 
 // Forward declarations
-class FMCPServer;
+class FEditorCommandServer;
 class FEditorAction;
 
 /**
@@ -82,7 +82,7 @@ private:
 	TSharedPtr<FJsonObject> ExecuteCommandInternal(const FString& CommandType, const TSharedPtr<FJsonObject>& Params);
 
 	/** The MCP TCP server (raw pointer - cleanup in Deinitialize) */
-	FMCPServer* Server;
+	FEditorCommandServer* Server;
 
 	/** Editor context (persists across commands) */
 	FUEEditorContext Context;
