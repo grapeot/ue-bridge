@@ -8,10 +8,10 @@
 #include "Dom/JsonObject.h"
 
 // =============================================================================
-// FMCPClientHandler - per-client thread
+// FEditorCommandClientHandler - per-client thread
 // =============================================================================
 
-FMCPClientHandler::FMCPClientHandler(FSocket* InClientSocket, UUEEditorBridge* InBridge, TAtomic<bool>& InServerStopping)
+FEditorCommandClientHandler::FEditorCommandClientHandler(FSocket* InClientSocket, UUEEditorBridge* InBridge, TAtomic<bool>& InServerStopping)
 	: ClientSocket(InClientSocket)
 	, Bridge(InBridge)
 	, Thread(nullptr)
@@ -23,7 +23,7 @@ FMCPClientHandler::FMCPClientHandler(FSocket* InClientSocket, UUEEditorBridge* I
 	Thread = FRunnableThread::Create(this, TEXT("UEEditorMCP Client Handler"));
 }
 
-FMCPClientHandler::~FMCPClientHandler()
+FEditorCommandClientHandler::~FEditorCommandClientHandler()
 {
 	bShouldStop = true;
 
@@ -45,7 +45,7 @@ FMCPClientHandler::~FMCPClientHandler()
 	}
 }
 
-uint32 FMCPClientHandler::Run()
+uint32 FEditorCommandClientHandler::Run()
 {
 	// Set socket options
 	ClientSocket->SetNonBlocking(false);
@@ -142,12 +142,12 @@ uint32 FMCPClientHandler::Run()
 	return 0;
 }
 
-void FMCPClientHandler::Exit()
+void FEditorCommandClientHandler::Exit()
 {
 	bIsFinished = true;
 }
 
-bool FMCPClientHandler::ReceiveMessage(FString& OutMessage)
+bool FEditorCommandClientHandler::ReceiveMessage(FString& OutMessage)
 {
 	// Receive length prefix (4 bytes, big endian)
 	uint8 LengthBytes[4];
@@ -186,7 +186,7 @@ bool FMCPClientHandler::ReceiveMessage(FString& OutMessage)
 	return true;
 }
 
-bool FMCPClientHandler::SendResponse(const FString& Response)
+bool FEditorCommandClientHandler::SendResponse(const FString& Response)
 {
 	// Convert to UTF-8
 	FTCHARToUTF8 Converter(*Response);
@@ -221,32 +221,32 @@ bool FMCPClientHandler::SendResponse(const FString& Response)
 	return true;
 }
 
-FString FMCPClientHandler::HandlePing()
+FString FEditorCommandClientHandler::HandlePing()
 {
 	return TEXT("{\"status\":\"success\",\"result\":{\"pong\":true}}");
 }
 
-void FMCPClientHandler::HandleClose()
+void FEditorCommandClientHandler::HandleClose()
 {
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Client requested disconnect"));
 	SendResponse(TEXT("{\"status\":\"success\",\"result\":{\"closed\":true}}"));
 }
 
-FString FMCPClientHandler::HandleGetContext()
+FString FEditorCommandClientHandler::HandleGetContext()
 {
 	return FEditorCommandExecutor::ExecuteGetContext(Bridge);
 }
 
-FString FMCPClientHandler::ExecuteOnGameThread(const FString& CommandType, TSharedPtr<FJsonObject> Params)
+FString FEditorCommandClientHandler::ExecuteOnGameThread(const FString& CommandType, TSharedPtr<FJsonObject> Params)
 {
 	return FEditorCommandExecutor::ExecuteCommand(Bridge, CommandType, Params);
 }
 
 // =============================================================================
-// FMCPServer - accept loop, spawns FMCPClientHandler per connection
+// FEditorCommandServer - accept loop, spawns FEditorCommandClientHandler per connection
 // =============================================================================
 
-FMCPServer::FMCPServer(UUEEditorBridge* InBridge, int32 InPort)
+FEditorCommandServer::FEditorCommandServer(UUEEditorBridge* InBridge, int32 InPort)
 	: Bridge(InBridge)
 	, ListenerSocket(nullptr)
 	, Port(InPort)
@@ -257,12 +257,12 @@ FMCPServer::FMCPServer(UUEEditorBridge* InBridge, int32 InPort)
 {
 }
 
-FMCPServer::~FMCPServer()
+FEditorCommandServer::~FEditorCommandServer()
 {
 	Stop();
 }
 
-bool FMCPServer::Start()
+bool FEditorCommandServer::Start()
 {
 	if (bIsRunning)
 	{
@@ -322,7 +322,7 @@ bool FMCPServer::Start()
 	return true;
 }
 
-void FMCPServer::Stop()
+void FEditorCommandServer::Stop()
 {
 	if (bIsStopping)
 	{
@@ -349,7 +349,7 @@ void FMCPServer::Stop()
 	// Stop and delete all client handlers
 	{
 		FScopeLock Lock(&HandlersLock);
-		for (FMCPClientHandler* Handler : ClientHandlers)
+		for (FEditorCommandClientHandler* Handler : ClientHandlers)
 		{
 			Handler->RequestStop();
 			delete Handler;  // destructor waits for thread + destroys socket
@@ -373,12 +373,12 @@ void FMCPServer::Stop()
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Server stopped"));
 }
 
-bool FMCPServer::Init()
+bool FEditorCommandServer::Init()
 {
 	return true;
 }
 
-uint32 FMCPServer::Run()
+uint32 FEditorCommandServer::Run()
 {
 	bIsRunning = true;
 
@@ -413,7 +413,7 @@ uint32 FMCPServer::Run()
 					UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Client connected (total: %d)"), ClientHandlers.Num() + 1);
 
 					// Create a handler that runs on its own thread
-					FMCPClientHandler* Handler = new FMCPClientHandler(ClientSocket, Bridge, bShouldStop);
+					FEditorCommandClientHandler* Handler = new FEditorCommandClientHandler(ClientSocket, Bridge, bShouldStop);
 					ClientHandlers.Add(Handler);
 				}
 			}
@@ -424,12 +424,12 @@ uint32 FMCPServer::Run()
 	return 0;
 }
 
-void FMCPServer::Exit()
+void FEditorCommandServer::Exit()
 {
 	bIsRunning = false;
 }
 
-void FMCPServer::CleanupFinishedHandlers()
+void FEditorCommandServer::CleanupFinishedHandlers()
 {
 	FScopeLock Lock(&HandlersLock);
 

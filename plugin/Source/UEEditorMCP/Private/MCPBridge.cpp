@@ -20,7 +20,7 @@ void UUEEditorBridge::Initialize(FSubsystemCollectionBase& Collection)
 	RegisterActions();
 
 	// Start the TCP server
-	Server = new FMCPServer(this, DefaultPort);
+	Server = new FEditorCommandServer(this, DefaultPort);
 	if (Server->Start())
 	{
 		UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Server started on port %d"), DefaultPort);
