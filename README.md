@@ -73,6 +73,8 @@ Or use the CLI:
 
 ```bash
 ue-bridge ping
+ue-bridge doctor
+ue-bridge verify
 ue-bridge get-context
 ue-bridge get-actors
 ue-bridge find-actors --pattern "Wall*"
@@ -80,6 +82,15 @@ ue-bridge compile --blueprint BP_ThirdPersonCharacter
 ```
 
 The CLI is the thin surface for simple one-off tasks. For multi-step automation, use the Python library.
+
+For installation and environment validation, prefer the Workflow A commands:
+
+```bash
+ue-bridge doctor
+ue-bridge verify
+```
+
+`doctor` returns a structured diagnosis report. `verify` is the stricter gate: it exits non-zero when the bridge is reachable but not fully ready.
 
 ## Key Features
 
@@ -141,6 +152,18 @@ python3 -m pytest tests/test_integration.py -v -m integration
 ```
 
 GitHub Actions runs the non-integration test suite on every push and pull request.
+
+## Workflow A: Install / Verify / Diagnose
+
+After installing the plugin and Python package, use the diagnostic flow instead of relying only on manual GUI checks:
+
+```bash
+ue-bridge doctor
+ue-bridge verify
+```
+
+- `doctor` checks connectivity, editor context, editor readiness, and log availability
+- `verify` enforces the minimum readiness bar for actual use and exits non-zero if the installation is not usable yet
 
 ## Credits
 

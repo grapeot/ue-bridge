@@ -4,6 +4,11 @@
 
 ### 2026-03-25
 
+- Started Workflow A on branch `workflow-a-doctor-verify`
+- Added Python bridge wrappers for `is_ready`, `get_editor_logs`, `get_unreal_logs`, plus aggregated `doctor()` and `verify_installation()` helpers
+- Added CLI commands for `is-ready`, `get-editor-logs`, `get-unreal-logs`, `doctor`, and `verify`
+- Added unit coverage for Workflow A bridge aggregation and CLI behavior, including non-zero exit on failed verification
+- Ran local fast suite successfully after Workflow A changes: 70 passed, 8 deselected
 - Started Phase 2/3 contract-hardening branch after merging Phase 1 into master
 - Added canonical `python/ue_bridge/` package surface while keeping `python/src/` as a compatibility layer
 - Updated `pyproject.toml` so the `ue-bridge` console script points at `ue_bridge.cli:main` and editable installs include both `ue_bridge*` and `src*`
@@ -28,3 +33,4 @@
 - A compatibility shim is much cheaper than a full package rename when the repo is still young. Adding a canonical `ue_bridge` package while preserving `src` lets us stabilize the public contract without forcing an all-at-once migration
 - For this repo, the right testing bar is contract coverage, not UE-heavy end-to-end coverage. The local fast suite is what should drive GitHub Actions, while UE integration remains opt-in
 - The correct CI scope for this repo is the Python contract surface, not Unreal-dependent integration flows. Shipping a small reliable workflow now is better than waiting for a full UE-capable pipeline
+- Workflow A should aggregate existing Unreal primitives before inventing new ones. This repo already had `ping`, `get_context`, `is_ready`, and log actions in C++; the missing layer was the Python/CLI contract that turns them into a usable install/verify/diagnose workflow

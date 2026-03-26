@@ -19,6 +19,37 @@ class TestCLIParsing:
         args = parser.parse_args(["get-context"])
         assert args.command == "get-context"
 
+    def test_is_ready(self):
+        parser = build_parser()
+        args = parser.parse_args(["is-ready"])
+        assert args.command == "is-ready"
+
+    def test_get_editor_logs_defaults(self):
+        parser = build_parser()
+        args = parser.parse_args(["get-editor-logs"])
+        assert args.count == 100
+        assert args.category is None
+        assert args.min_verbosity is None
+
+    def test_get_unreal_logs_defaults(self):
+        parser = build_parser()
+        args = parser.parse_args(["get-unreal-logs"])
+        assert args.tail_lines == 200
+        assert args.max_bytes == 65536
+        assert args.no_include_meta is False
+
+    def test_doctor_defaults(self):
+        parser = build_parser()
+        args = parser.parse_args(["doctor"])
+        assert args.editor_log_count == 50
+        assert args.unreal_tail_lines == 80
+        assert args.require_recent_live_logs is False
+
+    def test_verify(self):
+        parser = build_parser()
+        args = parser.parse_args(["verify"])
+        assert args.command == "verify"
+
     def test_compile_requires_blueprint(self):
         parser = build_parser()
         with pytest.raises(SystemExit):
@@ -178,3 +209,47 @@ class TestCLIContract:
         assert calls["args"] == ("BP_Test", "Character", "/Game/Test")
         captured = capsys.readouterr()
         assert json.loads(captured.out)["created"] is True
+
+    def test_main_doctor_outputs_structured_json(self, monkeypatch, capsys):
+        class FakeBridge:
+            def __init__(self, host="127.0.0.1", port=55558):
+                pass
+
+            def doctor(self, editor_log_count=50, unreal_tail_lines=80, require_recent_live_logs=False):
+                return {
+                    "ok": True,
+                    "status": "ready",
+                    "checks": {"ping": {"ok": True}},
+                }
+
+            def close(self):
+                return None
+
+        monkeypatch.setattr("src.cli.UEBridge", FakeBridge)
+        main(["doctor"])
+
+        captured = capsys.readouterr()
+        assert json.loads(captured.out)["status"] == "ready"
+
+    def test_main_verify_exits_nonzero_when_not_verified(self, monkeypatch, capsys):
+        class FakeBridge:
+            def __init__(self, host="127.0.0.1", port=55558):
+                pass
+
+            def verify_installation(self):
+                return {
+                    "verified": False,
+                    "required_checks": {"ping": True, "context": False, "editor_ready": False},
+                }
+
+            def close(self):
+                return None
+
+        monkeypatch.setattr("src.cli.UEBridge", FakeBridge)
+
+        with pytest.raises(SystemExit) as exc_info:
+            main(["verify"])
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert json.loads(captured.out)["verified"] is False

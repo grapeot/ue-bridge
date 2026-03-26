@@ -11,11 +11,23 @@
 
 Use CLI when a single command suffices. Use the library when you need sequencing, conditionals, or access to node IDs returned by earlier calls.
 
+Before doing real work, use the Workflow A checks once:
+
+```bash
+ue-bridge doctor
+ue-bridge verify
+```
+
 ## CLI Quick Reference
 
 ```bash
 ue-bridge ping
+ue-bridge doctor
+ue-bridge verify
 ue-bridge get-context
+ue-bridge is-ready
+ue-bridge get-editor-logs --count 50
+ue-bridge get-unreal-logs --tail-lines 80
 ue-bridge save
 ue-bridge get-actors
 ue-bridge find-actors --pattern "Wall*"

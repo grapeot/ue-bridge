@@ -13,6 +13,15 @@ def _json_out(data):
     print(json.dumps(data, indent=2))
 
 
+def _parse_location(value: str | None) -> tuple[float, float, float]:
+    if not value:
+        return (0.0, 0.0, 0.0)
+    parts = tuple(float(x) for x in value.split(","))
+    if len(parts) != 3:
+        raise UECommandError("Location must be in x,y,z format", error_type="invalid_arguments")
+    return parts
+
+
 def cmd_ping(ue: UEBridge, args):
     result = ue.ping()
     _json_out({"pong": result})
@@ -22,8 +31,47 @@ def cmd_get_context(ue: UEBridge, args):
     _json_out(ue.get_context())
 
 
+def cmd_is_ready(ue: UEBridge, args):
+    _json_out(ue.is_ready())
+
+
 def cmd_save(ue: UEBridge, args):
     _json_out(ue.save_all())
+
+
+def cmd_get_editor_logs(ue: UEBridge, args):
+    _json_out(ue.get_editor_logs(count=args.count, category=args.category, min_verbosity=args.min_verbosity))
+
+
+def cmd_get_unreal_logs(ue: UEBridge, args):
+    _json_out(
+        ue.get_unreal_logs(
+            tail_lines=args.tail_lines,
+            max_bytes=args.max_bytes,
+            include_meta=not args.no_include_meta,
+            require_recent=args.require_recent,
+            recent_window_seconds=args.recent_window_seconds,
+            filter_contains=args.filter_contains,
+            filter_category=args.filter_category,
+        )
+    )
+
+
+def cmd_doctor(ue: UEBridge, args):
+    _json_out(
+        ue.doctor(
+            editor_log_count=args.editor_log_count,
+            unreal_tail_lines=args.unreal_tail_lines,
+            require_recent_live_logs=args.require_recent_live_logs,
+        )
+    )
+
+
+def cmd_verify(ue: UEBridge, args):
+    result = ue.verify_installation()
+    _json_out(result)
+    if not result.get("verified", False):
+        raise SystemExit(1)
 
 
 def cmd_list_assets(ue: UEBridge, args):
@@ -50,12 +98,12 @@ def cmd_summary(ue: UEBridge, args):
 
 
 def cmd_spawn_actor(ue: UEBridge, args):
-    loc = tuple(float(x) for x in args.location.split(",")) if args.location else (0, 0, 0)
+    loc = _parse_location(args.location)
     _json_out(ue.spawn_actor(args.type, args.name, location=loc))
 
 
 def cmd_spawn_blueprint_actor(ue: UEBridge, args):
-    loc = tuple(float(x) for x in args.location.split(",")) if args.location else (0, 0, 0)
+    loc = _parse_location(args.location)
     _json_out(ue.spawn_blueprint_actor(args.blueprint, args.name, location=loc))
 
 
@@ -100,6 +148,28 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser("ping", help="Test connection")
     sub.add_parser("save", help="Save all")
     sub.add_parser("get-context", help="Get current editor context")
+    sub.add_parser("is-ready", help="Check whether Unreal Editor is fully ready")
+
+    p = sub.add_parser("get-editor-logs", help="Read recent captured editor logs")
+    p.add_argument("--count", type=int, default=100)
+    p.add_argument("--category", default=None)
+    p.add_argument("--min-verbosity", default=None)
+
+    p = sub.add_parser("get-unreal-logs", help="Read live Unreal log capture output")
+    p.add_argument("--tail-lines", type=int, default=200)
+    p.add_argument("--max-bytes", type=int, default=65536)
+    p.add_argument("--no-include-meta", action="store_true")
+    p.add_argument("--require-recent", action="store_true")
+    p.add_argument("--recent-window-seconds", type=float, default=2.0)
+    p.add_argument("--filter-contains", default=None)
+    p.add_argument("--filter-category", default=None)
+
+    p = sub.add_parser("doctor", help="Run install/verify/diagnose checks")
+    p.add_argument("--editor-log-count", type=int, default=50)
+    p.add_argument("--unreal-tail-lines", type=int, default=80)
+    p.add_argument("--require-recent-live-logs", action="store_true")
+
+    sub.add_parser("verify", help="Verify that the installed bridge is ready to use")
 
     p = sub.add_parser("list-assets", help="List assets")
     p.add_argument("--path", default="/Game/")
@@ -163,6 +233,11 @@ COMMAND_MAP = {
     "ping": cmd_ping,
     "save": cmd_save,
     "get-context": cmd_get_context,
+    "is-ready": cmd_is_ready,
+    "get-editor-logs": cmd_get_editor_logs,
+    "get-unreal-logs": cmd_get_unreal_logs,
+    "doctor": cmd_doctor,
+    "verify": cmd_verify,
     "list-assets": cmd_list_assets,
     "get-actors": cmd_get_actors,
     "find-actors": cmd_find_actors,

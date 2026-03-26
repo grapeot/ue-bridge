@@ -65,16 +65,24 @@ This installs the `ue-bridge` package in editable mode with test dependencies. I
 ### Step 4: Confirm end-to-end connectivity
 
 ```bash
-ue-bridge ping
+ue-bridge doctor
+ue-bridge verify
 ```
 
-Returns `{"pong": true}` if Python -> TCP -> UE Plugin is working. This is the single verification step — if ping succeeds, installation is complete.
+Use the two commands differently:
+
+- `ue-bridge doctor` returns a structured diagnosis report across connection, editor context, readiness, and logs
+- `ue-bridge verify` is the final gate and exits non-zero unless the bridge is actually ready to use
+
+If `verify` succeeds, installation is complete.
 
 ## Troubleshooting
 
 **"Cannot connect to Unreal Editor"**: UE Editor is not running, or the UEEditorMCP plugin is not enabled. Check Edit > Plugins in UE.
 
 **"Connection refused on port 55558"**: The plugin's TCP server may not have started. Search for "MCP" in UE's Output Log.
+
+**`doctor` succeeds but `verify` fails**: The editor is reachable, but not fully initialized. Wait for asset registry loading to finish, then run `ue-bridge verify` again.
 
 **Python import errors**: Ensure you ran `pip install -e .` from the `python/` directory. The package name is `ue-bridge` and the canonical import is `from ue_bridge import UEBridge`.
 
