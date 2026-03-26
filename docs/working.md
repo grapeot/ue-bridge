@@ -146,3 +146,8 @@
 - Discovery: `open .uproject` on macOS may not work reliably for auto-restart. Direct binary launch works: `"/Users/Shared/Epic Games/UE_5.7/Engine/Binaries/Mac/UnrealEditor" <uproject> &`
 - Discovery: take_screenshot captures editor viewport only. Game viewport (PIE camera) capture needs separate implementation (ReadPixels on game viewport crashes). For now, the user sees the game viewport directly while AI observes via editor viewport
 - Confirmed working: GM_Touhou (via DefaultEngine.ini) + BP_TouhouPlayer (with orthographic CameraComponent) produces correct top-down view after editor restart
+- Root cause of actor disappearing: Open World template uses World Partition, which doesn't persist dynamically spawned actors across editor restarts. Solution: use new_level to create empty level (no World Partition), set EditorStartupMap + GameDefaultMap in DefaultEngine.ini to persist across restarts
+- spawn_actor doesn't support PlayerStart class. Workaround: omit PlayerStart, GameMode spawns pawn at origin (0,0,0)
+- focus_viewport can crash editor — avoid using it, use set_viewport_transform instead
+- Confirmed full feedback loop: AI creates BP → sets properties → spawns actor → save → restart → PIE → Boss visible + SPAWN BULLET timer firing → game logic verified at runtime
+- Touhou Pilot Phase 1-2 milestone reached: Player (blue sphere), Boss (red cube), top-down orthographic camera, timer-driven bullet spawn logic, all visible and working in PIE on clean TouhouArena level
