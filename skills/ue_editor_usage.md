@@ -18,6 +18,12 @@ ue-bridge doctor
 ue-bridge verify
 ```
 
+If you want a full repo-contained validation run before editing anything, use:
+
+```bash
+scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uproject
+```
+
 ## CLI Quick Reference
 
 ```bash
@@ -47,6 +53,8 @@ ue-bridge raw compile_blueprint --params '{"blueprint_name":"BP_Foo"}'
 ```
 
 Alternatively, from the `python/` directory: `python3 -m ue_bridge <command>` (canonical) or `python3 -m src <command>` (legacy compatibility).
+
+The checked-in `hosts/UEBridgeHost` project is the preferred automation baseline. Use larger UE projects only when you need parity with a more realistic environment.
 
 ## Python API Quick Reference
 

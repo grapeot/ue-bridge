@@ -4,6 +4,8 @@
 
 ### 2026-03-25
 
+- Tightened the AI-first docs so the default install/usage path now points at `UEBridgeHost`, `ue-bridge doctor`, `ue-bridge verify`, and `scripts/run_python_unreal_integration.sh` instead of manual GUI inspection
+- Removed the remaining doc-level dependence on checking Edit > Plugins or reading a specific startup log line as the primary success signal
 - Replaced the hottest direct-field `FMCPEditorContext` usages with explicit API methods for last-created node and material-session state access
 - Added `FMCPEditorContext` helpers for current material access, registered material node lookup/removal, and last-node tracking so actions stop reaching into context internals as freely
 - Verified the `MCPContext` API refactor is behavior-preserving: Workflow A health, Blueprint create/compile, and graph create/connect/delete all still pass in the checked-in `UEBridgeHost`
@@ -74,3 +76,4 @@
 - A self-contained host only becomes real when it is versioned inside the plugin repo and the integration script can launch it from a clean shell. Creating a smallest host outside the repo was a useful proof, but checking it into `hosts/UEBridgeHost` was the point where it became a maintainable product asset
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
 - The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front
+- AI-first usability is not only about API coverage; it is also about default pathways. If the docs still send the reader to GUI menus or raw logs first, the product is not actually AI-first yet, even if the CLI and tests are good
