@@ -4,8 +4,10 @@
 
 ### 2026-03-25
 
+- Closed the second major playability gap from the temporary third-person trial: `set_component_property` now accepts struct-shaped values, which made `RelativeScale3D` work for obstacle Blueprints
+- Verified the obstacle-building workflow end-to-end in the trial project: create Blueprint → add StaticMeshComponent → assign cube mesh → scale via struct value → compile → spawn into the world
 - In the real playability trial, the first bridge-side usability gap was concrete and actionable: `spawn_blueprint_actor()` used the wrong parameter name for the underlying command, and `set_static_mesh_properties` existed only as a raw command. Both were fixed directly from the trial
-- The next gap surfaced immediately after that: `set_component_property` still does not support struct-shaped values such as `RelativeScale3D`. This is a real product gap, not a host/setup issue, and it affects how naturally AI can shape scene components
+- The next gap surfaced immediately after that: `set_component_property` originally did not support struct-shaped values such as `RelativeScale3D`. This was a real product gap, and it is now fixed and verified in the temporary third-person trial project
 - In a temporary third-person playtest project, the first real obstacle was not the bridge but template residue: the copied template still contained `TP_THIRDPERSON_API` macros in variant files, so the host project could not even compile until those were normalized
 - This is worth documenting because a “usability trial” can fail for two very different reasons: bridge UX problems vs. template/project hygiene problems. Keeping those causes separate matters for honest evaluation
 - Added repo-native `docs/PRD.md` and `docs/RFC.md` so the AI-first product intent and architecture direction are no longer only implicit in code and chat history
