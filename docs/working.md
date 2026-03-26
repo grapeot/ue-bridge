@@ -4,6 +4,10 @@
 
 ### 2026-03-25
 
+- Added `UEEditorMCP.Health.WorkflowA.PIESmokeLifecycle` and verified a non-destructive runtime lifecycle path on the checked-in host (start PIE → observe running → stop PIE → observe quiesced state)
+- Added a direct raw-socket representative case to `python/tests/test_integration_workflow_a.py` so the end-to-end integration flow now checks the length-prefixed JSON protocol, not just the Python wrapper
+- Verified the repo-contained integration flow now passes 5 Python integration tests end-to-end, including the raw socket ping/close path
+- Accepted one PIE warning from the engine audio layer during unattended runs as environmental noise rather than a plugin failure; the test itself completed successfully with zero plugin-side errors
 - Extracted the game-thread command execution path out of `MCPServer.cpp` into a dedicated `EditorCommandExecutor` boundary
 - Verified the server-boundary refactor is behavior-preserving: the checked-in `UEBridgeHost` still passes Workflow A health, Blueprint create/compile, and graph create/connect/delete after the extraction
 - Confirmed the de-MCP effort has now reached three safe internal seams in order: `ActionRegistry`, `MCPContext`, and the server-side command execution boundary
@@ -81,3 +85,4 @@
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
 - The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front
 - AI-first usability is not only about API coverage; it is also about default pathways. If the docs still send the reader to GUI menus or raw logs first, the product is not actually AI-first yet, even if the CLI and tests are good
+- For unattended PIE smoke tests, the right success criterion is plugin behavior, not total engine silence. Engine-level warnings from unrelated subsystems (like audio device probing) can appear even when the lifecycle contract is healthy
