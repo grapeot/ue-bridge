@@ -151,3 +151,8 @@
 - focus_viewport can crash editor — avoid using it, use set_viewport_transform instead
 - Confirmed full feedback loop: AI creates BP → sets properties → spawns actor → save → restart → PIE → Boss visible + SPAWN BULLET timer firing → game logic verified at runtime
 - Touhou Pilot Phase 1-2 milestone reached: Player (blue sphere), Boss (red cube), top-down orthographic camera, timer-driven bullet spawn logic, all visible and working in PIE on clean TouhouArena level
+- Breakthrough: SpawnActorFromClass workaround found — use BeginDeferredActorSpawnFromClass + FinishSpawningActor (regular function call nodes) instead of UK2Node_SpawnActorFromClass (special node that crashes on macOS). Both are standard GameplayStatics functions, work perfectly via add_function_node
+- UK2Node_SpawnActorFromClass crashes on ALL classes (native and Blueprint) on macOS ARM64 UE 5.7 — this is an engine bug, not a bridge bug. Crash protection prevents editor death but the node still can't be created
+- Confirmed bullets spawning and moving in PIE: Boss timer fires every 0.5s, bullets fly from Boss toward Player at speed 100, visible in game viewport
+- Discovery: get_actors and take_screenshot only access editor world, not PIE world. Bullets spawned during PIE are invisible to both. Need game viewport screenshot for full observability (future work)
+- Discovery: set_variable_default for Vector type uses UE string format "(X=0.0,Y=-1.0,Z=0.0)"
