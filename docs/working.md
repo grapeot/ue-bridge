@@ -4,6 +4,11 @@
 
 ### 2026-03-25
 
+- Added the first Unreal Automation Tests for Workflow A health checks in `plugin/Source/UEEditorMCP/Private/Tests/WorkflowAHealthTests.cpp`
+- Pointed `CharacterActionRoom/Plugins/UEEditorMCP` at the maintained `ue_bridge_skill/plugin` via symlink so the host project runs the real plugin under development
+- Built `CharacterActionRoomEditor` with the symlinked project plugin to ensure `UEEditorMCP` was discoverable as a project plugin module
+- Ran Unreal Automation Tests successfully against `CharacterActionRoom.uproject` with `UEEditorMCP.Health` filter: 4 passed, 0 failed, exit code 0
+- Verified the first Automation batch covers module load, bridge subsystem availability, `is_ready` success shape, `get_editor_logs` success shape, and safe unknown-command failure handling
 - Started Workflow A on branch `workflow-a-doctor-verify`
 - Added Python bridge wrappers for `is_ready`, `get_editor_logs`, `get_unreal_logs`, plus aggregated `doctor()` and `verify_installation()` helpers
 - Added CLI commands for `is-ready`, `get-editor-logs`, `get-unreal-logs`, `doctor`, and `verify`
@@ -34,3 +39,5 @@
 - For this repo, the right testing bar is contract coverage, not UE-heavy end-to-end coverage. The local fast suite is what should drive GitHub Actions, while UE integration remains opt-in
 - The correct CI scope for this repo is the Python contract surface, not Unreal-dependent integration flows. Shipping a small reliable workflow now is better than waiting for a full UE-capable pipeline
 - Workflow A should aggregate existing Unreal primitives before inventing new ones. This repo already had `ping`, `get_context`, `is_ready`, and log actions in C++; the missing layer was the Python/CLI contract that turns them into a usable install/verify/diagnose workflow
+- For Unreal Automation Tests, the first real blocker was not test code but host-project plugin loading. Pointing the host project at the maintained plugin and explicitly building the editor target before running tests was necessary to get stable results
+- The safest first Unreal test batch is editor-only health checks executed through `UMCPBridge::ExecuteCommand`, not socket-level or asset-heavy scenarios. That keeps failures attributable to plugin bootstrap and command contracts rather than project content noise
