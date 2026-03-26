@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import time
 import uuid
+import json
+import socket
 
 import pytest
 
@@ -70,3 +72,31 @@ class TestWorkflowA:
     def test_recent_unreal_logs_are_queryable(self, ue: UEBridge):
         logs = ue.get_unreal_logs(tail_lines=20, max_bytes=8192)
         assert "linesReturned" in logs or "content" in logs or "cursor" in logs
+
+    def test_raw_socket_ping_and_close(self):
+        def send_message(sock: socket.socket, payload: dict) -> dict:
+            message = json.dumps(payload).encode("utf-8")
+            sock.sendall(len(message).to_bytes(4, byteorder="big") + message)
+
+            length_bytes = sock.recv(4)
+            assert len(length_bytes) == 4
+            response_length = int.from_bytes(length_bytes, byteorder="big")
+
+            chunks: list[bytes] = []
+            bytes_remaining = response_length
+            while bytes_remaining > 0:
+                chunk = sock.recv(bytes_remaining)
+                assert chunk
+                chunks.append(chunk)
+                bytes_remaining -= len(chunk)
+
+            return json.loads(b"".join(chunks).decode("utf-8"))
+
+        with socket.create_connection(("127.0.0.1", 55558), timeout=5.0) as sock:
+            ping_response = send_message(sock, {"type": "ping"})
+            assert ping_response["status"] == "success"
+            assert ping_response["result"]["pong"] is True
+
+            close_response = send_message(sock, {"type": "close"})
+            assert close_response["status"] == "success"
+            assert close_response["result"]["closed"] is True

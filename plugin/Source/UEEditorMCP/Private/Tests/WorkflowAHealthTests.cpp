@@ -228,6 +228,93 @@ bool FUEEditorMCPLogControlSurfaceTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FUEEditorMCPPIESmokeLifecycleTest,
+	"UEEditorMCP.Health.WorkflowA.PIESmokeLifecycle",
+	UEEditorMCP::Tests::EditorOnlyFlags)
+
+bool FUEEditorMCPPIESmokeLifecycleTest::RunTest(const FString& Parameters)
+{
+	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
+	{
+		return false;
+	}
+
+	auto QueryPieState = [Bridge]() -> TSharedPtr<FJsonObject>
+	{
+		return Bridge->ExecuteCommand(TEXT("get_pie_state"), MakeShared<FJsonObject>());
+	};
+
+	TSharedPtr<FJsonObject> StartParams = MakeShared<FJsonObject>();
+	StartParams->SetStringField(TEXT("mode"), TEXT("SelectedViewport"));
+	TSharedPtr<FJsonObject> StartResponse = Bridge->ExecuteCommand(TEXT("start_pie"), StartParams);
+	bool bStartSuccess = false;
+	TestTrue(TEXT("start_pie should return success"), StartResponse.IsValid() && StartResponse->TryGetBoolField(TEXT("success"), bStartSuccess) && bStartSuccess);
+
+	bool bObservedRunning = false;
+	for (int32 Attempt = 0; Attempt < 40; ++Attempt)
+	{
+		FPlatformProcess::Sleep(0.25f);
+		TSharedPtr<FJsonObject> StateResponse = QueryPieState();
+		bool bStateSuccess = false;
+		if (!StateResponse.IsValid() || !StateResponse->TryGetBoolField(TEXT("success"), bStateSuccess) || !bStateSuccess)
+		{
+			continue;
+		}
+		const TSharedPtr<FJsonObject>& StateResult = UEEditorMCP::Tests::GetFlatSuccessObject(*this, StateResponse);
+		if (!StateResult.IsValid())
+		{
+			continue;
+		}
+
+		FString State;
+		bool bInProgress = false;
+		StateResult->TryGetStringField(TEXT("state"), State);
+		StateResult->TryGetBoolField(TEXT("is_play_session_in_progress"), bInProgress);
+		if (State == TEXT("Running") || bInProgress)
+		{
+			bObservedRunning = true;
+			break;
+		}
+	}
+	TestTrue(TEXT("PIE smoke test should observe a running play session after start_pie"), bObservedRunning);
+
+	TSharedPtr<FJsonObject> StopResponse = Bridge->ExecuteCommand(TEXT("stop_pie"), MakeShared<FJsonObject>());
+	bool bStopSuccess = false;
+	TestTrue(TEXT("stop_pie should return success"), StopResponse.IsValid() && StopResponse->TryGetBoolField(TEXT("success"), bStopSuccess) && bStopSuccess);
+
+	bool bObservedStopped = false;
+	for (int32 Attempt = 0; Attempt < 40; ++Attempt)
+	{
+		FPlatformProcess::Sleep(0.25f);
+		TSharedPtr<FJsonObject> StateResponse = QueryPieState();
+		bool bStateSuccess = false;
+		if (!StateResponse.IsValid() || !StateResponse->TryGetBoolField(TEXT("success"), bStateSuccess) || !bStateSuccess)
+		{
+			continue;
+		}
+		const TSharedPtr<FJsonObject>& StateResult = UEEditorMCP::Tests::GetFlatSuccessObject(*this, StateResponse);
+		if (!StateResult.IsValid())
+		{
+			continue;
+		}
+
+		FString State;
+		bool bInProgress = true;
+		StateResult->TryGetStringField(TEXT("state"), State);
+		StateResult->TryGetBoolField(TEXT("is_play_session_in_progress"), bInProgress);
+		if (State == TEXT("Stopped") || !bInProgress)
+		{
+			bObservedStopped = true;
+			break;
+		}
+	}
+	TestTrue(TEXT("PIE smoke test should observe the play session quiescing after stop_pie"), bObservedStopped);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 	FUEEditorMCPCreateAndCompileBlueprintTest,
 	"UEEditorMCP.Blueprint.WorkflowA.CreateAndCompile",
 	UEEditorMCP::Tests::EditorOnlyFlags)
