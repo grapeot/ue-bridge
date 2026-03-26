@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/LayoutActions.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphNode.h"
@@ -40,7 +40,7 @@ static void ShowNotification(const FString& Message, bool bSuccess = true)
 }
 
 
-// GetActiveBlueprintEditor() moved to FMCPCommonUtils::GetActiveBlueprintEditor().
+// GetActiveBlueprintEditor() moved to FUEBridgeCommonUtils::GetActiveBlueprintEditor().
 // All call sites in this file now use the shared utility.
 
 
@@ -137,7 +137,7 @@ static UEdGraph* ResolveGraph(
 	if (Params->HasField(TEXT("blueprint_name")))
 	{
 		FString BlueprintName = Params->GetStringField(TEXT("blueprint_name"));
-		UBlueprint* Blueprint = FMCPCommonUtils::FindBlueprint(BlueprintName);
+		UBlueprint* Blueprint = FUEBridgeCommonUtils::FindBlueprint(BlueprintName);
 		if (!Blueprint) return nullptr;
 
 		FString GraphName;
@@ -149,22 +149,22 @@ static UEdGraph* ResolveGraph(
 		if (GraphName.IsEmpty())
 		{
 			// Default to first uber graph (event graph)
-			Graph = FMCPCommonUtils::FindOrCreateEventGraph(Blueprint);
+			Graph = FUEBridgeCommonUtils::FindOrCreateEventGraph(Blueprint);
 		}
 		else
 		{
-			Graph = FMCPCommonUtils::FindGraphByName(Blueprint, GraphName);
+			Graph = FUEBridgeCommonUtils::FindGraphByName(Blueprint, GraphName);
 		}
 
 		// Also try to find the BPEditor for this blueprint so callers can
 		// access editor state (selected nodes, etc.)
-		OutBPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
+		OutBPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor(BlueprintName);
 
 		return Graph;
 	}
 
 	// Fall back to focused editor
-	OutBPEditor = FMCPCommonUtils::GetActiveBlueprintEditor();
+	OutBPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor();
 	if (OutBPEditor)
 	{
 		Graph = OutBPEditor->GetFocusedGraph();
@@ -211,7 +211,7 @@ FVector2D FBlueprintAutoLayout::GetNodeSize(const UEdGraphNode* Node, const FBlu
 	//   - When Slate widget is available: Max(Slate, TightFloor).
 	//     At 1:1 zoom Slate is accurate and >= floor → uses Slate.
 	//     At low LOD Slate shrinks → floor catches underestimation.
-	//   - When Slate is unavailable (MCP path): TightFloor * safety.
+	//   - When Slate is unavailable (bridge path): TightFloor * safety.
 	// ----------------------------------------------------------------
 
 	// --- Tight floor: Height ---
@@ -327,7 +327,7 @@ FVector2D FBlueprintAutoLayout::GetNodeSize(const UEdGraphNode* Node, const FBlu
 	}
 
 	// ----------------------------------------------------------------
-	// Slate unavailable (MCP path) — small safety factor + absolute
+	// Slate unavailable (bridge path) — small safety factor + absolute
 	// minimum from Fallback settings to compensate for heuristic gaps.
 	// ----------------------------------------------------------------
 	// Safety factors compensate for heuristic gaps (render-time borders,
@@ -2399,7 +2399,7 @@ TSharedPtr<FJsonObject> FAutoLayoutBlueprintAction::ExecuteInternal(const TShare
 	if (Params->HasField(TEXT("blueprint_name")))
 	{
 		FString BlueprintName = Params->GetStringField(TEXT("blueprint_name"));
-		Blueprint = FMCPCommonUtils::FindBlueprint(BlueprintName);
+		Blueprint = FUEBridgeCommonUtils::FindBlueprint(BlueprintName);
 		if (!Blueprint)
 		{
 			return CreateErrorResponse(FString::Printf(TEXT("Blueprint '%s' not found."), *BlueprintName));
@@ -2408,7 +2408,7 @@ TSharedPtr<FJsonObject> FAutoLayoutBlueprintAction::ExecuteInternal(const TShare
 	else
 	{
 		// Try focused editor
-		FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor();
+		FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor();
 		if (BPEditor)
 		{
 			UEdGraph* FocusedGraph = BPEditor->GetFocusedGraph();

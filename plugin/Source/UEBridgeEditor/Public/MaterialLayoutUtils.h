@@ -1,5 +1,5 @@
 // MaterialLayoutUtils.h — Shared pin-aware layer sorting for material auto-layout
-// Used by both the MCP action path (MaterialActions.cpp) and
+// Used by both the bridge action path (MaterialActions.cpp) and
 // the editor UI toolbar path (UEEditorMCPModule.cpp).
 
 #pragma once

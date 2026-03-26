@@ -4,6 +4,9 @@
 
 ### 2026-03-25
 
+- Renamed the remaining helper-layer classes from `FMCPCommonUtils` / `FMCPLogCapture` to `FUEBridgeCommonUtils` / `FUEBridgeLogCapture`, and renamed the legacy setup helpers to `setup_legacy_bridge.*`
+- Verified the tail cleanup is still behavior-preserving: the checked-in host builds, Workflow A health remains green, and Python ↔ Unreal integration still passes 5/5 after the helper cleanup
+- Confirmed that MCP now survives mostly as historical changelog language and a few compatibility-oriented comments, not as a core code or packaging surface
 - Completed the packaging-layer rename from `UEEditorMCP` to `UEBridgeEditor`: uplugin file, module name, source directory, module implementation file, and checked-in host plugin path all now use the bridge-native name
 - Verified the deep packaging rename is behavior-preserving on the checked-in host: `UEBridgeEditor.Health`, `UEBridgeEditor.Blueprint`, `UEBridgeEditor.Graph`, and Python ↔ Unreal integration all remain green
 - Confirmed that the remaining MCP residue is now mostly limited to a few helper/file names, historical comments, and compatibility helper script names rather than the plugin's primary packaging surface
@@ -70,7 +73,7 @@
 - Rewrote skills/ue_editor_usage.md: full usage guide with CLI quick reference, Python API quick reference (connection, scene, Blueprint nodes, input system, materials, raw commands), known limitations (inherited components, IMC read/cleanup, error handling), working principles, and a complete crouch example. Removed outdated path references
 - Created docs/working.md (this file)
 - Updated README.md to make the CLI/library split explicit and added docs/working.md to the project structure
-- Marked plugin/setup_mcp.bat and plugin/setup_mcp.ps1 as legacy MCP helpers so they no longer generate outdated `ue_editor_mcp.server_*` config for the current ue-bridge workflow
+- Marked plugin/setup_legacy_bridge.bat and plugin/setup_legacy_bridge.ps1 as legacy MCP helpers so they no longer generate outdated `ue_editor_mcp.server_*` config for the current ue-bridge workflow
 
 ## Lessons Learned
 

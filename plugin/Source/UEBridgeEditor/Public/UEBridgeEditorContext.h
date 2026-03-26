@@ -11,7 +11,7 @@
 /**
  * FUEEditorContext
  *
- * Tracks the current editing context across MCP commands.
+	 * Tracks the current editing context across bridge commands.
  * This allows commands to reference the "current" blueprint/graph
  * without specifying it each time.
  */

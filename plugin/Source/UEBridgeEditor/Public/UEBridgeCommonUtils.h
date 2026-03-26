@@ -23,10 +23,10 @@ class UK2Node_InputAction;
 class USCS_Node;
 
 /**
- * Common utility functions for MCP commands.
+	 * Common utility functions for bridge commands.
  * These are shared across all action handlers.
  */
-class UEBRIDGEEDITOR_API FMCPCommonUtils
+class UEBRIDGEEDITOR_API FUEBridgeCommonUtils
 {
 public:
 	// =========================================================================

@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/GraphActions.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "UEBridgeEditorContext.h"
 
 #include "Engine/Blueprint.h"
@@ -93,7 +93,7 @@ namespace PatchHelpers
 		// If a direction is specified, try that first
 		if (PreferredDirection != EGPD_MAX)
 		{
-			UEdGraphPin* Pin = FMCPCommonUtils::FindPin(Node, PinName, PreferredDirection);
+			UEdGraphPin* Pin = FUEBridgeCommonUtils::FindPin(Node, PinName, PreferredDirection);
 			if (Pin)
 			{
 				return Pin;
@@ -101,10 +101,10 @@ namespace PatchHelpers
 		}
 
 		// Try both directions
-		UEdGraphPin* Pin = FMCPCommonUtils::FindPin(Node, PinName, EGPD_Output);
+		UEdGraphPin* Pin = FUEBridgeCommonUtils::FindPin(Node, PinName, EGPD_Output);
 		if (!Pin)
 		{
-			Pin = FMCPCommonUtils::FindPin(Node, PinName, EGPD_Input);
+			Pin = FUEBridgeCommonUtils::FindPin(Node, PinName, EGPD_Input);
 		}
 		return Pin;
 	}
@@ -841,7 +841,7 @@ FPatchOpResult FApplyPatchAction::ExecuteAddNode(const FPatchOp& Op, UBlueprint*
 		}
 
 		// Check if event already exists
-		UK2Node_Event* ExistingEvent = FMCPCommonUtils::FindExistingEventNode(Graph, EventName);
+		UK2Node_Event* ExistingEvent = FUEBridgeCommonUtils::FindExistingEventNode(Graph, EventName);
 		if (ExistingEvent)
 		{
 			// Reuse existing event node
@@ -850,7 +850,7 @@ FPatchOpResult FApplyPatchAction::ExecuteAddNode(const FPatchOp& Op, UBlueprint*
 		}
 		else
 		{
-			UK2Node_Event* EventNode = FMCPCommonUtils::CreateEventNode(Graph, EventName, Position);
+			UK2Node_Event* EventNode = FUEBridgeCommonUtils::CreateEventNode(Graph, EventName, Position);
 			if (!EventNode)
 			{
 				Result.bSuccess = false;
@@ -1074,7 +1074,7 @@ FPatchOpResult FApplyPatchAction::ExecuteAddNode(const FPatchOp& Op, UBlueprint*
 			return Result;
 		}
 
-		UK2Node_CallFunction* FuncNode = FMCPCommonUtils::CreateFunctionCallNode(Graph, Function, Position);
+		UK2Node_CallFunction* FuncNode = FUEBridgeCommonUtils::CreateFunctionCallNode(Graph, Function, Position);
 		if (!FuncNode)
 		{
 			Result.bSuccess = false;
@@ -1088,7 +1088,7 @@ FPatchOpResult FApplyPatchAction::ExecuteAddNode(const FPatchOp& Op, UBlueprint*
 		{
 			for (const auto& DefaultPair : (*DefaultsObj)->Values)
 			{
-				UEdGraphPin* Pin = FMCPCommonUtils::FindPin(FuncNode, DefaultPair.Key, EGPD_Input);
+				UEdGraphPin* Pin = FUEBridgeCommonUtils::FindPin(FuncNode, DefaultPair.Key, EGPD_Input);
 				if (Pin)
 				{
 					FString DefaultStr;
@@ -1207,7 +1207,7 @@ FPatchOpResult FApplyPatchAction::ExecuteAddNode(const FPatchOp& Op, UBlueprint*
 	}
 	else if (NodeType.Equals(TEXT("Self"), ESearchCase::IgnoreCase))
 	{
-		UK2Node_Self* SelfNode = FMCPCommonUtils::CreateSelfReferenceNode(Graph, Position);
+		UK2Node_Self* SelfNode = FUEBridgeCommonUtils::CreateSelfReferenceNode(Graph, Position);
 		if (!SelfNode)
 		{
 			Result.bSuccess = false;
@@ -1592,7 +1592,7 @@ FPatchOpResult FApplyPatchAction::ExecuteAddVariable(const FPatchOp& Op, UBluepr
 	// Resolve type to FEdGraphPinType
 	FEdGraphPinType PinType;
 	FString TypeResolveError;
-	if (!FMCPCommonUtils::ResolvePinTypeFromString(VarType, PinType, TypeResolveError))
+	if (!FUEBridgeCommonUtils::ResolvePinTypeFromString(VarType, PinType, TypeResolveError))
 	{
 		Result.bSuccess = false;
 		Result.Message = FString::Printf(TEXT("Variable '%s': %s"), *VarName, *TypeResolveError);

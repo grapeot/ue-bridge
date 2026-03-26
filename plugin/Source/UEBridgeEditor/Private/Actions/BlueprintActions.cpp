@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/BlueprintActions.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "Engine/Blueprint.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/SimpleConstructionScript.h"
@@ -244,14 +244,14 @@ TSharedPtr<FJsonObject> FCompileBlueprintAction::ExecuteInternal(const TSharedPt
 	UE_LOG(LogMCP, Log, TEXT("UEBridgeEditor: compile_blueprint - Found blueprint '%s'"), *Blueprint->GetName());
 
 	// Repair WidgetVariableNameToGuidMap before compile for Widget Blueprints.
-	// MCP's ConstructWidget API never populates this map; WidgetBlueprintCompiler
+	// The bridge-side ConstructWidget path never populates this map; WidgetBlueprintCompiler
 	// fires ensure(WidgetBP->WidgetVariableNameToGuidMap.Contains(Widget->GetFName()))
 	// for every named widget that lacks a GUID entry.  Running this repair here
 	// also fixes any pre-existing broken Widget Blueprint assets.
 	//
 	// NOTE: On editor startup, UE's ensure() fires but does NOT stop execution --
 	// the UMG compiler continues and auto-patches the GUID map in memory.  So when
-	// MCP compile runs, the memory map may already be complete even if the uasset
+	// During compile runs, the memory map may already be complete even if the uasset
 	// file on disk still lacks the entry.  We therefore check BOTH before compile
 	// (pre-patch) and after (to catch the engine's own silent repair), and always
 	// force-save a WidgetBlueprint that compiled successfully so that the fixed
@@ -775,7 +775,7 @@ TSharedPtr<FJsonObject> FSetComponentPropertyAction::ExecuteInternal(const TShar
 	GetRequiredString(Params, TEXT("property_name"), PropertyName, Error);
 
 	// Find component node
-	USCS_Node* ComponentNode = FMCPCommonUtils::FindComponentNode(Blueprint, ComponentName);
+	USCS_Node* ComponentNode = FUEBridgeCommonUtils::FindComponentNode(Blueprint, ComponentName);
 	if (!ComponentNode)
 	{
 		return CreateErrorResponse(
@@ -795,7 +795,7 @@ TSharedPtr<FJsonObject> FSetComponentPropertyAction::ExecuteInternal(const TShar
 
 	// Set the property
 	FString ErrorMessage;
-	if (!FMCPCommonUtils::SetObjectProperty(ComponentTemplate, PropertyName, JsonValue, ErrorMessage))
+	if (!FUEBridgeCommonUtils::SetObjectProperty(ComponentTemplate, PropertyName, JsonValue, ErrorMessage))
 	{
 		return CreateErrorResponse(ErrorMessage, TEXT("property_set_failed"));
 	}
@@ -886,7 +886,7 @@ TSharedPtr<FJsonObject> FSetInheritedComponentPropertyAction::ExecuteInternal(co
 	// Set the property
 	TSharedPtr<FJsonValue> JsonValue = Params->Values.FindRef(TEXT("property_value"));
 	FString ErrorMessage;
-	if (!FMCPCommonUtils::SetObjectProperty(FoundComponent, PropertyName, JsonValue, ErrorMessage))
+	if (!FUEBridgeCommonUtils::SetObjectProperty(FoundComponent, PropertyName, JsonValue, ErrorMessage))
 	{
 		return CreateErrorResponse(ErrorMessage, TEXT("property_set_failed"));
 	}
@@ -929,7 +929,7 @@ TSharedPtr<FJsonObject> FSetStaticMeshPropertiesAction::ExecuteInternal(const TS
 	GetRequiredString(Params, TEXT("component_name"), ComponentName, Error);
 
 	// Find component node
-	USCS_Node* ComponentNode = FMCPCommonUtils::FindComponentNode(Blueprint, ComponentName);
+	USCS_Node* ComponentNode = FUEBridgeCommonUtils::FindComponentNode(Blueprint, ComponentName);
 	if (!ComponentNode)
 	{
 		return CreateErrorResponse(
@@ -1017,7 +1017,7 @@ TSharedPtr<FJsonObject> FSetPhysicsPropertiesAction::ExecuteInternal(const TShar
 	GetRequiredString(Params, TEXT("component_name"), ComponentName, Error);
 
 	// Find component node
-	USCS_Node* ComponentNode = FMCPCommonUtils::FindComponentNode(Blueprint, ComponentName);
+	USCS_Node* ComponentNode = FUEBridgeCommonUtils::FindComponentNode(Blueprint, ComponentName);
 	if (!ComponentNode)
 	{
 		return CreateErrorResponse(
@@ -1119,7 +1119,7 @@ TSharedPtr<FJsonObject> FSetBlueprintPropertyAction::ExecuteInternal(const TShar
 
 	// Set the property
 	FString ErrorMessage;
-	if (!FMCPCommonUtils::SetObjectProperty(DefaultObject, PropertyName, JsonValue, ErrorMessage))
+	if (!FUEBridgeCommonUtils::SetObjectProperty(DefaultObject, PropertyName, JsonValue, ErrorMessage))
 	{
 		return CreateErrorResponse(ErrorMessage, TEXT("property_set_failed"));
 	}

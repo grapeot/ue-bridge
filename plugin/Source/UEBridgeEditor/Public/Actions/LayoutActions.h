@@ -22,7 +22,7 @@ class FBlueprintEditor;
  * (Sugiyama-style) layout for Exec-connected nodes, with Pure nodes
  * clustering near their consumer Exec nodes.
  *
- * Usage from either MCP action or editor command:
+	 * Usage from either bridge action or editor command:
  *   FBlueprintAutoLayout::LayoutNodes(Graph, NodesToLayout, Settings);
  */
 struct UEBRIDGEEDITOR_API FBlueprintLayoutSettings
@@ -121,7 +121,7 @@ private:
 
 
 // ============================================================================
-// MCP Actions
+// Bridge actions
 // ============================================================================
 
 /**

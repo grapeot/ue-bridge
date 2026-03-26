@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/EditorActions.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "Editor.h"
 #include "EditorViewportClient.h"
 #include "LevelEditorViewport.h"
@@ -36,7 +36,7 @@
 #include "ImageUtils.h"
 #include "Misc/Base64.h"
 #include "Misc/PackageName.h"
-#include "MCPLogCapture.h"
+#include "UEBridgeLogCapture.h"
 #include "UEBridgeEditorBridge.h"
 #include "UObject/ObjectRedirector.h"
 #include "UObject/UnrealType.h"
@@ -89,7 +89,7 @@ TSharedPtr<FJsonObject> FGetActorsInLevelAction::ExecuteInternal(const TSharedPt
 	{
 		if (Actor)
 		{
-			ActorArray.Add(FMCPCommonUtils::ActorToJsonValue(Actor));
+			ActorArray.Add(FUEBridgeCommonUtils::ActorToJsonValue(Actor));
 		}
 	}
 
@@ -128,7 +128,7 @@ TSharedPtr<FJsonObject> FFindActorsByNameAction::ExecuteInternal(const TSharedPt
 	{
 		if (Actor && Actor->GetName().Contains(Pattern))
 		{
-			MatchingActors.Add(FMCPCommonUtils::ActorToJsonValue(Actor));
+			MatchingActors.Add(FUEBridgeCommonUtils::ActorToJsonValue(Actor));
 		}
 	}
 
@@ -180,10 +180,10 @@ TSharedPtr<FJsonObject> FSpawnActorAction::ExecuteInternal(const TSharedPtr<FJso
 	}
 
 	// Parse transform
-	FVector Location = FMCPCommonUtils::GetVectorFromJson(Params, TEXT("location"));
-	FRotator Rotation = FMCPCommonUtils::GetRotatorFromJson(Params, TEXT("rotation"));
+	FVector Location = FUEBridgeCommonUtils::GetVectorFromJson(Params, TEXT("location"));
+	FRotator Rotation = FUEBridgeCommonUtils::GetRotatorFromJson(Params, TEXT("rotation"));
 	FVector Scale = Params->HasField(TEXT("scale")) ?
-		FMCPCommonUtils::GetVectorFromJson(Params, TEXT("scale")) : FVector(1, 1, 1);
+		FUEBridgeCommonUtils::GetVectorFromJson(Params, TEXT("scale")) : FVector(1, 1, 1);
 
 	// Spawn
 	FActorSpawnParameters SpawnParams;
@@ -205,7 +205,7 @@ TSharedPtr<FJsonObject> FSpawnActorAction::ExecuteInternal(const TSharedPtr<FJso
 
 	UE_LOG(LogMCP, Log, TEXT("UEBridgeEditor: Spawned actor '%s' of type '%s'"), *ActorName, *ActorType);
 
-	return CreateSuccessResponse(FMCPCommonUtils::ActorToJsonObject(NewActor));
+	return CreateSuccessResponse(FUEBridgeCommonUtils::ActorToJsonObject(NewActor));
 }
 
 UClass* FSpawnActorAction::ResolveActorClass(const FString& TypeName) const
@@ -251,7 +251,7 @@ TSharedPtr<FJsonObject> FDeleteActorAction::ExecuteInternal(const TSharedPtr<FJs
 	}
 
 	// Store info before deletion
-	TSharedPtr<FJsonObject> ActorInfo = FMCPCommonUtils::ActorToJsonObject(Actor);
+	TSharedPtr<FJsonObject> ActorInfo = FUEBridgeCommonUtils::ActorToJsonObject(Actor);
 
 	// Use editor-proper destruction which handles World Partition external actors
 	bool bDestroyed = World->EditorDestroyActor(Actor, true);
@@ -307,15 +307,15 @@ TSharedPtr<FJsonObject> FSetActorTransformAction::ExecuteInternal(const TSharedP
 
 	if (Params->HasField(TEXT("location")))
 	{
-		Transform.SetLocation(FMCPCommonUtils::GetVectorFromJson(Params, TEXT("location")));
+		Transform.SetLocation(FUEBridgeCommonUtils::GetVectorFromJson(Params, TEXT("location")));
 	}
 	if (Params->HasField(TEXT("rotation")))
 	{
-		Transform.SetRotation(FQuat(FMCPCommonUtils::GetRotatorFromJson(Params, TEXT("rotation"))));
+		Transform.SetRotation(FQuat(FUEBridgeCommonUtils::GetRotatorFromJson(Params, TEXT("rotation"))));
 	}
 	if (Params->HasField(TEXT("scale")))
 	{
-		Transform.SetScale3D(FMCPCommonUtils::GetVectorFromJson(Params, TEXT("scale")));
+		Transform.SetScale3D(FUEBridgeCommonUtils::GetVectorFromJson(Params, TEXT("scale")));
 	}
 
 	Actor->SetActorTransform(Transform);
@@ -325,7 +325,7 @@ TSharedPtr<FJsonObject> FSetActorTransformAction::ExecuteInternal(const TSharedP
 
 	UE_LOG(LogMCP, Log, TEXT("UEBridgeEditor: Set transform on actor '%s'"), *ActorName);
 
-	return CreateSuccessResponse(FMCPCommonUtils::ActorToJsonObject(Actor));
+	return CreateSuccessResponse(FUEBridgeCommonUtils::ActorToJsonObject(Actor));
 }
 
 
@@ -595,7 +595,7 @@ TSharedPtr<FJsonObject> FGetActorPropertiesAction::ExecuteInternal(const TShared
 	}
 
 	// Always include basic info (backward compatible)
-	TSharedPtr<FJsonObject> Result = FMCPCommonUtils::ActorToJsonObject(Actor);
+	TSharedPtr<FJsonObject> Result = FUEBridgeCommonUtils::ActorToJsonObject(Actor);
 
 	if (bDetailed)
 	{
@@ -754,7 +754,7 @@ TSharedPtr<FJsonObject> FSetActorPropertyAction::ExecuteInternal(const TSharedPt
 	TSharedPtr<FJsonValue> JsonValue = Params->Values.FindRef(TEXT("property_value"));
 
 	FString ErrorMessage;
-	if (!FMCPCommonUtils::SetObjectProperty(Actor, Property->GetName(), JsonValue, ErrorMessage))
+	if (!FUEBridgeCommonUtils::SetObjectProperty(Actor, Property->GetName(), JsonValue, ErrorMessage))
 	{
 		return CreateErrorResponse(ErrorMessage, TEXT("property_set_failed"));
 	}
@@ -823,14 +823,14 @@ TSharedPtr<FJsonObject> FFocusViewportAction::ExecuteInternal(const TSharedPtr<F
 	}
 	else
 	{
-		TargetLocation = FMCPCommonUtils::GetVectorFromJson(Params, TEXT("location"));
+		TargetLocation = FUEBridgeCommonUtils::GetVectorFromJson(Params, TEXT("location"));
 	}
 
 	ViewportClient->SetViewLocation(TargetLocation - FVector(Distance, 0, 0));
 
 	if (Params->HasField(TEXT("orientation")))
 	{
-		ViewportClient->SetViewRotation(FMCPCommonUtils::GetRotatorFromJson(Params, TEXT("orientation")));
+		ViewportClient->SetViewRotation(FUEBridgeCommonUtils::GetRotatorFromJson(Params, TEXT("orientation")));
 	}
 
 	ViewportClient->Invalidate();
@@ -908,11 +908,11 @@ TSharedPtr<FJsonObject> FSetViewportTransformAction::ExecuteInternal(const TShar
 
 	if (Params->HasField(TEXT("location")))
 	{
-		ViewportClient->SetViewLocation(FMCPCommonUtils::GetVectorFromJson(Params, TEXT("location")));
+		ViewportClient->SetViewLocation(FUEBridgeCommonUtils::GetVectorFromJson(Params, TEXT("location")));
 	}
 	if (Params->HasField(TEXT("rotation")))
 	{
-		ViewportClient->SetViewRotation(FMCPCommonUtils::GetRotatorFromJson(Params, TEXT("rotation")));
+		ViewportClient->SetViewRotation(FUEBridgeCommonUtils::GetRotatorFromJson(Params, TEXT("rotation")));
 	}
 
 	ViewportClient->Invalidate();
@@ -1769,7 +1769,7 @@ TSharedPtr<FJsonObject> FGetBlueprintSummaryAction::ExecuteInternal(const TShare
 	if (!Blueprint && Params->HasField(TEXT("blueprint_name")))
 	{
 		FString BlueprintName = Params->GetStringField(TEXT("blueprint_name"));
-		Blueprint = FMCPCommonUtils::FindBlueprint(BlueprintName);
+		Blueprint = FUEBridgeCommonUtils::FindBlueprint(BlueprintName);
 	}
 
 	if (!Blueprint)
@@ -2061,10 +2061,10 @@ TSharedPtr<FJsonObject> FGetEditorLogsAction::ExecuteInternal(const TSharedPtr<F
 	// Parse verbosity filter
 	const ELogVerbosity::Type MinVerbosity = ParseMinVerbosity(GetOptionalString(Params, TEXT("min_verbosity")));
 
-	TArray<FMCPLogCapture::FLogEntry> Entries = FMCPLogCapture::Get().GetRecent(Count, CategoryFilter, MinVerbosity);
+	TArray<FUEBridgeLogCapture::FLogEntry> Entries = FUEBridgeLogCapture::Get().GetRecent(Count, CategoryFilter, MinVerbosity);
 
 	TArray<TSharedPtr<FJsonValue>> LinesArray;
-	for (const FMCPLogCapture::FLogEntry& Entry : Entries)
+	for (const FUEBridgeLogCapture::FLogEntry& Entry : Entries)
 	{
 		TSharedPtr<FJsonObject> LineObj = MakeShared<FJsonObject>();
 		LineObj->SetNumberField(TEXT("timestamp"), Entry.Timestamp);
@@ -2080,14 +2080,14 @@ TSharedPtr<FJsonObject> FGetEditorLogsAction::ExecuteInternal(const TSharedPtr<F
 	TSharedPtr<FJsonObject> ResultData = MakeShared<FJsonObject>();
 	ResultData->SetArrayField(TEXT("lines"), LinesArray);
 	ResultData->SetNumberField(TEXT("total"), static_cast<double>(LinesArray.Num()));
-	ResultData->SetNumberField(TEXT("total_captured"), static_cast<double>(FMCPLogCapture::Get().GetTotalCaptured()));
-	ResultData->SetBoolField(TEXT("capturing"), FMCPLogCapture::Get().IsCapturing());
+	ResultData->SetNumberField(TEXT("total_captured"), static_cast<double>(FUEBridgeLogCapture::Get().GetTotalCaptured()));
+	ResultData->SetBoolField(TEXT("capturing"), FUEBridgeLogCapture::Get().IsCapturing());
 	return CreateSuccessResponse(ResultData);
 }
 
 TSharedPtr<FJsonObject> FGetUnrealLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
-	FMCPLogCapture& Capture = FMCPLogCapture::Get();
+	FUEBridgeLogCapture& Capture = FUEBridgeLogCapture::Get();
 	if (!Capture.IsCapturing())
 	{
 		return CreateErrorResponse(TEXT("Live log capture is not active"), TEXT("capture_inactive"));
@@ -2134,7 +2134,7 @@ TSharedPtr<FJsonObject> FGetUnrealLogsAction::ExecuteInternal(const TSharedPtr<F
 
 	bool bTruncated = false;
 	uint64 LastSeq = Capture.GetLatestSeq();
-	TArray<FMCPLogCapture::FLogEntry> Entries = Capture.GetSince(
+	TArray<FUEBridgeLogCapture::FLogEntry> Entries = Capture.GetSince(
 		AfterSeq,
 		TailLines,
 		MaxBytes,
@@ -2156,7 +2156,7 @@ TSharedPtr<FJsonObject> FGetUnrealLogsAction::ExecuteInternal(const TSharedPtr<F
 
 	FString Content;
 	int32 BytesReturned = 0;
-	for (const FMCPLogCapture::FLogEntry& Entry : Entries)
+	for (const FUEBridgeLogCapture::FLogEntry& Entry : Entries)
 	{
 		const FString Line = FString::Printf(
 			TEXT("[%s][%s][%s] %s\n"),
@@ -2398,10 +2398,8 @@ TSharedPtr<FJsonObject> FRequestEditorShutdownAction::ExecuteInternal(const TSha
 	Result->SetBoolField(TEXT("shutdown_requested"), true);
 	Result->SetBoolField(TEXT("force"), bForce);
 
-	// Schedule the exit on the next game-thread tick so we can send the response first
 	AsyncTask(ENamedThreads::GameThread, [bForce]()
 	{
-		// Small delay to ensure the MCP response is sent before the process starts shutting down
 		FTSTicker::GetCoreTicker().AddTicker(
 			FTickerDelegate::CreateLambda([bForce](float DeltaTime) -> bool
 			{
@@ -2602,7 +2600,7 @@ TSharedPtr<FJsonObject> FDescribeFullAction::ExecuteInternal(const TSharedPtr<FJ
 	if (!Blueprint && Params->HasField(TEXT("blueprint_name")))
 	{
 		FString BlueprintName = Params->GetStringField(TEXT("blueprint_name"));
-		Blueprint = FMCPCommonUtils::FindBlueprint(BlueprintName);
+		Blueprint = FUEBridgeCommonUtils::FindBlueprint(BlueprintName);
 	}
 	if (!Blueprint)
 	{
@@ -2882,13 +2880,13 @@ TSharedPtr<FJsonObject> FGetPIEStateAction::ExecuteInternal(const TSharedPtr<FJs
 // P6: Log Enhancement Actions
 // =========================================================================
 
-#include "MCPLogCapture.h"
+#include "UEBridgeLogCapture.h"
 
 // ---- P6.4 FClearLogsAction ----
 
 TSharedPtr<FJsonObject> FClearLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
-	FMCPLogCapture& LogCapture = FMCPLogCapture::Get();
+	FUEBridgeLogCapture& LogCapture = FUEBridgeLogCapture::Get();
 
 	// Get pre-clear stats
 	int64 PrevCount = LogCapture.GetTotalCaptured();
@@ -2934,7 +2932,7 @@ bool FAssertLogAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditor
 
 TSharedPtr<FJsonObject> FAssertLogAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
-	FMCPLogCapture& LogCapture = FMCPLogCapture::Get();
+	FUEBridgeLogCapture& LogCapture = FUEBridgeLogCapture::Get();
 
 	// Parse optional cursor
 	FString SinceCursor = GetOptionalString(Params, TEXT("since_cursor"), TEXT(""));
@@ -2949,7 +2947,7 @@ TSharedPtr<FJsonObject> FAssertLogAction::ExecuteInternal(const TSharedPtr<FJson
 	bool bTruncated = false;
 	uint64 LastSeq = 0;
 	TArray<FString> EmptyCategories;
-	TArray<FMCPLogCapture::FLogEntry> LogEntries = LogCapture.GetSince(
+	TArray<FUEBridgeLogCapture::FLogEntry> LogEntries = LogCapture.GetSince(
 		AfterSeq, 10000, 5 * 1024 * 1024,
 		EmptyCategories, ELogVerbosity::All, TEXT(""),
 		bTruncated, LastSeq);
@@ -2983,7 +2981,7 @@ TSharedPtr<FJsonObject> FAssertLogAction::ExecuteInternal(const TSharedPtr<FJson
 
 		// Count keyword occurrences
 		int32 ActualCount = 0;
-		for (const FMCPLogCapture::FLogEntry& Entry : LogEntries)
+		for (const FUEBridgeLogCapture::FLogEntry& Entry : LogEntries)
 		{
 			// Optional category filter
 			if (!CategoryFilter.IsEmpty() && !Entry.Category.ToString().Contains(CategoryFilter))
@@ -3158,7 +3156,7 @@ TSharedPtr<FJsonObject> FRenameActorLabelAction::ExecuteInternal(const TSharedPt
 		ItemsList.Add(MoveTemp(Item));
 	}
 
-	FScopedTransaction Transaction(FText::FromString(TEXT("MCP Rename Actor Labels")));
+	FScopedTransaction Transaction(FText::FromString(TEXT("Bridge Rename Actor Labels")));
 
 	TArray<TSharedPtr<FJsonValue>> ResultsArray;
 	int32 SuccessCount = 0;
@@ -3261,7 +3259,7 @@ TSharedPtr<FJsonObject> FSetActorFolderAction::ExecuteInternal(const TSharedPtr<
 		ItemsList.Add(MoveTemp(Item));
 	}
 
-	FScopedTransaction Transaction(FText::FromString(TEXT("MCP Set Actor Folders")));
+	FScopedTransaction Transaction(FText::FromString(TEXT("Bridge Set Actor Folders")));
 
 	TArray<TSharedPtr<FJsonValue>> ResultsArray;
 	int32 SuccessCount = 0;

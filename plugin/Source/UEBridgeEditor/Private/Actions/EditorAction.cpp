@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/EditorAction.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "Engine/Blueprint.h"
 #include "EdGraph/EdGraph.h"
 #include "EdGraph/EdGraphNode.h"
@@ -220,7 +220,7 @@ UBlueprint* FEditorAction::FindBlueprint(const FString& BlueprintName, FString& 
 		return nullptr;
 	}
 
-	UBlueprint* BP = FMCPCommonUtils::FindBlueprint(BlueprintName);
+	UBlueprint* BP = FUEBridgeCommonUtils::FindBlueprint(BlueprintName);
 	if (!BP)
 	{
 		OutError = FString::Printf(TEXT("Blueprint '%s' not found"), *BlueprintName);

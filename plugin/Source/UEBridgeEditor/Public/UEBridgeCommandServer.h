@@ -71,7 +71,7 @@ private:
 /**
  * FEditorCommandServer
  *
- * TCP server that accepts connections from MCP clients and routes
+	 * TCP server that accepts local bridge clients and routes
  * commands to the Bridge for execution.
  *
  * Supports multiple concurrent client connections, each handled on

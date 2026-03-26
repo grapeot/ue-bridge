@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/ProjectActions.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "GameFramework/InputSettings.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
@@ -43,7 +43,7 @@ TSharedPtr<FJsonObject> FCreateInputMappingAction::ExecuteInternal(const TShared
 	UInputSettings* InputSettings = GetMutableDefault<UInputSettings>();
 	if (!InputSettings)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to get input settings"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to get input settings"));
 	}
 
 	TSharedPtr<FJsonObject> ResultObj = MakeShared<FJsonObject>();
@@ -176,7 +176,7 @@ TSharedPtr<FJsonObject> FCreateInputActionAction::ExecuteInternal(const TSharedP
 	UInputAction* NewAction = NewObject<UInputAction>(Package, *Name, RF_Public | RF_Standalone);
 	if (!NewAction)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Input Action"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Input Action"));
 	}
 
 	NewAction->ValueType = ValueType;
@@ -287,7 +287,7 @@ TSharedPtr<FJsonObject> FCreateInputMappingContextAction::ExecuteInternal(const 
 	UInputMappingContext* NewIMC = NewObject<UInputMappingContext>(Package, *Name, RF_Public | RF_Standalone);
 	if (!NewIMC)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Input Mapping Context"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Input Mapping Context"));
 	}
 
 	// Register with asset registry and save
@@ -344,7 +344,7 @@ TSharedPtr<FJsonObject> FAddKeyMappingToContextAction::ExecuteInternal(const TSh
 	UInputMappingContext* IMC = LoadObject<UInputMappingContext>(nullptr, *FullContextPath);
 	if (!IMC)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Mapping Context not found: %s"), *FullContextPath));
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Mapping Context not found: %s"), *FullContextPath));
 	}
 
 	// Find the Input Action asset
@@ -355,7 +355,7 @@ TSharedPtr<FJsonObject> FAddKeyMappingToContextAction::ExecuteInternal(const TSh
 	UInputAction* Action = LoadObject<UInputAction>(nullptr, *FullActionPath);
 	if (!Action)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Action not found: %s"), *FullActionPath));
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Action not found: %s"), *FullActionPath));
 	}
 
 	// Map the key to the action
@@ -449,7 +449,7 @@ TSharedPtr<FJsonObject> FReadIMCAction::ExecuteInternal(const TSharedPtr<FJsonOb
 	UInputMappingContext* IMC = LoadObject<UInputMappingContext>(nullptr, *FullContextPath);
 	if (!IMC)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Mapping Context not found: %s"), *FullContextPath));
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Mapping Context not found: %s"), *FullContextPath));
 	}
 
 	TArray<TSharedPtr<FJsonValue>> MappingsArray;
@@ -561,7 +561,7 @@ TSharedPtr<FJsonObject> FRemoveKeyMappingFromContextAction::ExecuteInternal(cons
 	UInputMappingContext* IMC = LoadObject<UInputMappingContext>(nullptr, *FullContextPath);
 	if (!IMC)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Mapping Context not found: %s"), *FullContextPath));
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(TEXT("Input Mapping Context not found: %s"), *FullContextPath));
 	}
 
 	// Get filter criteria

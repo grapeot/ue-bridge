@@ -302,7 +302,7 @@ protected:
 
 /**
  * FGetEditorLogsAction
- * Returns recent editor log entries from the MCPLogCapture ring buffer.
+ * Returns recent editor log entries from the UEBridgeLogCapture ring buffer.
  * Params: count (int, default 100), category (string), min_verbosity (string)
  */
 class UEBRIDGEEDITOR_API FGetEditorLogsAction : public FEditorAction
@@ -319,7 +319,7 @@ protected:
 
 /**
  * FGetUnrealLogsAction
- * Returns live log lines from FMCPLogCapture using seq cursor + byte/line limits.
+ * Returns live log lines from FUEBridgeLogCapture using seq cursor + byte/line limits.
  * Params:
  *   cursor ("live:<seq>")
  *   tail_lines (int, default 200, clamp 20..2000)
@@ -497,7 +497,7 @@ protected:
 
 /**
  * FClearLogsAction
- * Clears the MCPLogCapture ring buffer. Optionally inserts a session tag marker before clearing.
+ * Clears the UEBridgeLogCapture ring buffer. Optionally inserts a session tag marker before clearing.
  * Params: tag (string, optional)
  * Action ID: editor.clear_logs
  */

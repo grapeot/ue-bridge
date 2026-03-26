@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/NodeActions.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "Engine/Blueprint.h"
 #include "Engine/BlueprintGeneratedClass.h"
 #include "EdGraph/EdGraph.h"
@@ -103,8 +103,8 @@ TSharedPtr<FJsonObject> FConnectBlueprintNodesAction::ExecuteInternal(const TSha
 	}
 
 	// Find pins and provide detailed error messages
-	UEdGraphPin* SourcePin = FMCPCommonUtils::FindPin(SourceNode, SourcePinName, EGPD_Output);
-	UEdGraphPin* TargetPin = FMCPCommonUtils::FindPin(TargetNode, TargetPinName, EGPD_Input);
+	UEdGraphPin* SourcePin = FUEBridgeCommonUtils::FindPin(SourceNode, SourcePinName, EGPD_Output);
+	UEdGraphPin* TargetPin = FUEBridgeCommonUtils::FindPin(TargetNode, TargetPinName, EGPD_Input);
 
 	auto GetAvailablePins = [](UEdGraphNode* Node, EEdGraphPinDirection Direction) -> FString
 	{
@@ -405,13 +405,13 @@ TSharedPtr<FJsonObject> FAddBlueprintEventNodeAction::ExecuteInternal(const TSha
 	UEdGraph* EventGraph = GetTargetGraph(Params, Context);
 
 	// Reuse existing event nodes to avoid duplicate Tick/BeginPlay, etc.
-	UK2Node_Event* ExistingEventNode = FMCPCommonUtils::FindExistingEventNode(EventGraph, EventName);
+	UK2Node_Event* ExistingEventNode = FUEBridgeCommonUtils::FindExistingEventNode(EventGraph, EventName);
 	if (!ExistingEventNode)
 	{
 		const FString NormalizedEventName = EventName.StartsWith(TEXT("Receive"))
 			? EventName.Mid(7)
 			: FString::Printf(TEXT("Receive%s"), *EventName);
-		ExistingEventNode = FMCPCommonUtils::FindExistingEventNode(EventGraph, NormalizedEventName);
+		ExistingEventNode = FUEBridgeCommonUtils::FindExistingEventNode(EventGraph, NormalizedEventName);
 	}
 	if (ExistingEventNode)
 	{
@@ -421,7 +421,7 @@ TSharedPtr<FJsonObject> FAddBlueprintEventNodeAction::ExecuteInternal(const TSha
 		return CreateSuccessResponse(ResultData);
 	}
 
-	UK2Node_Event* EventNode = FMCPCommonUtils::CreateEventNode(EventGraph, EventName, Position);
+	UK2Node_Event* EventNode = FUEBridgeCommonUtils::CreateEventNode(EventGraph, EventName, Position);
 	if (!EventNode)
 	{
 		return CreateErrorResponse(TEXT("Failed to create event node"));
@@ -450,9 +450,9 @@ TSharedPtr<FJsonObject> FAddBlueprintInputActionNodeAction::ExecuteInternal(cons
 	FVector2D Position = GetNodePosition(Params);
 
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
-	UEdGraph* EventGraph = FMCPCommonUtils::FindOrCreateEventGraph(Blueprint);
+	UEdGraph* EventGraph = FUEBridgeCommonUtils::FindOrCreateEventGraph(Blueprint);
 
-	UK2Node_InputAction* InputActionNode = FMCPCommonUtils::CreateInputActionNode(EventGraph, ActionName, Position);
+	UK2Node_InputAction* InputActionNode = FUEBridgeCommonUtils::CreateInputActionNode(EventGraph, ActionName, Position);
 	if (!InputActionNode)
 	{
 		return CreateErrorResponse(TEXT("Failed to create input action node"));
@@ -481,7 +481,7 @@ TSharedPtr<FJsonObject> FAddEnhancedInputActionNodeAction::ExecuteInternal(const
 	FVector2D Position = GetNodePosition(Params);
 
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
-	UEdGraph* EventGraph = FMCPCommonUtils::FindOrCreateEventGraph(Blueprint);
+	UEdGraph* EventGraph = FUEBridgeCommonUtils::FindOrCreateEventGraph(Blueprint);
 
 	// Load the UInputAction asset
 	FString AssetPath = FString::Printf(TEXT("%s/%s.%s"), *ActionPath, *ActionName, *ActionName);
@@ -542,7 +542,7 @@ TSharedPtr<FJsonObject> FAddBlueprintCustomEventAction::ExecuteInternal(const TS
 				{
 					FEdGraphPinType PinType;
 					FString TypeResolveError;
-					if (!FMCPCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
+					if (!FUEBridgeCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
 					{
 						UE_LOG(LogTemp, Warning, TEXT("CustomEvent param '%s': %s, defaulting to Float"), *ParamName, *TypeResolveError);
 						PinType.PinCategory = UEdGraphSchema_K2::PC_Real;
@@ -731,7 +731,7 @@ TSharedPtr<FJsonObject> FAddCustomEventForDelegateAction::ExecuteInternal(const 
 		// Find the delegate pin
 		if (!SourcePinName.IsEmpty())
 		{
-			TargetDelegatePin = FMCPCommonUtils::FindPin(SourceNode, SourcePinName, EGPD_Input);
+			TargetDelegatePin = FUEBridgeCommonUtils::FindPin(SourceNode, SourcePinName, EGPD_Input);
 		}
 
 		// Fallback: find first unconnected delegate input pin
@@ -900,7 +900,7 @@ TSharedPtr<FJsonObject> FAddBlueprintVariableAction::ExecuteInternal(const TShar
 	// Create variable based on type
 	FEdGraphPinType PinType;
 	FString TypeResolveError;
-	if (!FMCPCommonUtils::ResolvePinTypeFromString(VariableType, PinType, TypeResolveError))
+	if (!FUEBridgeCommonUtils::ResolvePinTypeFromString(VariableType, PinType, TypeResolveError))
 	{
 		return CreateErrorResponse(TypeResolveError);
 	}
@@ -1097,7 +1097,7 @@ TSharedPtr<FJsonObject> FSetNodePinDefaultAction::ExecuteInternal(const TSharedP
 	}
 
 	// Find the pin
-	UEdGraphPin* TargetPin = FMCPCommonUtils::FindPin(TargetNode, PinName, EGPD_Input);
+	UEdGraphPin* TargetPin = FUEBridgeCommonUtils::FindPin(TargetNode, PinName, EGPD_Input);
 	if (!TargetPin)
 	{
 		return CreateErrorResponse(FString::Printf(TEXT("Pin not found: %s"), *PinName));
@@ -1380,7 +1380,7 @@ TSharedPtr<FJsonObject> FAddBlueprintFunctionNodeAction::ExecuteInternal(const T
 			if (ExtraParams->HasField(TEXT("widget_blueprint")))
 			{
 				const FString WidgetBPName = ExtraParams->GetStringField(TEXT("widget_blueprint"));
-				UBlueprint* WidgetBP = FMCPCommonUtils::FindBlueprint(WidgetBPName);
+				UBlueprint* WidgetBP = FUEBridgeCommonUtils::FindBlueprint(WidgetBPName);
 				if (WidgetBP && WidgetBP->GeneratedClass)
 				{
 					WidgetClass = WidgetBP->GeneratedClass;
@@ -1438,7 +1438,7 @@ TSharedPtr<FJsonObject> FAddBlueprintFunctionNodeAction::ExecuteInternal(const T
 		}
 	}
 
-	UK2Node_CallFunction* FunctionNode = FMCPCommonUtils::CreateFunctionCallNode(TargetGraph, Function, Position);
+	UK2Node_CallFunction* FunctionNode = FUEBridgeCommonUtils::CreateFunctionCallNode(TargetGraph, Function, Position);
 	if (!FunctionNode)
 	{
 		return CreateErrorResponse(TEXT("Failed to create function call node"));
@@ -1452,7 +1452,7 @@ TSharedPtr<FJsonObject> FAddBlueprintFunctionNodeAction::ExecuteInternal(const T
 		for (const auto& Pair : ExtraParams->Values)
 		{
 			const FString PinName = Pair.Key;
-			UEdGraphPin* Pin = FMCPCommonUtils::FindPin(FunctionNode, PinName, EGPD_Input);
+			UEdGraphPin* Pin = FUEBridgeCommonUtils::FindPin(FunctionNode, PinName, EGPD_Input);
 			if (!Pin) continue;
 
 			const TSharedPtr<FJsonValue>& JsonVal = Pair.Value;
@@ -1531,7 +1531,7 @@ TSharedPtr<FJsonObject> FAddBlueprintSelfReferenceAction::ExecuteInternal(const 
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
 
-	UK2Node_Self* SelfNode = FMCPCommonUtils::CreateSelfReferenceNode(TargetGraph, Position);
+	UK2Node_Self* SelfNode = FUEBridgeCommonUtils::CreateSelfReferenceNode(TargetGraph, Position);
 	if (!SelfNode)
 	{
 		return CreateErrorResponse(TEXT("Failed to create self node"));
@@ -1620,7 +1620,7 @@ TSharedPtr<FJsonObject> FAddBlueprintCastNodeAction::ExecuteInternal(const TShar
 	UEdGraph* EventGraph = GetTargetGraph(Params, Context);
 	if (!EventGraph)
 	{
-		EventGraph = FMCPCommonUtils::FindOrCreateEventGraph(Blueprint);
+		EventGraph = FUEBridgeCommonUtils::FindOrCreateEventGraph(Blueprint);
 	}
 
 	// Find the target class
@@ -1644,7 +1644,7 @@ TSharedPtr<FJsonObject> FAddBlueprintCastNodeAction::ExecuteInternal(const TShar
 	// Try to find as a blueprint name
 	if (!TargetClass)
 	{
-		UBlueprint* TargetBP = FMCPCommonUtils::FindBlueprint(TargetClassName);
+		UBlueprint* TargetBP = FUEBridgeCommonUtils::FindBlueprint(TargetClassName);
 		if (TargetBP && TargetBP->GeneratedClass)
 		{
 			TargetClass = TargetBP->GeneratedClass;
@@ -1714,7 +1714,7 @@ TSharedPtr<FJsonObject> FAddBlueprintGetSubsystemNodeAction::ExecuteInternal(con
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
 	if (!TargetGraph)
 	{
-		TargetGraph = FMCPCommonUtils::FindOrCreateEventGraph(Blueprint);
+		TargetGraph = FUEBridgeCommonUtils::FindOrCreateEventGraph(Blueprint);
 	}
 
 	// Find the subsystem class
@@ -1921,7 +1921,7 @@ TSharedPtr<FJsonObject> FCreateBlueprintFunctionAction::ExecuteInternal(const TS
 
 			FEdGraphPinType PinType;
 			FString TypeResolveError;
-			if (!FMCPCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
+			if (!FUEBridgeCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
 			{
 				return CreateErrorResponse(FString::Printf(TEXT("Function input '%s': %s"), *ParamName, *TypeResolveError));
 			}
@@ -1953,7 +1953,7 @@ TSharedPtr<FJsonObject> FCreateBlueprintFunctionAction::ExecuteInternal(const TS
 
 			FEdGraphPinType PinType;
 			FString TypeResolveError;
-			if (!FMCPCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
+			if (!FUEBridgeCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
 			{
 				return CreateErrorResponse(FString::Printf(TEXT("Function output '%s': %s"), *ParamName, *TypeResolveError));
 			}
@@ -2057,7 +2057,7 @@ TSharedPtr<FJsonObject> FAddEventDispatcherAction::ExecuteInternal(const TShared
 
 			FEdGraphPinType PinType;
 			FString TypeResolveError;
-			if (!FMCPCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
+			if (!FUEBridgeCommonUtils::ResolvePinTypeFromString(ParamType, PinType, TypeResolveError))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("EventDispatcher param '%s': %s, skipping"), *ParamName, *TypeResolveError);
 				continue;
@@ -2140,7 +2140,7 @@ TSharedPtr<FJsonObject> FBindEventDispatcherAction::ExecuteInternal(const TShare
 	UBlueprint* TargetBlueprint = Blueprint;
 	if (!TargetBlueprintName.IsEmpty())
 	{
-		TargetBlueprint = FMCPCommonUtils::FindBlueprint(TargetBlueprintName);
+		TargetBlueprint = FUEBridgeCommonUtils::FindBlueprint(TargetBlueprintName);
 		if (!TargetBlueprint)
 		{
 			return CreateErrorResponse(FString::Printf(TEXT("Target blueprint not found: %s"), *TargetBlueprintName));
@@ -2175,7 +2175,7 @@ TSharedPtr<FJsonObject> FBindEventDispatcherAction::ExecuteInternal(const TShare
 			FunctionName = FString::Printf(TEXT("On%s"), *DispatcherName);
 		}
 
-		UEdGraph* FunctionGraph = FMCPCommonUtils::FindFunctionGraph(Blueprint, FunctionName);
+		UEdGraph* FunctionGraph = FUEBridgeCommonUtils::FindFunctionGraph(Blueprint, FunctionName);
 		bool bFunctionCreated = false;
 
 		if (!FunctionGraph && bCreateFunctionIfMissing)
@@ -2372,7 +2372,7 @@ TSharedPtr<FJsonObject> FCreateEventDelegateAction::ExecuteInternal(const TShare
 			{
 				// Find the target delegate pin
 				FString PinName = ConnectToPin.IsEmpty() ? TEXT("Event") : ConnectToPin;
-				UEdGraphPin* TargetDelegatePin = FMCPCommonUtils::FindPin(TargetNode, PinName, EGPD_Input);
+				UEdGraphPin* TargetDelegatePin = FUEBridgeCommonUtils::FindPin(TargetNode, PinName, EGPD_Input);
 
 				// Fallback: look for any unconnected delegate input pin
 				if (!TargetDelegatePin)
@@ -2609,7 +2609,7 @@ TSharedPtr<FJsonObject> FAddSpawnActorFromClassNodeAction::ExecuteInternal(const
 	UClass* SpawnClass = nullptr;
 
 	// First, try to find as a blueprint
-	UBlueprint* SpawnBP = FMCPCommonUtils::FindBlueprint(ClassToSpawn);
+	UBlueprint* SpawnBP = FUEBridgeCommonUtils::FindBlueprint(ClassToSpawn);
 	if (SpawnBP && SpawnBP->GeneratedClass)
 	{
 		SpawnClass = SpawnBP->GeneratedClass;
@@ -2694,7 +2694,7 @@ TSharedPtr<FJsonObject> FCallBlueprintFunctionAction::ExecuteInternal(const TSha
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
 
 	// Find the target blueprint
-	UBlueprint* TargetBlueprint = FMCPCommonUtils::FindBlueprint(TargetBlueprintName);
+	UBlueprint* TargetBlueprint = FUEBridgeCommonUtils::FindBlueprint(TargetBlueprintName);
 	if (!TargetBlueprint)
 	{
 		return CreateErrorResponse(FString::Printf(TEXT("Target blueprint not found: %s"), *TargetBlueprintName));
@@ -2797,7 +2797,7 @@ TSharedPtr<FJsonObject> FSetObjectPropertyAction::ExecuteInternal(const TSharedP
 	UClass* OwnerClass = LoadClass<UObject>(nullptr, *FString::Printf(TEXT("/Script/Engine.%s"), *OwnerClassName));
 	if (!OwnerClass)
 	{
-		UBlueprint* OwnerBP = FMCPCommonUtils::FindBlueprint(OwnerClassName);
+		UBlueprint* OwnerBP = FUEBridgeCommonUtils::FindBlueprint(OwnerClassName);
 		if (OwnerBP) OwnerClass = OwnerBP->GeneratedClass;
 	}
 
@@ -3010,7 +3010,7 @@ TSharedPtr<FJsonObject> FAddMakeStructNodeAction::ExecuteInternal(const TSharedP
 			FString Value;
 			if (Pair.Value->TryGetString(Value))
 			{
-				UEdGraphPin* Pin = FMCPCommonUtils::FindPin(MakeStructNode, Pair.Key, EGPD_Input);
+				UEdGraphPin* Pin = FUEBridgeCommonUtils::FindPin(MakeStructNode, Pair.Key, EGPD_Input);
 				if (Pin)
 				{
 					Pin->DefaultValue = Value;
@@ -3289,7 +3289,7 @@ TSharedPtr<FJsonObject> FAddFunctionLocalVariableAction::ExecuteInternal(const T
 	// Resolve pin type
 	FEdGraphPinType PinType;
 	FString TypeResolveError;
-	if (!FMCPCommonUtils::ResolvePinTypeFromString(VariableType, PinType, TypeResolveError))
+	if (!FUEBridgeCommonUtils::ResolvePinTypeFromString(VariableType, PinType, TypeResolveError))
 	{
 		return CreateErrorResponse(FString::Printf(TEXT("Function local variable '%s': %s"), *VariableName, *TypeResolveError));
 	}
@@ -4204,10 +4204,10 @@ TSharedPtr<FJsonObject> FDisconnectBlueprintPinAction::ExecuteInternal(const TSh
 	}
 
 	// Find the pin (try both directions)
-	UEdGraphPin* TargetPin = FMCPCommonUtils::FindPin(FoundNode, PinName, EGPD_Output);
+	UEdGraphPin* TargetPin = FUEBridgeCommonUtils::FindPin(FoundNode, PinName, EGPD_Output);
 	if (!TargetPin)
 	{
-		TargetPin = FMCPCommonUtils::FindPin(FoundNode, PinName, EGPD_Input);
+		TargetPin = FUEBridgeCommonUtils::FindPin(FoundNode, PinName, EGPD_Input);
 	}
 
 	if (!TargetPin)
@@ -4481,7 +4481,7 @@ TSharedPtr<FJsonObject> FDescribeGraphAction::ExecuteInternal(const TSharedPtr<F
 #undef private
 #include "Subsystems/AssetEditorSubsystem.h"
 
-// GetActiveBlueprintEditorForAction removed — use FMCPCommonUtils::GetActiveBlueprintEditor() instead.
+// GetActiveBlueprintEditorForAction removed — use FUEBridgeCommonUtils::GetActiveBlueprintEditor() instead.
 
 bool FGetSelectedNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
@@ -4500,7 +4500,7 @@ TSharedPtr<FJsonObject> FCollapseSelectionToFunctionAction::ExecuteInternal(cons
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor(BlueprintName);
 	if (!BPEditor)
 	{
 		return CreateErrorResponse(
@@ -4530,7 +4530,7 @@ TSharedPtr<FJsonObject> FCollapseSelectionToFunctionAction::ExecuteInternal(cons
 	// are fully supported by the engine's CollapseSelectionToFunction flow.
 	// Only UK2Node_ComponentBoundEvent (an Event subclass) cannot be placed
 	// in function graphs, but the engine's own CanPasteHere validation handles
-	// that correctly — no need for MCP-side preemptive exclusion.
+		// that correctly — no need for preemptive exclusion in the bridge layer.
 	const TSharedRef<const FUICommandInfo> CollapseToFunctionCommand = FGraphEditorCommands::Get().CollapseSelectionToFunction.ToSharedRef();
 	if (!BPEditor->GraphEditorCommands->CanExecuteAction(CollapseToFunctionCommand))
 	{
@@ -4611,7 +4611,7 @@ TSharedPtr<FJsonObject> FCollapseSelectionToMacroAction::ExecuteInternal(const T
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
 
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor(BlueprintName);
 	if (!BPEditor)
 	{
 		return CreateErrorResponse(
@@ -4791,7 +4791,7 @@ static bool SetSelectionByNodeIds(
 TSharedPtr<FJsonObject> FSetSelectedNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor(BlueprintName);
 	if (!BPEditor)
 	{
 		return CreateErrorResponse(
@@ -4900,7 +4900,7 @@ bool FBatchSelectAndActAction::Validate(const TSharedPtr<FJsonObject>& Params, F
 TSharedPtr<FJsonObject> FBatchSelectAndActAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor(BlueprintName);
 	if (!BPEditor)
 	{
 		return CreateErrorResponse(
@@ -5081,7 +5081,7 @@ TSharedPtr<FJsonObject> FGetSelectedNodesAction::ExecuteInternal(const TSharedPt
 {
 	// Resolve which editor to inspect
 	FString BlueprintName = GetOptionalString(Params, TEXT("blueprint_name"));
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor(BlueprintName);
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor(BlueprintName);
 
 	if (!BPEditor)
 	{
