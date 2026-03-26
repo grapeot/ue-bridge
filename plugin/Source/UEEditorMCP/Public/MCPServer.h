@@ -8,7 +8,7 @@
 #include "SocketSubsystem.h"
 
 // Forward declarations
-class UMCPBridge;
+class UUEEditorBridge;
 
 /**
  * FMCPClientHandler
@@ -19,7 +19,7 @@ class UMCPBridge;
 class FMCPClientHandler : public FRunnable
 {
 public:
-	FMCPClientHandler(FSocket* InClientSocket, UMCPBridge* InBridge, TAtomic<bool>& InServerStopping);
+	FMCPClientHandler(FSocket* InClientSocket, UUEEditorBridge* InBridge, TAtomic<bool>& InServerStopping);
 	virtual ~FMCPClientHandler();
 
 	// FRunnable Interface
@@ -53,7 +53,7 @@ private:
 	FString ExecuteOnGameThread(const FString& CommandType, TSharedPtr<FJsonObject> Params);
 
 	FSocket* ClientSocket;
-	UMCPBridge* Bridge;
+	UUEEditorBridge* Bridge;
 	FRunnableThread* Thread;
 	TAtomic<bool>& bServerStopping;
 	TAtomic<bool> bShouldStop;
@@ -86,7 +86,7 @@ private:
 class UEEDITORMCP_API FMCPServer : public FRunnable
 {
 public:
-	FMCPServer(UMCPBridge* InBridge, int32 InPort = 55558);
+	FMCPServer(UUEEditorBridge* InBridge, int32 InPort = 55558);
 	virtual ~FMCPServer();
 
 	/** Start the server thread */
@@ -111,7 +111,7 @@ private:
 	void CleanupFinishedHandlers();
 
 	/** The bridge that owns this server */
-	UMCPBridge* Bridge;
+	UUEEditorBridge* Bridge;
 
 	/** Listener socket */
 	FSocket* ListenerSocket;

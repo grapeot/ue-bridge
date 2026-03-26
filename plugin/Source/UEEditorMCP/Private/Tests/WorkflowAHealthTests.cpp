@@ -13,9 +13,9 @@ namespace UEEditorMCP::Tests
 {
 constexpr auto EditorOnlyFlags = EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter;
 
-UMCPBridge* GetBridge()
+UUEEditorBridge* GetBridge()
 {
-	return GEditor ? GEditor->GetEditorSubsystem<UMCPBridge>() : nullptr;
+	return GEditor ? GEditor->GetEditorSubsystem<UUEEditorBridge>() : nullptr;
 }
 
 	const TSharedPtr<FJsonObject>& GetFlatSuccessObject(FAutomationTestBase& Test, const TSharedPtr<FJsonObject>& Response)
@@ -56,7 +56,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPBridgeAvailableTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::Tests::GetBridge();
 	TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge);
 	return true;
 }
@@ -68,7 +68,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPIsReadyCommandTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
 	{
 		return false;
@@ -105,7 +105,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPWorkflowAHealthSurfaceTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
 	{
 		return false;
@@ -142,7 +142,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPGetPIEStateStoppedTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
 	{
 		return false;
@@ -175,7 +175,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPLogControlSurfaceTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
 	{
 		return false;
@@ -234,7 +234,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPPIESmokeLifecycleTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
 	{
 		return false;
@@ -321,7 +321,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(
 
 bool FUEEditorMCPCreateAndCompileBlueprintTest::RunTest(const FString& Parameters)
 {
-	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	UUEEditorBridge* Bridge = UEEditorMCP::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
 	{
 		return false;

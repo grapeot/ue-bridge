@@ -5,12 +5,12 @@
 #include "MCPServer.h"
 #include "Actions/EditorAction.h"
 
-UMCPBridge::UMCPBridge()
+UUEEditorBridge::UUEEditorBridge()
 	: Server(nullptr)
 {
 }
 
-void UMCPBridge::Initialize(FSubsystemCollectionBase& Collection)
+void UUEEditorBridge::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 
@@ -31,7 +31,7 @@ void UMCPBridge::Initialize(FSubsystemCollectionBase& Collection)
 	}
 }
 
-void UMCPBridge::Deinitialize()
+void UUEEditorBridge::Deinitialize()
 {
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Bridge deinitializing"));
 
@@ -49,19 +49,19 @@ void UMCPBridge::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UMCPBridge::RegisterActions()
+void UUEEditorBridge::RegisterActions()
 {
 	FUEEditorActionRegistry::RegisterDefaultActions(ActionHandlers);
 
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: Registered %d action handlers"), ActionHandlers.Num());
 }
 
-TSharedRef<FEditorAction>* UMCPBridge::FindAction(const FString& CommandType)
+TSharedRef<FEditorAction>* UUEEditorBridge::FindAction(const FString& CommandType)
 {
 	return ActionHandlers.Find(CommandType);
 }
 
-TSharedPtr<FJsonObject> UMCPBridge::ExecuteCommand(const FString& CommandType, const TSharedPtr<FJsonObject>& Params)
+TSharedPtr<FJsonObject> UUEEditorBridge::ExecuteCommand(const FString& CommandType, const TSharedPtr<FJsonObject>& Params)
 {
 	// =========================================================================
 	// Action Handlers (modular actions - check these first)
@@ -81,7 +81,7 @@ TSharedPtr<FJsonObject> UMCPBridge::ExecuteCommand(const FString& CommandType, c
 	);
 }
 
-TSharedPtr<FJsonObject> UMCPBridge::ExecuteCommandSafe(const FString& CommandType, const TSharedPtr<FJsonObject>& Params)
+TSharedPtr<FJsonObject> UUEEditorBridge::ExecuteCommandSafe(const FString& CommandType, const TSharedPtr<FJsonObject>& Params)
 {
 	// Phase 2: Top-level C++ exception guard around command execution.
 	// SEH is handled per-action inside FEditorAction::ExecuteWithCrashProtection.
@@ -104,12 +104,12 @@ TSharedPtr<FJsonObject> UMCPBridge::ExecuteCommandSafe(const FString& CommandTyp
 	}
 }
 
-TSharedPtr<FJsonObject> UMCPBridge::ExecuteCommandInternal(const FString& CommandType, const TSharedPtr<FJsonObject>& Params)
+TSharedPtr<FJsonObject> UUEEditorBridge::ExecuteCommandInternal(const FString& CommandType, const TSharedPtr<FJsonObject>& Params)
 {
 	return ExecuteCommand(CommandType, Params);
 }
 
-TSharedPtr<FJsonObject> UMCPBridge::CreateSuccessResponse(const TSharedPtr<FJsonObject>& ResultData)
+TSharedPtr<FJsonObject> UUEEditorBridge::CreateSuccessResponse(const TSharedPtr<FJsonObject>& ResultData)
 {
 	TSharedPtr<FJsonObject> Response = MakeShared<FJsonObject>();
 	Response->SetStringField(TEXT("status"), TEXT("success"));
@@ -127,7 +127,7 @@ TSharedPtr<FJsonObject> UMCPBridge::CreateSuccessResponse(const TSharedPtr<FJson
 	return Response;
 }
 
-TSharedPtr<FJsonObject> UMCPBridge::CreateErrorResponse(const FString& ErrorMessage, const FString& ErrorType)
+TSharedPtr<FJsonObject> UUEEditorBridge::CreateErrorResponse(const FString& ErrorMessage, const FString& ErrorType)
 {
 	TSharedPtr<FJsonObject> Response = MakeShared<FJsonObject>();
 	Response->SetStringField(TEXT("status"), TEXT("error"));

@@ -73,7 +73,7 @@ static AActor* FindActorByName(UWorld* World, const FString& ActorName)
 // FGetActorsInLevelAction
 // ============================================================================
 
-TSharedPtr<FJsonObject> FGetActorsInLevelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetActorsInLevelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 	if (!World)
@@ -103,13 +103,13 @@ TSharedPtr<FJsonObject> FGetActorsInLevelAction::ExecuteInternal(const TSharedPt
 // FFindActorsByNameAction
 // ============================================================================
 
-bool FFindActorsByNameAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FFindActorsByNameAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Pattern;
 	return GetRequiredString(Params, TEXT("pattern"), Pattern, OutError);
 }
 
-TSharedPtr<FJsonObject> FFindActorsByNameAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FFindActorsByNameAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Pattern, Error;
 	GetRequiredString(Params, TEXT("pattern"), Pattern, Error);
@@ -142,7 +142,7 @@ TSharedPtr<FJsonObject> FFindActorsByNameAction::ExecuteInternal(const TSharedPt
 // FSpawnActorAction
 // ============================================================================
 
-bool FSpawnActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSpawnActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Name, Type;
 	if (!GetRequiredString(Params, TEXT("name"), Name, OutError)) return false;
@@ -150,7 +150,7 @@ bool FSpawnActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEdit
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSpawnActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSpawnActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActorName, ActorType, Error;
 	GetRequiredString(Params, TEXT("name"), ActorName, Error);
@@ -224,13 +224,13 @@ UClass* FSpawnActorAction::ResolveActorClass(const FString& TypeName) const
 // FDeleteActorAction
 // ============================================================================
 
-bool FDeleteActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDeleteActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Name;
 	return GetRequiredString(Params, TEXT("name"), Name, OutError);
 }
 
-TSharedPtr<FJsonObject> FDeleteActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDeleteActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActorName, Error;
 	GetRequiredString(Params, TEXT("name"), ActorName, Error);
@@ -276,13 +276,13 @@ TSharedPtr<FJsonObject> FDeleteActorAction::ExecuteInternal(const TSharedPtr<FJs
 // FSetActorTransformAction
 // ============================================================================
 
-bool FSetActorTransformAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetActorTransformAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Name;
 	return GetRequiredString(Params, TEXT("name"), Name, OutError);
 }
 
-TSharedPtr<FJsonObject> FSetActorTransformAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetActorTransformAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActorName, Error;
 	GetRequiredString(Params, TEXT("name"), ActorName, Error);
@@ -333,7 +333,7 @@ TSharedPtr<FJsonObject> FSetActorTransformAction::ExecuteInternal(const TSharedP
 // FGetActorPropertiesAction
 // ============================================================================
 
-bool FGetActorPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetActorPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Name;
 	return GetRequiredString(Params, TEXT("name"), Name, OutError);
@@ -570,7 +570,7 @@ FString FGetActorPropertiesAction::GetPropertyTypeString(FProperty* Property)
 	return Property->GetCPPType();
 }
 
-TSharedPtr<FJsonObject> FGetActorPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetActorPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActorName, Error;
 	GetRequiredString(Params, TEXT("name"), ActorName, Error);
@@ -693,7 +693,7 @@ TSharedPtr<FJsonObject> FGetActorPropertiesAction::ExecuteInternal(const TShared
 // FSetActorPropertyAction
 // ============================================================================
 
-bool FSetActorPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetActorPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Name, PropertyName;
 	if (!GetRequiredString(Params, TEXT("name"), Name, OutError)) return false;
@@ -706,7 +706,7 @@ bool FSetActorPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FM
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetActorPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetActorPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ActorName, PropertyName, Error;
 	GetRequiredString(Params, TEXT("name"), ActorName, Error);
@@ -777,7 +777,7 @@ TSharedPtr<FJsonObject> FSetActorPropertyAction::ExecuteInternal(const TSharedPt
 // FFocusViewportAction
 // ============================================================================
 
-bool FFocusViewportAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FFocusViewportAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	bool HasTarget = Params->HasField(TEXT("target"));
 	bool HasLocation = Params->HasField(TEXT("location"));
@@ -790,7 +790,7 @@ bool FFocusViewportAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPE
 	return true;
 }
 
-TSharedPtr<FJsonObject> FFocusViewportAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FFocusViewportAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FLevelEditorViewportClient* ViewportClient = nullptr;
 	if (GEditor && GEditor->GetActiveViewport())
@@ -845,7 +845,7 @@ TSharedPtr<FJsonObject> FFocusViewportAction::ExecuteInternal(const TSharedPtr<F
 // FGetViewportTransformAction
 // ============================================================================
 
-TSharedPtr<FJsonObject> FGetViewportTransformAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetViewportTransformAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FLevelEditorViewportClient* ViewportClient = nullptr;
 	if (GEditor && GEditor->GetActiveViewport())
@@ -883,7 +883,7 @@ TSharedPtr<FJsonObject> FGetViewportTransformAction::ExecuteInternal(const TShar
 // FSetViewportTransformAction
 // ============================================================================
 
-bool FSetViewportTransformAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetViewportTransformAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("location")) && !Params->HasField(TEXT("rotation")))
 	{
@@ -893,7 +893,7 @@ bool FSetViewportTransformAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetViewportTransformAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetViewportTransformAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FLevelEditorViewportClient* ViewportClient = nullptr;
 	if (GEditor && GEditor->GetActiveViewport())
@@ -943,7 +943,7 @@ TSharedPtr<FJsonObject> FSetViewportTransformAction::ExecuteInternal(const TShar
 // FSaveAllAction
 // ============================================================================
 
-TSharedPtr<FJsonObject> FSaveAllAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSaveAllAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	bool bOnlyMaps = GetOptionalBool(Params, TEXT("only_maps"), false);
 
@@ -1024,7 +1024,7 @@ TSharedPtr<FJsonObject> FSaveAllAction::ExecuteInternal(const TSharedPtr<FJsonOb
 // FListAssetsAction
 // ========================================================================
 
-bool FListAssetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FListAssetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("path")))
 	{
@@ -1034,7 +1034,7 @@ bool FListAssetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEdit
 	return true;
 }
 
-TSharedPtr<FJsonObject> FListAssetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FListAssetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Path = Params->GetStringField(TEXT("path"));
 	bool bRecursive = true;
@@ -1133,7 +1133,7 @@ TSharedPtr<FJsonObject> FListAssetsAction::ExecuteInternal(const TSharedPtr<FJso
 // FRenameAssetsAction
 // ========================================================================
 
-bool FRenameAssetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRenameAssetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const bool bHasBatch = Params->HasField(TEXT("items"));
 	const bool bHasSingle = Params->HasField(TEXT("old_asset_path"));
@@ -1211,7 +1211,7 @@ bool FRenameAssetsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEd
 	return true;
 }
 
-TSharedPtr<FJsonObject> FRenameAssetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRenameAssetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	struct FRenameRequestItem
 	{
@@ -1453,7 +1453,7 @@ TSharedPtr<FJsonObject> FRenameAssetsAction::ExecuteInternal(const TSharedPtr<FJ
 // FGetSelectedAssetThumbnailAction
 // ========================================================================
 
-bool FGetSelectedAssetThumbnailAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetSelectedAssetThumbnailAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (Params->HasField(TEXT("size")))
 	{
@@ -1499,7 +1499,7 @@ bool FGetSelectedAssetThumbnailAction::Validate(const TSharedPtr<FJsonObject>& P
 	return true;
 }
 
-TSharedPtr<FJsonObject> FGetSelectedAssetThumbnailAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetSelectedAssetThumbnailAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	const int32 RequestedSize = Params->HasField(TEXT("size"))
 		? static_cast<int32>(Params->GetNumberField(TEXT("size")))
@@ -1706,7 +1706,7 @@ TSharedPtr<FJsonObject> FGetSelectedAssetThumbnailAction::ExecuteInternal(const 
 // FGetSelectedAssetsAction
 // ========================================================================
 
-TSharedPtr<FJsonObject> FGetSelectedAssetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetSelectedAssetsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	TArray<FAssetData> SelectedAssets;
 	AssetSelectionUtils::GetSelectedAssets(SelectedAssets);
@@ -1745,7 +1745,7 @@ TSharedPtr<FJsonObject> FGetSelectedAssetsAction::ExecuteInternal(const TSharedP
 // FGetBlueprintSummaryAction
 // ========================================================================
 
-bool FGetBlueprintSummaryAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetBlueprintSummaryAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("blueprint_name")) && !Params->HasField(TEXT("asset_path")))
 	{
@@ -1755,7 +1755,7 @@ bool FGetBlueprintSummaryAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FGetBlueprintSummaryAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetBlueprintSummaryAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = nullptr;
 
@@ -2053,7 +2053,7 @@ uint64 ParseLiveCursor(const FString& Cursor)
 }
 }
 
-TSharedPtr<FJsonObject> FGetEditorLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetEditorLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	const int32 Count = static_cast<int32>(GetOptionalNumber(Params, TEXT("count"), 100.0));
 	const FString CategoryFilter = GetOptionalString(Params, TEXT("category"));
@@ -2085,7 +2085,7 @@ TSharedPtr<FJsonObject> FGetEditorLogsAction::ExecuteInternal(const TSharedPtr<F
 	return CreateSuccessResponse(ResultData);
 }
 
-TSharedPtr<FJsonObject> FGetUnrealLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetUnrealLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FMCPLogCapture& Capture = FMCPLogCapture::Get();
 	if (!Capture.IsCapturing())
@@ -2217,7 +2217,7 @@ TSharedPtr<FJsonObject> FGetUnrealLogsAction::ExecuteInternal(const TSharedPtr<F
 // P2: FBatchExecuteAction
 // ============================================================================
 
-bool FBatchExecuteAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FBatchExecuteAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const TArray<TSharedPtr<FJsonValue>>* Commands = GetOptionalArray(Params, TEXT("commands"));
 	if (!Commands || Commands->Num() == 0)
@@ -2233,13 +2233,13 @@ bool FBatchExecuteAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEd
 	return true;
 }
 
-TSharedPtr<FJsonObject> FBatchExecuteAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FBatchExecuteAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	const TArray<TSharedPtr<FJsonValue>>* Commands = GetOptionalArray(Params, TEXT("commands"));
 	const bool bStopOnError = GetOptionalBool(Params, TEXT("stop_on_error"), true);
 
 	// We need access to the Bridge to dispatch sub-commands
-	UMCPBridge* Bridge = GEditor ? GEditor->GetEditorSubsystem<UMCPBridge>() : nullptr;
+	UUEEditorBridge* Bridge = GEditor ? GEditor->GetEditorSubsystem<UUEEditorBridge>() : nullptr;
 	if (!Bridge)
 	{
 		return CreateErrorResponse(TEXT("MCPBridge subsystem not available"));
@@ -2349,7 +2349,7 @@ TSharedPtr<FJsonObject> FBatchExecuteAction::ExecuteInternal(const TSharedPtr<FJ
 // FEditorIsReadyAction
 // ============================================================================
 
-TSharedPtr<FJsonObject> FEditorIsReadyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FEditorIsReadyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
 
@@ -2390,7 +2390,7 @@ TSharedPtr<FJsonObject> FEditorIsReadyAction::ExecuteInternal(const TSharedPtr<F
 // FRequestEditorShutdownAction
 // ============================================================================
 
-TSharedPtr<FJsonObject> FRequestEditorShutdownAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRequestEditorShutdownAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	bool bForce = GetOptionalBool(Params, TEXT("force"), false);
 
@@ -2428,7 +2428,7 @@ TSharedPtr<FJsonObject> FRequestEditorShutdownAction::ExecuteInternal(const TSha
 // FDescribeFullAction — Single-call comprehensive Blueprint snapshot
 // ============================================================================
 
-bool FDescribeFullAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDescribeFullAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("blueprint_name")) && !Params->HasField(TEXT("asset_path")))
 	{
@@ -2590,7 +2590,7 @@ TSharedPtr<FJsonObject> FDescribeFullAction::SerializeGraph(UBlueprint* Blueprin
 	return GraphObj;
 }
 
-TSharedPtr<FJsonObject> FDescribeFullAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDescribeFullAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = nullptr;
 
@@ -2758,7 +2758,7 @@ TSharedPtr<FJsonObject> FDescribeFullAction::ExecuteInternal(const TSharedPtr<FJ
 
 // ---- P6.1 FStartPIEAction ----
 
-bool FStartPIEAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FStartPIEAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!GEditor)
 	{
@@ -2773,7 +2773,7 @@ bool FStartPIEAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditor
 	return true;
 }
 
-TSharedPtr<FJsonObject> FStartPIEAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FStartPIEAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ModeStr = GetOptionalString(Params, TEXT("mode"), TEXT("SelectedViewport"));
 
@@ -2821,7 +2821,7 @@ TSharedPtr<FJsonObject> FStartPIEAction::ExecuteInternal(const TSharedPtr<FJsonO
 
 // ---- P6.2 FStopPIEAction ----
 
-TSharedPtr<FJsonObject> FStopPIEAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FStopPIEAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
 
@@ -2844,7 +2844,7 @@ TSharedPtr<FJsonObject> FStopPIEAction::ExecuteInternal(const TSharedPtr<FJsonOb
 
 // ---- P6.3 FGetPIEStateAction ----
 
-TSharedPtr<FJsonObject> FGetPIEStateAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetPIEStateAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
 
@@ -2886,7 +2886,7 @@ TSharedPtr<FJsonObject> FGetPIEStateAction::ExecuteInternal(const TSharedPtr<FJs
 
 // ---- P6.4 FClearLogsAction ----
 
-TSharedPtr<FJsonObject> FClearLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FClearLogsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FMCPLogCapture& LogCapture = FMCPLogCapture::Get();
 
@@ -2921,7 +2921,7 @@ TSharedPtr<FJsonObject> FClearLogsAction::ExecuteInternal(const TSharedPtr<FJson
 
 // ---- P6.5 FAssertLogAction ----
 
-bool FAssertLogAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAssertLogAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const TArray<TSharedPtr<FJsonValue>>* Assertions = GetOptionalArray(Params, TEXT("assertions"));
 	if (!Assertions || Assertions->Num() == 0)
@@ -2932,7 +2932,7 @@ bool FAssertLogAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEdito
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAssertLogAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAssertLogAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FMCPLogCapture& LogCapture = FMCPLogCapture::Get();
 
@@ -3093,7 +3093,7 @@ static AActor* FindActorInWorld(UWorld* World, const FString& ActorName)
 
 // ---- P6.6 FRenameActorLabelAction ----
 
-bool FRenameActorLabelAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRenameActorLabelAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// Need either (actor_name + new_label) or items[]
 	const TArray<TSharedPtr<FJsonValue>>* Items = GetOptionalArray(Params, TEXT("items"));
@@ -3117,7 +3117,7 @@ AActor* FRenameActorLabelAction::FindActorByName(UWorld* World, const FString& A
 	return FindActorInWorld(World, ActorName);
 }
 
-TSharedPtr<FJsonObject> FRenameActorLabelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRenameActorLabelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 	if (!World)
@@ -3197,7 +3197,7 @@ TSharedPtr<FJsonObject> FRenameActorLabelAction::ExecuteInternal(const TSharedPt
 
 // ---- P6.7 FSetActorFolderAction ----
 
-bool FSetActorFolderAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetActorFolderAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const TArray<TSharedPtr<FJsonValue>>* Items = GetOptionalArray(Params, TEXT("items"));
 	if (Items && Items->Num() > 0)
@@ -3220,7 +3220,7 @@ AActor* FSetActorFolderAction::FindActorByName(UWorld* World, const FString& Act
 	return FindActorInWorld(World, ActorName);
 }
 
-TSharedPtr<FJsonObject> FSetActorFolderAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetActorFolderAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 	if (!World)
@@ -3300,7 +3300,7 @@ TSharedPtr<FJsonObject> FSetActorFolderAction::ExecuteInternal(const TSharedPtr<
 
 // ---- P6.8 FSelectActorsAction ----
 
-bool FSelectActorsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSelectActorsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	const TArray<TSharedPtr<FJsonValue>>* ActorNames = GetOptionalArray(Params, TEXT("actor_names"));
 	if (!ActorNames || ActorNames->Num() == 0)
@@ -3316,7 +3316,7 @@ AActor* FSelectActorsAction::FindActorByName(UWorld* World, const FString& Actor
 	return FindActorInWorld(World, ActorName);
 }
 
-TSharedPtr<FJsonObject> FSelectActorsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSelectActorsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 	if (!World)
@@ -3401,7 +3401,7 @@ TSharedPtr<FJsonObject> FSelectActorsAction::ExecuteInternal(const TSharedPtr<FJ
 
 // ---- P6.9 FGetOutlinerTreeAction ----
 
-TSharedPtr<FJsonObject> FGetOutlinerTreeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetOutlinerTreeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
 	if (!World)
@@ -3492,7 +3492,7 @@ TSharedPtr<FJsonObject> FGetOutlinerTreeAction::ExecuteInternal(const TSharedPtr
 // FOpenAssetEditorAction — Open an asset editor and optionally focus it
 // ============================================================================
 
-bool FOpenAssetEditorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FOpenAssetEditorAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!Params->HasField(TEXT("asset_path")))
 	{
@@ -3502,7 +3502,7 @@ bool FOpenAssetEditorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FOpenAssetEditorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FOpenAssetEditorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString AssetPath = Params->GetStringField(TEXT("asset_path"));
 	bool bFocus = GetOptionalBool(Params, TEXT("focus"), true);

@@ -14,12 +14,12 @@
 #include "Materials/MaterialExpressionScalarParameter.h"
 #include "Materials/MaterialExpressionVectorParameter.h"
 
-FMCPEditorContext::FMCPEditorContext()
+FUEEditorContext::FUEEditorContext()
 	: CurrentGraphName(NAME_None)
 {
 }
 
-void FMCPEditorContext::SetCurrentBlueprint(UBlueprint* BP)
+void FUEEditorContext::SetCurrentBlueprint(UBlueprint* BP)
 {
 	CurrentBlueprint = BP;
 
@@ -27,12 +27,12 @@ void FMCPEditorContext::SetCurrentBlueprint(UBlueprint* BP)
 	CurrentGraphName = NAME_None;
 }
 
-void FMCPEditorContext::SetCurrentGraph(const FName& GraphName)
+void FUEEditorContext::SetCurrentGraph(const FName& GraphName)
 {
 	CurrentGraphName = GraphName;
 }
 
-UEdGraph* FMCPEditorContext::GetCurrentGraph() const
+UEdGraph* FUEEditorContext::GetCurrentGraph() const
 {
 	UBlueprint* BP = CurrentBlueprint.Get();
 	if (!BP)
@@ -70,7 +70,7 @@ UEdGraph* FMCPEditorContext::GetCurrentGraph() const
 	return GetEventGraph();
 }
 
-UEdGraph* FMCPEditorContext::GetEventGraph() const
+UEdGraph* FUEEditorContext::GetEventGraph() const
 {
 	UBlueprint* BP = CurrentBlueprint.Get();
 	if (!BP)
@@ -96,7 +96,7 @@ UEdGraph* FMCPEditorContext::GetEventGraph() const
 	return nullptr;
 }
 
-void FMCPEditorContext::MarkPackageDirty(UPackage* Package)
+void FUEEditorContext::MarkPackageDirty(UPackage* Package)
 {
 	if (Package)
 	{
@@ -105,7 +105,7 @@ void FMCPEditorContext::MarkPackageDirty(UPackage* Package)
 	}
 }
 
-void FMCPEditorContext::SaveDirtyPackages()
+void FUEEditorContext::SaveDirtyPackages()
 {
 	// Use direct UPackage::SavePackage instead of FEditorFileUtils::SaveDirtyPackages.
 	// FEditorFileUtils goes through InternalPromptForCheckoutAndSave which can create
@@ -182,7 +182,7 @@ void FMCPEditorContext::SaveDirtyPackages()
 	DirtyPackages.Empty();
 }
 
-void FMCPEditorContext::Clear()
+void FUEEditorContext::Clear()
 {
 	CurrentBlueprint = nullptr;
 	CurrentGraphName = NAME_None;
@@ -202,7 +202,7 @@ void FMCPEditorContext::Clear()
 // Material Context Methods
 // =========================================================================
 
-void FMCPEditorContext::SetCurrentMaterial(UMaterial* Mat)
+void FUEEditorContext::SetCurrentMaterial(UMaterial* Mat)
 {
 	// If switching materials, clear the node map
 	if (CurrentMaterial.Get() != Mat)
@@ -212,7 +212,7 @@ void FMCPEditorContext::SetCurrentMaterial(UMaterial* Mat)
 	CurrentMaterial = Mat;
 }
 
-void FMCPEditorContext::RegisterMaterialNode(const FString& NodeName, UMaterialExpression* Expr)
+void FUEEditorContext::RegisterMaterialNode(const FString& NodeName, UMaterialExpression* Expr)
 {
 	if (!NodeName.IsEmpty() && Expr)
 	{
@@ -221,7 +221,7 @@ void FMCPEditorContext::RegisterMaterialNode(const FString& NodeName, UMaterialE
 	}
 }
 
-void FMCPEditorContext::UnregisterMaterialNode(const FString& NodeName)
+void FUEEditorContext::UnregisterMaterialNode(const FString& NodeName)
 {
 	MaterialNodeMap.Remove(NodeName);
 	if (LastCreatedMaterialNodeName == NodeName)
@@ -230,7 +230,7 @@ void FMCPEditorContext::UnregisterMaterialNode(const FString& NodeName)
 	}
 }
 
-UMaterialExpression* FMCPEditorContext::GetMaterialNode(const FString& NodeName) const
+UMaterialExpression* FUEEditorContext::GetMaterialNode(const FString& NodeName) const
 {
 	// Handle special alias for last created node
 	if (NodeName == TEXT("$last_node") || NodeName == TEXT("$last"))
@@ -342,7 +342,7 @@ UMaterialExpression* FMCPEditorContext::GetMaterialNode(const FString& NodeName)
 	return nullptr;
 }
 
-FString FMCPEditorContext::FindRegisteredMaterialNodeName(const UMaterialExpression* Expr) const
+FString FUEEditorContext::FindRegisteredMaterialNodeName(const UMaterialExpression* Expr) const
 {
 	if (!Expr)
 	{
@@ -360,28 +360,28 @@ FString FMCPEditorContext::FindRegisteredMaterialNodeName(const UMaterialExpress
 	return FString();
 }
 
-void FMCPEditorContext::ClearMaterialNodes()
+void FUEEditorContext::ClearMaterialNodes()
 {
 	MaterialNodeMap.Empty();
 	LastCreatedMaterialNodeName.Empty();
 }
 
-bool FMCPEditorContext::HasCurrentMaterial() const
+bool FUEEditorContext::HasCurrentMaterial() const
 {
 	return CurrentMaterial.IsValid();
 }
 
-UMaterial* FMCPEditorContext::GetCurrentMaterial() const
+UMaterial* FUEEditorContext::GetCurrentMaterial() const
 {
 	return CurrentMaterial.Get();
 }
 
-const TMap<FString, TWeakObjectPtr<UMaterialExpression>>& FMCPEditorContext::GetRegisteredMaterialNodes() const
+const TMap<FString, TWeakObjectPtr<UMaterialExpression>>& FUEEditorContext::GetRegisteredMaterialNodes() const
 {
 	return MaterialNodeMap;
 }
 
-UMaterial* FMCPEditorContext::GetMaterialByNameOrCurrent(const FString& MaterialName) const
+UMaterial* FUEEditorContext::GetMaterialByNameOrCurrent(const FString& MaterialName) const
 {
 	// If name is empty, use current
 	if (MaterialName.IsEmpty())
@@ -407,7 +407,7 @@ UMaterial* FMCPEditorContext::GetMaterialByNameOrCurrent(const FString& Material
 	return nullptr;
 }
 
-TSharedPtr<FJsonObject> FMCPEditorContext::ToJson() const
+TSharedPtr<FJsonObject> FUEEditorContext::ToJson() const
 {
 	TSharedPtr<FJsonObject> JsonObj = MakeShared<FJsonObject>();
 
@@ -473,7 +473,7 @@ TSharedPtr<FJsonObject> FMCPEditorContext::ToJson() const
 	return JsonObj;
 }
 
-UBlueprint* FMCPEditorContext::GetBlueprintByNameOrCurrent(const FString& BlueprintName) const
+UBlueprint* FUEEditorContext::GetBlueprintByNameOrCurrent(const FString& BlueprintName) const
 {
 	if (BlueprintName.IsEmpty())
 	{
@@ -482,7 +482,7 @@ UBlueprint* FMCPEditorContext::GetBlueprintByNameOrCurrent(const FString& Bluepr
 	return FMCPCommonUtils::FindBlueprint(BlueprintName);
 }
 
-UEdGraph* FMCPEditorContext::GetGraphByNameOrCurrent(const FString& GraphName) const
+UEdGraph* FUEEditorContext::GetGraphByNameOrCurrent(const FString& GraphName) const
 {
 	UBlueprint* BP = CurrentBlueprint.Get();
 	if (!BP)
@@ -517,7 +517,7 @@ UEdGraph* FMCPEditorContext::GetGraphByNameOrCurrent(const FString& GraphName) c
 	return nullptr;
 }
 
-FGuid FMCPEditorContext::ResolveNodeId(const FString& NodeIdOrAlias) const
+FGuid FUEEditorContext::ResolveNodeId(const FString& NodeIdOrAlias) const
 {
 	// Handle special alias
 	if (NodeIdOrAlias == TEXT("$last_node") || NodeIdOrAlias == TEXT("$last"))
@@ -536,7 +536,7 @@ FGuid FMCPEditorContext::ResolveNodeId(const FString& NodeIdOrAlias) const
 	return FGuid();
 }
 
-void FMCPEditorContext::SetLastCreatedNodeId(const FGuid& NodeId)
+void FUEEditorContext::SetLastCreatedNodeId(const FGuid& NodeId)
 {
 	LastCreatedNodeId = NodeId;
 }

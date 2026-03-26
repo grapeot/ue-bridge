@@ -17,9 +17,9 @@ class UEdGraphPin;
 class UEEDITORMCP_API FConnectBlueprintNodesAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("connect_blueprint_nodes"); }
 };
 
@@ -28,9 +28,9 @@ protected:
 class UEEDITORMCP_API FFindBlueprintNodesAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("find_blueprint_nodes"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -40,9 +40,9 @@ protected:
 class UEEDITORMCP_API FDeleteBlueprintNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("delete_blueprint_node"); }
 };
 
@@ -51,9 +51,9 @@ protected:
 class UEEDITORMCP_API FGetNodePinsAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("get_node_pins"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -67,9 +67,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintEventNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_event_node"); }
 };
 
@@ -78,9 +78,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintInputActionNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_input_action_node"); }
 };
 
@@ -89,9 +89,9 @@ protected:
 class UEEDITORMCP_API FAddEnhancedInputActionNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_enhanced_input_action_node"); }
 };
 
@@ -100,9 +100,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintCustomEventAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_custom_event"); }
 };
 
@@ -115,9 +115,9 @@ protected:
 class UEEDITORMCP_API FAddCustomEventForDelegateAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_custom_event_for_delegate"); }
 private:
 	UClass* ResolveClass(const FString& ClassName) const;
@@ -132,9 +132,9 @@ private:
 class UEEDITORMCP_API FAddBlueprintVariableAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_variable"); }
 };
 
@@ -143,9 +143,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintVariableGetAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_variable_get"); }
 };
 
@@ -154,9 +154,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintVariableSetAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_variable_set"); }
 };
 
@@ -165,9 +165,9 @@ protected:
 class UEEDITORMCP_API FSetNodePinDefaultAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_node_pin_default"); }
 };
 
@@ -180,9 +180,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintFunctionNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_function_node"); }
 };
 
@@ -191,9 +191,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintSelfReferenceAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_self_reference"); }
 };
 
@@ -202,9 +202,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintGetSelfComponentReferenceAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_get_self_component_reference"); }
 };
 
@@ -213,9 +213,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintBranchNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_branch_node"); }
 };
 
@@ -224,9 +224,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintCastNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_cast_node"); }
 };
 
@@ -235,9 +235,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintGetSubsystemNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_get_subsystem_node"); }
 };
 
@@ -250,9 +250,9 @@ protected:
 class UEEDITORMCP_API FCreateBlueprintFunctionAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("create_blueprint_function"); }
 };
 
@@ -265,9 +265,9 @@ protected:
 class UEEDITORMCP_API FAddEventDispatcherAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_event_dispatcher"); }
 };
 
@@ -276,9 +276,9 @@ protected:
 class UEEDITORMCP_API FCallEventDispatcherAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("call_event_dispatcher"); }
 };
 
@@ -287,9 +287,9 @@ protected:
 class UEEDITORMCP_API FBindEventDispatcherAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("bind_event_dispatcher"); }
 };
 
@@ -299,9 +299,9 @@ protected:
 class UEEDITORMCP_API FCreateEventDelegateAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("create_event_delegate"); }
 };
 
@@ -313,9 +313,9 @@ protected:
 class UEEDITORMCP_API FBindComponentEventAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("bind_component_event"); }
 };
 
@@ -328,9 +328,9 @@ protected:
 class UEEDITORMCP_API FAddSpawnActorFromClassNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_spawn_actor_from_class_node"); }
 };
 
@@ -339,9 +339,9 @@ protected:
 class UEEDITORMCP_API FCallBlueprintFunctionAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("call_blueprint_function"); }
 };
 
@@ -354,9 +354,9 @@ protected:
 class UEEDITORMCP_API FSetObjectPropertyAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_object_property"); }
 };
 
@@ -369,9 +369,9 @@ protected:
 class UEEDITORMCP_API FAddSequenceNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_sequence_node"); }
 };
 
@@ -384,9 +384,9 @@ protected:
 class UEEDITORMCP_API FAddMacroInstanceNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_macro_instance_node"); }
 private:
 	UEdGraph* FindMacroGraph(const FString& MacroName) const;
@@ -401,9 +401,9 @@ private:
 class UEEDITORMCP_API FAddMakeStructNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_make_struct_node"); }
 };
 
@@ -412,9 +412,9 @@ protected:
 class UEEDITORMCP_API FAddBreakStructNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_break_struct_node"); }
 };
 
@@ -427,9 +427,9 @@ protected:
 class UEEDITORMCP_API FAddSwitchOnStringNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_switch_on_string_node"); }
 };
 
@@ -438,9 +438,9 @@ protected:
 class UEEDITORMCP_API FAddSwitchOnIntNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_switch_on_int_node"); }
 };
 
@@ -453,9 +453,9 @@ protected:
 class UEEDITORMCP_API FAddFunctionLocalVariableAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_function_local_variable"); }
 };
 
@@ -468,9 +468,9 @@ protected:
 class UEEDITORMCP_API FSetBlueprintVariableDefaultAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_blueprint_variable_default"); }
 };
 
@@ -483,9 +483,9 @@ protected:
 class UEEDITORMCP_API FAddBlueprintCommentAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_blueprint_comment"); }
 };
 
@@ -506,9 +506,9 @@ protected:
 class UEEDITORMCP_API FAutoCommentAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("auto_comment"); }
 };
 
@@ -521,9 +521,9 @@ protected:
 class UEEDITORMCP_API FDeleteBlueprintVariableAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("delete_blueprint_variable"); }
 };
 
@@ -532,9 +532,9 @@ protected:
 class UEEDITORMCP_API FRenameBlueprintVariableAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("rename_blueprint_variable"); }
 };
 
@@ -546,9 +546,9 @@ protected:
 class UEEDITORMCP_API FSetVariableMetadataAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_variable_metadata"); }
 };
 
@@ -557,9 +557,9 @@ protected:
 class UEEDITORMCP_API FDeleteBlueprintFunctionAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("delete_blueprint_function"); }
 };
 
@@ -568,9 +568,9 @@ protected:
 class UEEDITORMCP_API FRenameBlueprintFunctionAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("rename_blueprint_function"); }
 };
 
@@ -579,9 +579,9 @@ protected:
 class UEEDITORMCP_API FRenameBlueprintMacroAction : public FBlueprintAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("rename_blueprint_macro"); }
 };
 
@@ -594,9 +594,9 @@ protected:
 class UEEDITORMCP_API FDisconnectBlueprintPinAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("disconnect_blueprint_pin"); }
 };
 
@@ -605,9 +605,9 @@ protected:
 class UEEDITORMCP_API FMoveNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("move_node"); }
 };
 
@@ -616,9 +616,9 @@ protected:
 class UEEDITORMCP_API FAddRerouteNodeAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("add_reroute_node"); }
 };
 
@@ -637,10 +637,10 @@ protected:
 class UEEDITORMCP_API FGetSelectedNodesAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("get_selected_nodes"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -653,10 +653,10 @@ protected:
 class UEEDITORMCP_API FCollapseSelectionToFunctionAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("collapse_selection_to_function"); }
 };
 
@@ -678,10 +678,10 @@ protected:
 class UEEDITORMCP_API FCollapseSelectionToMacroAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("collapse_selection_to_macro"); }
 };
 
@@ -708,10 +708,10 @@ protected:
 class UEEDITORMCP_API FSetSelectedNodesAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_selected_nodes"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -741,10 +741,10 @@ protected:
 class UEEDITORMCP_API FBatchSelectAndActAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("batch_select_and_act"); }
 };
 
@@ -763,10 +763,10 @@ protected:
 class UEEDITORMCP_API FDescribeGraphAction : public FBlueprintNodeAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("describe_graph"); }
 	virtual bool RequiresSave() const override { return false; }
 

@@ -41,7 +41,7 @@
 // FCreateBlueprintAction
 // ============================================================================
 
-bool FCreateBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString BlueprintName;
 	if (!GetRequiredString(Params, TEXT("name"), BlueprintName, OutError))
@@ -51,7 +51,7 @@ bool FCreateBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCreateBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName;
 	FString Error;
@@ -221,7 +221,7 @@ void FCreateBlueprintAction::CleanupExistingBlueprint(const FString& BlueprintNa
 // FCompileBlueprintAction
 // ============================================================================
 
-bool FCompileBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCompileBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: compile_blueprint Validate called"));
 	bool bResult = ValidateBlueprint(Params, Context, OutError);
@@ -230,7 +230,7 @@ bool FCompileBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FM
 	return bResult;
 }
 
-TSharedPtr<FJsonObject> FCompileBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCompileBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UE_LOG(LogMCP, Log, TEXT("UEEditorMCP: compile_blueprint ExecuteInternal called"));
 
@@ -422,7 +422,7 @@ void FCompileBlueprintAction::CollectCompilationMessages(UBlueprint* Blueprint,
 // FAddComponentToBlueprintAction
 // ============================================================================
 
-bool FAddComponentToBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddComponentToBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateBlueprint(Params, Context, OutError))
 	{
@@ -449,7 +449,7 @@ bool FAddComponentToBlueprintAction::Validate(const TSharedPtr<FJsonObject>& Par
 	return true;
 }
 
-TSharedPtr<FJsonObject> FAddComponentToBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddComponentToBlueprintAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	FString Error;
@@ -602,7 +602,7 @@ FRotator FAddComponentToBlueprintAction::GetRotatorFromParams(const TSharedPtr<F
 // FSpawnBlueprintActorAction
 // ============================================================================
 
-bool FSpawnBlueprintActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSpawnBlueprintActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString BlueprintName, ActorName;
 	if (!GetRequiredString(Params, TEXT("blueprint_name"), BlueprintName, OutError))
@@ -631,7 +631,7 @@ bool FSpawnBlueprintActorAction::Validate(const TSharedPtr<FJsonObject>& Params,
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSpawnBlueprintActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSpawnBlueprintActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString BlueprintName, ActorName, Error;
 	GetRequiredString(Params, TEXT("blueprint_name"), BlueprintName, Error);
@@ -741,7 +741,7 @@ TSharedPtr<FJsonObject> FSpawnBlueprintActorAction::ActorToJson(AActor* Actor) c
 // FSetComponentPropertyAction
 // ============================================================================
 
-bool FSetComponentPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetComponentPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateBlueprint(Params, Context, OutError))
 	{
@@ -766,7 +766,7 @@ bool FSetComponentPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetComponentPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetComponentPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	FString Error;
@@ -817,7 +817,7 @@ TSharedPtr<FJsonObject> FSetComponentPropertyAction::ExecuteInternal(const TShar
 // FSetInheritedComponentPropertyAction
 // ============================================================================
 
-bool FSetInheritedComponentPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetInheritedComponentPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateBlueprint(Params, Context, OutError)) return false;
 	FString Dummy;
@@ -831,7 +831,7 @@ bool FSetInheritedComponentPropertyAction::Validate(const TSharedPtr<FJsonObject
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetInheritedComponentPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetInheritedComponentPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	FString Error;
@@ -905,7 +905,7 @@ TSharedPtr<FJsonObject> FSetInheritedComponentPropertyAction::ExecuteInternal(co
 // FSetStaticMeshPropertiesAction
 // ============================================================================
 
-bool FSetStaticMeshPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetStaticMeshPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateBlueprint(Params, Context, OutError))
 	{
@@ -921,7 +921,7 @@ bool FSetStaticMeshPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Par
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetStaticMeshPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetStaticMeshPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	FString Error;
@@ -993,7 +993,7 @@ TSharedPtr<FJsonObject> FSetStaticMeshPropertiesAction::ExecuteInternal(const TS
 // FSetPhysicsPropertiesAction
 // ============================================================================
 
-bool FSetPhysicsPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetPhysicsPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateBlueprint(Params, Context, OutError))
 	{
@@ -1009,7 +1009,7 @@ bool FSetPhysicsPropertiesAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetPhysicsPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetPhysicsPropertiesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	FString Error;
@@ -1074,7 +1074,7 @@ TSharedPtr<FJsonObject> FSetPhysicsPropertiesAction::ExecuteInternal(const TShar
 // FSetBlueprintPropertyAction
 // ============================================================================
 
-bool FSetBlueprintPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetBlueprintPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!ValidateBlueprint(Params, Context, OutError))
 	{
@@ -1095,7 +1095,7 @@ bool FSetBlueprintPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return true;
 }
 
-TSharedPtr<FJsonObject> FSetBlueprintPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetBlueprintPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
 	FString Error;
@@ -1140,7 +1140,7 @@ TSharedPtr<FJsonObject> FSetBlueprintPropertyAction::ExecuteInternal(const TShar
 // FCreateColoredMaterialAction
 // ============================================================================
 
-bool FCreateColoredMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateColoredMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MaterialName;
 	if (!GetRequiredString(Params, TEXT("material_name"), MaterialName, OutError))
@@ -1150,7 +1150,7 @@ bool FCreateColoredMaterialAction::Validate(const TSharedPtr<FJsonObject>& Param
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCreateColoredMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateColoredMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString MaterialName;
@@ -1292,14 +1292,14 @@ UClass* FSetBlueprintParentClassAction::ResolveClass(const FString& ClassName) c
 	return FoundClass;
 }
 
-bool FSetBlueprintParentClassAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetBlueprintParentClassAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ParentClass;
 	if (!GetRequiredString(Params, TEXT("parent_class"), ParentClass, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FSetBlueprintParentClassAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetBlueprintParentClassAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString ParentClassName = Params->GetStringField(TEXT("parent_class"));
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
@@ -1331,14 +1331,14 @@ TSharedPtr<FJsonObject> FSetBlueprintParentClassAction::ExecuteInternal(const TS
 // Add Blueprint Interface
 // ============================================================================
 
-bool FAddBlueprintInterfaceAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddBlueprintInterfaceAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString InterfaceName;
 	if (!GetRequiredString(Params, TEXT("interface_name"), InterfaceName, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FAddBlueprintInterfaceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddBlueprintInterfaceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString InterfaceName = Params->GetStringField(TEXT("interface_name"));
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
@@ -1394,14 +1394,14 @@ TSharedPtr<FJsonObject> FAddBlueprintInterfaceAction::ExecuteInternal(const TSha
 // Remove Blueprint Interface
 // ============================================================================
 
-bool FRemoveBlueprintInterfaceAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRemoveBlueprintInterfaceAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString InterfaceName;
 	if (!GetRequiredString(Params, TEXT("interface_name"), InterfaceName, OutError)) return false;
 	return ValidateBlueprint(Params, Context, OutError);
 }
 
-TSharedPtr<FJsonObject> FRemoveBlueprintInterfaceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRemoveBlueprintInterfaceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString InterfaceName = Params->GetStringField(TEXT("interface_name"));
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);

@@ -35,7 +35,7 @@ public:
 	 * @param Context Current editor context
 	 * @return JSON response with success/failure and result/error
 	 */
-	TSharedPtr<FJsonObject> Execute(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context);
+	TSharedPtr<FJsonObject> Execute(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context);
 
 	/**
 	 * Execute the action (called after validation).
@@ -45,7 +45,7 @@ public:
 	 * @param Context Current editor context
 	 * @return JSON response
 	 */
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) = 0;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) = 0;
 
 protected:
 	// =========================================================================
@@ -60,7 +60,7 @@ protected:
 	 * @param OutError Error message if validation fails
 	 * @return True if validation passes
 	 */
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) = 0;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) = 0;
 
 	/**
 	 * Post-execution validation (optional).
@@ -70,7 +70,7 @@ protected:
 	 * @param OutError Error message if validation fails
 	 * @return True if post-validation passes
 	 */
-	virtual bool PostValidate(FMCPEditorContext& Context, FString& OutError) { return true; }
+	virtual bool PostValidate(FUEEditorContext& Context, FString& OutError) { return true; }
 
 	/**
 	 * Get the action name for error messages.
@@ -124,7 +124,7 @@ private:
 	 * Execute with crash protection.
 	 * Uses SEH on Windows, signal handlers on Unix.
 	 */
-	TSharedPtr<FJsonObject> ExecuteWithCrashProtection(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context);
+	TSharedPtr<FJsonObject> ExecuteWithCrashProtection(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context);
 };
 
 
@@ -138,13 +138,13 @@ class UEEDITORMCP_API FBlueprintAction : public FEditorAction
 {
 protected:
 	/** Validate that Blueprint exists and is valid */
-	bool ValidateBlueprint(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError);
+	bool ValidateBlueprint(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError);
 
 	/** Get the Blueprint for this action (validates and caches) */
-	UBlueprint* GetTargetBlueprint(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) const;
+	UBlueprint* GetTargetBlueprint(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) const;
 
 	/** Mark Blueprint as modified */
-	void MarkBlueprintModified(UBlueprint* Blueprint, FMCPEditorContext& Context) const;
+	void MarkBlueprintModified(UBlueprint* Blueprint, FUEEditorContext& Context) const;
 
 	/** Compile Blueprint and check for errors */
 	bool CompileBlueprint(UBlueprint* Blueprint, FString& OutError) const;
@@ -161,13 +161,13 @@ class UEEDITORMCP_API FBlueprintNodeAction : public FBlueprintAction
 {
 protected:
 	/** Validate that graph exists */
-	bool ValidateGraph(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError);
+	bool ValidateGraph(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError);
 
 	/** Get the target graph for this action */
-	UEdGraph* GetTargetGraph(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) const;
+	UEdGraph* GetTargetGraph(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) const;
 
 	/** Add node to graph and update context */
-	void RegisterCreatedNode(UEdGraphNode* Node, FMCPEditorContext& Context) const;
+	void RegisterCreatedNode(UEdGraphNode* Node, FUEEditorContext& Context) const;
 
 	/** Parse node position from params */
 	FVector2D GetNodePosition(const TSharedPtr<FJsonObject>& Params) const;

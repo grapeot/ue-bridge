@@ -146,10 +146,10 @@ private:
 class UEEDITORMCP_API FAutoLayoutSelectedAction : public FEditorAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("auto_layout_selected"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -171,10 +171,10 @@ protected:
 class UEEDITORMCP_API FAutoLayoutSubtreeAction : public FEditorAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("auto_layout_subtree"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -200,10 +200,10 @@ protected:
 class UEEDITORMCP_API FAutoLayoutBlueprintAction : public FEditorAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("auto_layout_blueprint"); }
 	virtual bool RequiresSave() const override { return false; }
 };
@@ -235,10 +235,10 @@ protected:
 class UEEDITORMCP_API FLayoutAndCommentAction : public FEditorAction
 {
 public:
-	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context) override;
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
 
 protected:
-	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) override;
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("layout_and_comment"); }
 	virtual bool RequiresSave() const override { return false; }
 };

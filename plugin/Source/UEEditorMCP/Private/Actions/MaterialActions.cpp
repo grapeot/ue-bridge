@@ -301,7 +301,7 @@ UMaterial* FMaterialAction::FindMaterial(const FString& MaterialName, FString& O
 	return nullptr;
 }
 
-UMaterial* FMaterialAction::GetMaterialByNameOrCurrent(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError) const
+UMaterial* FMaterialAction::GetMaterialByNameOrCurrent(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) const
 {
 	FString MaterialName = GetOptionalString(Params, TEXT("material_name"));
 
@@ -366,7 +366,7 @@ UClass* FMaterialAction::ResolveExpressionClass(const FString& ExpressionClassNa
 	return FoundClass;
 }
 
-void FMaterialAction::MarkMaterialModified(UMaterial* Material, FMCPEditorContext& Context) const
+void FMaterialAction::MarkMaterialModified(UMaterial* Material, FUEEditorContext& Context) const
 {
 	if (Material)
 	{
@@ -387,7 +387,7 @@ void FMaterialAction::MarkMaterialModified(UMaterial* Material, FMCPEditorContex
 // FCreateMaterialAction
 // =========================================================================
 
-bool FCreateMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MaterialName;
 	return GetRequiredString(Params, TEXT("material_name"), MaterialName, OutError);
@@ -455,7 +455,7 @@ TOptional<EBlendableLocation> FCreateMaterialAction::ResolveBlendableLocation(co
 	return TOptional<EBlendableLocation>();
 }
 
-TSharedPtr<FJsonObject> FCreateMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString MaterialName;
@@ -555,7 +555,7 @@ TSharedPtr<FJsonObject> FCreateMaterialAction::ExecuteInternal(const TSharedPtr<
 // FAddMaterialExpressionAction
 // =========================================================================
 
-bool FAddMaterialExpressionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAddMaterialExpressionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ExpressionClass, NodeName;
 	if (!GetRequiredString(Params, TEXT("expression_class"), ExpressionClass, OutError)) return false;
@@ -720,7 +720,7 @@ void FAddMaterialExpressionAction::SetExpressionProperties(UMaterialExpression* 
 	}
 }
 
-TSharedPtr<FJsonObject> FAddMaterialExpressionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAddMaterialExpressionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -834,7 +834,7 @@ TSharedPtr<FJsonObject> FAddMaterialExpressionAction::ExecuteInternal(const TSha
 // FConnectMaterialExpressionsAction
 // =========================================================================
 
-bool FConnectMaterialExpressionsAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FConnectMaterialExpressionsAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString SourceNode, TargetNode, TargetInput;
 	if (!GetRequiredString(Params, TEXT("source_node"), SourceNode, OutError)) return false;
@@ -918,7 +918,7 @@ bool FConnectMaterialExpressionsAction::ConnectToExpressionInput(UMaterialExpres
 	return false;
 }
 
-TSharedPtr<FJsonObject> FConnectMaterialExpressionsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FConnectMaterialExpressionsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -977,7 +977,7 @@ TSharedPtr<FJsonObject> FConnectMaterialExpressionsAction::ExecuteInternal(const
 // FConnectToMaterialOutputAction
 // =========================================================================
 
-bool FConnectToMaterialOutputAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FConnectToMaterialOutputAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString SourceNode, MaterialProperty;
 	if (!GetRequiredString(Params, TEXT("source_node"), SourceNode, OutError)) return false;
@@ -1071,7 +1071,7 @@ bool FConnectToMaterialOutputAction::ConnectToMaterialProperty(UMaterial* Materi
 	return false;
 }
 
-TSharedPtr<FJsonObject> FConnectToMaterialOutputAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FConnectToMaterialOutputAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -1119,7 +1119,7 @@ TSharedPtr<FJsonObject> FConnectToMaterialOutputAction::ExecuteInternal(const TS
 // FSetMaterialExpressionPropertyAction
 // =========================================================================
 
-bool FSetMaterialExpressionPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetMaterialExpressionPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString NodeName, PropertyName, PropertyValue;
 	if (!GetRequiredString(Params, TEXT("node_name"), NodeName, OutError)) return false;
@@ -1222,7 +1222,7 @@ bool FSetMaterialExpressionPropertyAction::SetExpressionProperty(UMaterialExpres
 	return false;
 }
 
-TSharedPtr<FJsonObject> FSetMaterialExpressionPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetMaterialExpressionPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -1269,7 +1269,7 @@ TSharedPtr<FJsonObject> FSetMaterialExpressionPropertyAction::ExecuteInternal(co
 // FCompileMaterialAction
 // =========================================================================
 
-bool FCompileMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCompileMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// Allow compiling the current material if material_name is omitted.
 	const FString MaterialName = GetOptionalString(Params, TEXT("material_name"));
@@ -1281,7 +1281,7 @@ bool FCompileMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCompileMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCompileMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	UMaterial* Material = GetMaterialByNameOrCurrent(Params, Context, Error);
@@ -1380,7 +1380,7 @@ TSharedPtr<FJsonObject> FCompileMaterialAction::ExecuteInternal(const TSharedPtr
 // FCreateMaterialInstanceAction
 // =========================================================================
 
-bool FCreateMaterialInstanceAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreateMaterialInstanceAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString InstanceName, ParentMaterial;
 	if (!GetRequiredString(Params, TEXT("instance_name"), InstanceName, OutError)) return false;
@@ -1397,7 +1397,7 @@ bool FCreateMaterialInstanceAction::Validate(const TSharedPtr<FJsonObject>& Para
 	return true;
 }
 
-TSharedPtr<FJsonObject> FCreateMaterialInstanceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreateMaterialInstanceAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString InstanceName, ParentMaterialName;
@@ -1535,7 +1535,7 @@ TSharedPtr<FJsonObject> FCreateMaterialInstanceAction::ExecuteInternal(const TSh
 // FSetMaterialPropertyAction
 // =========================================================================
 
-bool FSetMaterialPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FSetMaterialPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MaterialName, PropertyName, PropertyValue;
 	if (!GetRequiredString(Params, TEXT("material_name"), MaterialName, OutError)) return false;
@@ -1554,7 +1554,7 @@ TOptional<EMaterialShadingModel> FSetMaterialPropertyAction::ResolveShadingModel
 	return TOptional<EMaterialShadingModel>();
 }
 
-TSharedPtr<FJsonObject> FSetMaterialPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FSetMaterialPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString MaterialName, PropertyName, PropertyValue;
@@ -1662,7 +1662,7 @@ TSharedPtr<FJsonObject> FSetMaterialPropertyAction::ExecuteInternal(const TShare
 // FCreatePostProcessVolumeAction
 // =========================================================================
 
-bool FCreatePostProcessVolumeAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FCreatePostProcessVolumeAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString Name;
 	return GetRequiredString(Params, TEXT("name"), Name, OutError);
@@ -1681,7 +1681,7 @@ FVector FCreatePostProcessVolumeAction::GetVectorFromParams(const TSharedPtr<FJs
 	return Result;
 }
 
-TSharedPtr<FJsonObject> FCreatePostProcessVolumeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FCreatePostProcessVolumeAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString ActorName;
@@ -1777,7 +1777,7 @@ TSharedPtr<FJsonObject> FCreatePostProcessVolumeAction::ExecuteInternal(const TS
 // FGetMaterialSummaryAction (P4.1)
 // =========================================================================
 
-bool FGetMaterialSummaryAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetMaterialSummaryAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MaterialName;
 	return GetRequiredString(Params, TEXT("material_name"), MaterialName, OutError);
@@ -1962,7 +1962,7 @@ TArray<TSharedPtr<FJsonValue>> FGetMaterialSummaryAction::BuildConnectionsArray(
 	return Connections;
 }
 
-TSharedPtr<FJsonObject> FGetMaterialSummaryAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetMaterialSummaryAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString MaterialName;
@@ -2098,7 +2098,7 @@ TSharedPtr<FJsonObject> FGetMaterialSummaryAction::ExecuteInternal(const TShared
 // FRemoveMaterialExpressionAction (P4.6)
 // =========================================================================
 
-bool FRemoveMaterialExpressionAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRemoveMaterialExpressionAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// At least one of node_name or node_names must be provided
 	FString NodeName = GetOptionalString(Params, TEXT("node_name"));
@@ -2111,7 +2111,7 @@ bool FRemoveMaterialExpressionAction::Validate(const TSharedPtr<FJsonObject>& Pa
 	return true;
 }
 
-TSharedPtr<FJsonObject> FRemoveMaterialExpressionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRemoveMaterialExpressionAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -2232,7 +2232,7 @@ TSharedPtr<FJsonObject> FRemoveMaterialExpressionAction::ExecuteInternal(const T
 // FAutoLayoutMaterialAction (P4.4)
 // =========================================================================
 
-bool FAutoLayoutMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAutoLayoutMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MaterialName;
 	return GetRequiredString(Params, TEXT("material_name"), MaterialName, OutError);
@@ -2441,7 +2441,7 @@ static FVector2D EstimateMaterialExprNodeSize(UMaterialExpression* Expr)
 	return FVector2D(Width, Height);
 }
 
-TSharedPtr<FJsonObject> FAutoLayoutMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAutoLayoutMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString MaterialName;
@@ -2716,13 +2716,13 @@ TSharedPtr<FJsonObject> FAutoLayoutMaterialAction::ExecuteInternal(const TShared
 // FAutoCommentMaterialAction (P4.5)
 // =========================================================================
 
-bool FAutoCommentMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FAutoCommentMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString CommentText;
 	return GetRequiredString(Params, TEXT("comment_text"), CommentText, OutError);
 }
 
-TSharedPtr<FJsonObject> FAutoCommentMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FAutoCommentMaterialAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -3395,13 +3395,13 @@ TSharedPtr<FJsonObject> FAutoCommentMaterialAction::ExecuteInternal(const TShare
 // FGetMaterialSelectedNodesAction (P5.5)
 // =========================================================================
 
-bool FGetMaterialSelectedNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetMaterialSelectedNodesAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	// No required params — material is auto-detected if not specified
 	return true;
 }
 
-TSharedPtr<FJsonObject> FGetMaterialSelectedNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetMaterialSelectedNodesAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 
@@ -3571,7 +3571,7 @@ TSharedPtr<FJsonObject> FGetMaterialSelectedNodesAction::ExecuteInternal(const T
 // FApplyMaterialToComponentAction (P5.2)
 // =========================================================================
 
-bool FApplyMaterialToComponentAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FApplyMaterialToComponentAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ActorName, MaterialPath;
 	if (!GetRequiredString(Params, TEXT("actor_name"), ActorName, OutError)) return false;
@@ -3579,7 +3579,7 @@ bool FApplyMaterialToComponentAction::Validate(const TSharedPtr<FJsonObject>& Pa
 	return true;
 }
 
-TSharedPtr<FJsonObject> FApplyMaterialToComponentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FApplyMaterialToComponentAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString ActorName, MaterialPath;
@@ -3689,7 +3689,7 @@ TSharedPtr<FJsonObject> FApplyMaterialToComponentAction::ExecuteInternal(const T
 // FApplyMaterialToActorAction (P5.4)
 // =========================================================================
 
-bool FApplyMaterialToActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FApplyMaterialToActorAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString ActorName, MaterialPath;
 	if (!GetRequiredString(Params, TEXT("actor_name"), ActorName, OutError)) return false;
@@ -3697,7 +3697,7 @@ bool FApplyMaterialToActorAction::Validate(const TSharedPtr<FJsonObject>& Params
 	return true;
 }
 
-TSharedPtr<FJsonObject> FApplyMaterialToActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FApplyMaterialToActorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString Error;
 	FString ActorName, MaterialPath;
@@ -3782,13 +3782,13 @@ TSharedPtr<FJsonObject> FApplyMaterialToActorAction::ExecuteInternal(const TShar
 // FRefreshMaterialEditorAction
 // =========================================================================
 
-bool FRefreshMaterialEditorAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FRefreshMaterialEditorAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	FString MaterialName;
 	return GetRequiredString(Params, TEXT("material_name"), MaterialName, OutError);
 }
 
-TSharedPtr<FJsonObject> FRefreshMaterialEditorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FRefreshMaterialEditorAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	FString MaterialName = Params->GetStringField(TEXT("material_name"));
 	FString FindError;

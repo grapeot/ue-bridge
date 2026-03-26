@@ -26,7 +26,7 @@
 #include "UObject/UObjectGlobals.h"
 #include "Misc/PackageName.h"
 
-bool FDiffAgainstDepotAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FDiffAgainstDepotAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!GetRequiredString(Params, TEXT("asset_path"), AssetPath, OutError))
 	{
@@ -51,7 +51,7 @@ bool FDiffAgainstDepotAction::Validate(const TSharedPtr<FJsonObject>& Params, FM
 	return true;
 }
 
-TSharedPtr<FJsonObject> FDiffAgainstDepotAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FDiffAgainstDepotAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	// ------------------------------------------------------------------
 	// 1. Load the local asset
@@ -436,7 +436,7 @@ FString FDiffAgainstDepotAction::DiffCategoryToString(int32 Category)
 // FGetAssetHistoryAction
 // =====================================================================
 
-bool FGetAssetHistoryAction::Validate(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context, FString& OutError)
+bool FGetAssetHistoryAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
 {
 	if (!GetRequiredString(Params, TEXT("asset_path"), AssetPath, OutError))
 	{
@@ -460,7 +460,7 @@ bool FGetAssetHistoryAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 	return true;
 }
 
-TSharedPtr<FJsonObject> FGetAssetHistoryAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FMCPEditorContext& Context)
+TSharedPtr<FJsonObject> FGetAssetHistoryAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 	// ------------------------------------------------------------------
 	// 1. Resolve package path to disk file
