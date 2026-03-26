@@ -65,6 +65,7 @@ void RegisterEditorActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandl
 	ActionHandlers.Add(TEXT("get_outliner_tree"), MakeShared<FGetOutlinerTreeAction>());
 	ActionHandlers.Add(TEXT("open_asset_editor"), MakeShared<FOpenAssetEditorAction>());
 	ActionHandlers.Add(TEXT("new_level"), MakeShared<FNewLevelAction>());
+	ActionHandlers.Add(TEXT("take_screenshot"), MakeShared<FTakeScreenshotAction>());
 }
 
 void RegisterLayoutActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandlers)

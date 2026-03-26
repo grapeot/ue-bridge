@@ -3538,6 +3538,80 @@ TSharedPtr<FJsonObject> FNewLevelAction::ExecuteInternal(const TSharedPtr<FJsonO
 }
 
 // ============================================================================
+// FTakeScreenshotAction — Capture viewport to PNG file
+// ============================================================================
+
+#include "ImageUtils.h"
+#include "UnrealClient.h"
+#include "LevelEditorViewport.h"
+#include "HighResScreenshot.h"
+
+bool FTakeScreenshotAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
+{
+	if (!Params->HasField(TEXT("output_path")))
+	{
+		OutError = TEXT("Missing 'output_path' parameter");
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FTakeScreenshotAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	FString OutputPath = Params->GetStringField(TEXT("output_path"));
+
+	// Use the editor viewport (safe, works in both editor and PIE modes)
+	// During PIE, the editor viewport still shows the scene
+	FViewport* Viewport = nullptr;
+
+	if (GEditor && GEditor->GetActiveViewport())
+	{
+		Viewport = GEditor->GetActiveViewport();
+	}
+
+	if (!Viewport)
+	{
+		return CreateErrorResponse(TEXT("No active viewport found"));
+	}
+
+	int32 Width = Viewport->GetSizeXY().X;
+	int32 Height = Viewport->GetSizeXY().Y;
+
+	if (Width == 0 || Height == 0)
+	{
+		return CreateErrorResponse(TEXT("Viewport has zero size"));
+	}
+
+	// ReadPixels on editor viewport is safe from game thread
+	TArray<FColor> Bitmap;
+	bool bReadOk = Viewport->ReadPixels(Bitmap);
+	if (!bReadOk || Bitmap.Num() == 0)
+	{
+		return CreateErrorResponse(TEXT("Failed to read viewport pixels"));
+	}
+
+	// Save as PNG
+	TArray64<uint8> PNGData;
+	FImageUtils::PNGCompressImageArray(Width, Height, Bitmap, PNGData);
+
+	bool bSaved = FFileHelper::SaveArrayToFile(PNGData, *OutputPath);
+	if (!bSaved)
+	{
+		return CreateErrorResponse(FString::Printf(TEXT("Failed to save screenshot to: %s"), *OutputPath));
+	}
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("output_path"), OutputPath);
+	Result->SetNumberField(TEXT("width"), Width);
+	Result->SetNumberField(TEXT("height"), Height);
+	Result->SetNumberField(TEXT("bytes_written"), PNGData.Num());
+
+	UE_LOG(LogMCP, Log, TEXT("Screenshot saved: %s (%dx%d, %d bytes)"), *OutputPath, Width, Height, PNGData.Num());
+
+	return CreateSuccessResponse(Result);
+}
+
+// ============================================================================
 // FOpenAssetEditorAction — Open an asset editor and optionally focus it
 // ============================================================================
 
