@@ -48,6 +48,10 @@ ue-bridge spawn-actor --type StaticMeshActor --name Wall_01 --location 100,0,0
 ue-bridge spawn-blueprint-actor --blueprint BP_Test --name BP_Test_01 --location 0,0,100
 ue-bridge delete-actor --name Wall_01
 ue-bridge auto-layout --blueprint BP_Test
+ue-bridge start-pie                              # Start PIE (default: SelectedViewport)
+ue-bridge start-pie --mode Simulate               # Start in Simulate mode
+ue-bridge stop-pie                                # Stop PIE
+ue-bridge pie-state                               # Query PIE state (Running/Stopped)
 ue-bridge raw get_context
 ue-bridge raw compile_blueprint --params '{"blueprint_name":"BP_Foo"}'
 ```
@@ -116,6 +120,61 @@ ue.compile("BP_Foo")
 ```python
 ue.create_input_action("IA_Crouch")                    # path defaults to /Game/Input/Actions
 ue.add_key_mapping("IMC_Default", "IA_Crouch", "C")   # action_path defaults to /Game/Input/Actions
+```
+
+### PIE (Play In Editor)
+
+```python
+# Start a PIE session
+ue.start_pie()                          # default: SelectedViewport
+ue.start_pie(mode="Simulate")          # Simulate mode
+ue.start_pie(mode="NewWindow")         # Standalone window
+
+# Check state (poll this after start_pie — startup is async)
+state = ue.get_pie_state()
+print(state["state"])                   # "Running" or "Stopped"
+
+# Stop
+ue.stop_pie()
+```
+
+PIE is essential for runtime verification. After building Blueprint logic, start PIE, then use `get_unreal_logs()` to check for runtime errors.
+
+### UMG Widgets
+
+```python
+# Create a Widget Blueprint
+ue.create_widget_blueprint("WBP_HUD", path="/Game/UI/")
+
+# Add components
+ue.add_text_block("WBP_HUD", "ScoreText", text="Score: 0")
+ue.add_progress_bar("WBP_HUD", "BossHP", percent=1.0, color=(1, 0, 0, 1))
+ue.add_image("WBP_HUD", "LifeIcon", position=(10, 10), size=(32, 32))
+
+# Layout containers
+ue.add_canvas_panel("WBP_HUD", "MainCanvas")
+ue.add_vertical_box("WBP_HUD", "InfoBox")
+ue.add_horizontal_box("WBP_HUD", "LivesRow")
+
+# Set text and properties
+ue.set_widget_text("WBP_HUD", "ScoreText", "Score: 1000", font_size=24)
+ue.set_widget_properties("WBP_HUD", "ScoreText", position=[100, 50], visibility="Visible")
+
+# Bind text to a Blueprint variable for runtime updates
+ue.set_text_block_binding("WBP_HUD", "ScoreText", "ScoreVar")
+
+# Inspect widget tree
+tree = ue.get_widget_tree("WBP_HUD")
+components = ue.list_widget_components("WBP_HUD")
+
+# Get class path for Blueprint use (CreateWidget + AddToViewport)
+info = ue.add_widget_to_viewport("WBP_HUD", z_order=10)
+print(info["class_path"])  # Use this in Blueprint to create and show the widget
+
+# Structure operations
+ue.reparent_widgets("WBP_HUD", "MainCanvas", ["ScoreText", "BossHP"])
+ue.rename_widget("WBP_HUD", "ScoreText", "PlayerScore")
+ue.delete_widget("WBP_HUD", "OldWidget")
 ```
 
 ### Materials
