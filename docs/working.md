@@ -4,6 +4,11 @@
 
 ### 2026-03-25
 
+- Moved `UEBridgeHost` into `ue_bridge_skill/hosts/UEBridgeHost`, so the repository now contains a checked-in self-contained automation host instead of depending on an external sibling project
+- Repointed the in-repo host's `Plugins/UEEditorMCP` symlink to the maintained repo-local `plugin/` directory and verified the host still builds as `UEBridgeHostEditor`
+- Added `python/tests/test_integration_workflow_a.py` as a host-agnostic Python ↔ Unreal integration suite covering `doctor`, `verify`, `get_context`, `create_blueprint`, and `compile`
+- Added `scripts/run_python_unreal_integration.sh` to build a host, launch Unreal, wait for `ue-bridge verify`, and run the Workflow A Python integration suite end-to-end
+- Verified the checked-in `hosts/UEBridgeHost/UEBridgeHost.uproject` can run the integration flow successfully from the repo: 4 Python integration tests passed end-to-end
 - Extracted the monolithic `UMCPBridge::RegisterActions()` body into a dedicated `FUEEditorActionRegistry` composition layer (`ActionRegistry.h/.cpp`)
 - Verified the `ActionRegistry` refactor is behavior-preserving: `UEBridgeHost` still passes the 6-test Workflow A suite and the `UEEditorMCP.Blueprint.WorkflowA.CreateAndCompile` contract test with exit code 0
 - Confirmed the first structural de-MCP step can proceed under existing coverage without changing transport or public command semantics
@@ -59,3 +64,5 @@
 - Build and automation execution for the same host must be serialized, not parallelized. Running the editor before the project plugin dylib is deployed can produce false "module could not be found" failures that look like product bugs but are really orchestration mistakes
 - For Blueprint contract tests, a unique per-run asset name is safer than create-then-delete on the same static path. Immediate deletion caused noisy AssetRegistry warnings; unique names kept the test signal clean enough for automation
 - The right first refactor target was not `MCPServer`, but the oversized `RegisterActions()` composition point. Extracting registration into a dedicated registry improved maintainability without reopening transport risk or forcing a naming migration too early
+- A self-contained host only becomes real when it is versioned inside the plugin repo and the integration script can launch it from a clean shell. Creating a smallest host outside the repo was a useful proof, but checking it into `hosts/UEBridgeHost` was the point where it became a maintainable product asset
+- Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project

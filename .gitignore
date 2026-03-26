@@ -23,6 +23,7 @@ htmlcov/
 *.swo
 *~
 .DS_Store
+tmp/
 
 # Unreal Engine build artifacts
 Binaries/
