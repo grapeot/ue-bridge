@@ -31,9 +31,22 @@ The setup script copies the plugin into your project's `Plugins/` directory, pat
 
 On **Windows**, copy `plugin/` into `<YourProject>/Plugins/UEEditorMCP/` manually, then restart the editor.
 
-### 2. Restart Unreal Editor
+If you want a repo-contained validation host instead of wiring your own project first, use:
 
-Open your project in UE. Go to Edit > Plugins and verify UEEditorMCP is enabled. You should see "MCP Server started on port 55558" in the Output Log.
+```text
+hosts/UEBridgeHost/UEBridgeHost.uproject
+```
+
+### 2. Start Unreal Editor and verify from the CLI
+
+Prefer machine-verifiable checks instead of relying on manual GUI inspection:
+
+```bash
+ue-bridge doctor
+ue-bridge verify
+```
+
+If `verify` succeeds, the plugin is loaded, the local command server is reachable, and the editor is ready enough for automation.
 
 ### 3. Install the Python library
 
@@ -92,6 +105,14 @@ ue-bridge verify
 
 `doctor` returns a structured diagnosis report. `verify` is the stricter gate: it exits non-zero when the bridge is reachable but not fully ready.
 
+For a full repo-contained end-to-end check, you can also run:
+
+```bash
+scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uproject
+```
+
+That script builds the checked-in host, launches Unreal, waits for `ue-bridge verify`, and runs the Python Workflow A integration suite.
+
 ## Key Features
 
 **Blueprint automation** -- Create Blueprints, add nodes (function calls, events, Enhanced Input actions, branches, casts, variable get/set), connect pins, and compile. Full graph construction from Python.
@@ -149,6 +170,9 @@ python3 -m pytest tests/ -v -k "not integration" --cov=ue_bridge --cov=src --cov
 
 # Integration tests (requires UE Editor running with plugin enabled)
 python3 -m pytest tests/test_integration.py -v -m integration
+
+# Repo-contained end-to-end integration against the checked-in host
+scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uproject
 ```
 
 GitHub Actions runs the non-integration test suite on every push and pull request.
