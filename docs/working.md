@@ -4,6 +4,10 @@
 
 ### 2026-03-25
 
+- In the real playability trial, the first bridge-side usability gap was concrete and actionable: `spawn_blueprint_actor()` used the wrong parameter name for the underlying command, and `set_static_mesh_properties` existed only as a raw command. Both were fixed directly from the trial
+- The next gap surfaced immediately after that: `set_component_property` still does not support struct-shaped values such as `RelativeScale3D`. This is a real product gap, not a host/setup issue, and it affects how naturally AI can shape scene components
+- In a temporary third-person playtest project, the first real obstacle was not the bridge but template residue: the copied template still contained `TP_THIRDPERSON_API` macros in variant files, so the host project could not even compile until those were normalized
+- This is worth documenting because a “usability trial” can fail for two very different reasons: bridge UX problems vs. template/project hygiene problems. Keeping those causes separate matters for honest evaluation
 - Added repo-native `docs/PRD.md` and `docs/RFC.md` so the AI-first product intent and architecture direction are no longer only implicit in code and chat history
 - Locked the design baseline around bridge-first concepts, repo-contained validation, machine-verifiable flows, and local transport retention
 - Began hotspot cleanup by extracting the Blueprint Auto Layout command handlers out of `UEBridgeEditorModule.cpp` into `UEBridgeEditorModuleAutoLayout.cpp/.h`
