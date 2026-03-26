@@ -1,6 +1,6 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
-#include "MCPLogCapture.h"
+#include "UEBridgeLogCapture.h"
 #include "Actions/EditorAction.h"
 
 namespace
@@ -38,19 +38,19 @@ bool ContainsMatches(const FString& Message, const FString& ContainsFilter)
 // Singleton
 // ============================================================================
 
-FMCPLogCapture& FMCPLogCapture::Get()
+FUEBridgeLogCapture& FUEBridgeLogCapture::Get()
 {
-	static FMCPLogCapture Instance;
+	static FUEBridgeLogCapture Instance;
 	return Instance;
 }
 
-FMCPLogCapture::FMCPLogCapture()
+FUEBridgeLogCapture::FUEBridgeLogCapture()
 {
 	RingBuffer.SetNum(BufferCapacity);
 	LastReceivedUtc = FDateTime::MinValue();
 }
 
-FMCPLogCapture::~FMCPLogCapture()
+FUEBridgeLogCapture::~FUEBridgeLogCapture()
 {
 	Stop();
 }
@@ -59,7 +59,7 @@ FMCPLogCapture::~FMCPLogCapture()
 // Start / Stop
 // ============================================================================
 
-void FMCPLogCapture::Start()
+void FUEBridgeLogCapture::Start()
 {
 	if (bCapturing)
 	{
@@ -74,7 +74,7 @@ void FMCPLogCapture::Start()
 	UE_LOG(LogMCP, Log, TEXT("MCPLogCapture: Started capturing editor logs (buffer=%d)"), BufferCapacity);
 }
 
-void FMCPLogCapture::Stop()
+void FUEBridgeLogCapture::Stop()
 {
 	if (!bCapturing)
 	{
@@ -91,7 +91,7 @@ void FMCPLogCapture::Stop()
 // FOutputDevice::Serialize
 // ============================================================================
 
-void FMCPLogCapture::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category)
+void FUEBridgeLogCapture::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category)
 {
 	FScopeLock ScopeLock(&Lock);
 
@@ -145,7 +145,7 @@ void FMCPLogCapture::Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, co
 // Query
 // ============================================================================
 
-TArray<FMCPLogCapture::FLogEntry> FMCPLogCapture::GetRecent(
+TArray<FUEBridgeLogCapture::FLogEntry> FUEBridgeLogCapture::GetRecent(
 	int32 InCount,
 	const FString& CategoryFilter,
 	ELogVerbosity::Type MinVerbosity) const
@@ -182,7 +182,7 @@ TArray<FMCPLogCapture::FLogEntry> FMCPLogCapture::GetRecent(
 	return Result;
 }
 
-TArray<FMCPLogCapture::FLogEntry> FMCPLogCapture::GetSince(
+TArray<FUEBridgeLogCapture::FLogEntry> FUEBridgeLogCapture::GetSince(
 	uint64 AfterSeq,
 	int32 MaxLines,
 	int32 MaxBytes,
@@ -252,7 +252,7 @@ TArray<FMCPLogCapture::FLogEntry> FMCPLogCapture::GetSince(
 	return Matched;
 }
 
-uint64 FMCPLogCapture::GetLatestSeq() const
+uint64 FUEBridgeLogCapture::GetLatestSeq() const
 {
 	FScopeLock ScopeLock(&Lock);
 	if (Count <= 0)
@@ -263,13 +263,13 @@ uint64 FMCPLogCapture::GetLatestSeq() const
 	return RingBuffer[LatestIndex].Seq;
 }
 
-FDateTime FMCPLogCapture::GetLastReceivedUtc() const
+FDateTime FUEBridgeLogCapture::GetLastReceivedUtc() const
 {
 	FScopeLock ScopeLock(&Lock);
 	return LastReceivedUtc;
 }
 
-bool FMCPLogCapture::HasRecentData(double RecentWindowSeconds) const
+bool FUEBridgeLogCapture::HasRecentData(double RecentWindowSeconds) const
 {
 	FScopeLock ScopeLock(&Lock);
 	if (LastReceivedUtc == FDateTime::MinValue())
@@ -281,7 +281,7 @@ bool FMCPLogCapture::HasRecentData(double RecentWindowSeconds) const
 	return Elapsed.GetTotalSeconds() <= RecentWindowSeconds;
 }
 
-void FMCPLogCapture::Clear()
+void FUEBridgeLogCapture::Clear()
 {
 	FScopeLock ScopeLock(&Lock);
 	HeadIndex = 0;

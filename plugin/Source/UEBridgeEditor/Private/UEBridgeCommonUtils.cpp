@@ -1,6 +1,6 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/Blueprint.h"
 #include "Engine/BlueprintGeneratedClass.h"
@@ -26,7 +26,7 @@
 // JSON Parsing Utilities
 // =========================================================================
 
-FVector FMCPCommonUtils::GetVectorFromJson(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName)
+FVector FUEBridgeCommonUtils::GetVectorFromJson(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName)
 {
 	FVector Result(0.0f, 0.0f, 0.0f);
 
@@ -46,7 +46,7 @@ FVector FMCPCommonUtils::GetVectorFromJson(const TSharedPtr<FJsonObject>& JsonOb
 	return Result;
 }
 
-FRotator FMCPCommonUtils::GetRotatorFromJson(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName)
+FRotator FUEBridgeCommonUtils::GetRotatorFromJson(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName)
 {
 	FRotator Result(0.0f, 0.0f, 0.0f);
 
@@ -66,7 +66,7 @@ FRotator FMCPCommonUtils::GetRotatorFromJson(const TSharedPtr<FJsonObject>& Json
 	return Result;
 }
 
-FVector2D FMCPCommonUtils::GetVector2DFromJson(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName)
+FVector2D FUEBridgeCommonUtils::GetVector2DFromJson(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName)
 {
 	FVector2D Result(0.0f, 0.0f);
 
@@ -89,7 +89,7 @@ FVector2D FMCPCommonUtils::GetVector2DFromJson(const TSharedPtr<FJsonObject>& Js
 // Blueprint Utilities
 // =========================================================================
 
-UBlueprint* FMCPCommonUtils::FindBlueprint(const FString& BlueprintName)
+UBlueprint* FUEBridgeCommonUtils::FindBlueprint(const FString& BlueprintName)
 {
 	if (BlueprintName.IsEmpty()) return nullptr;
 
@@ -115,7 +115,7 @@ UBlueprint* FMCPCommonUtils::FindBlueprint(const FString& BlueprintName)
 	return nullptr;
 }
 
-UEdGraph* FMCPCommonUtils::FindOrCreateEventGraph(UBlueprint* Blueprint)
+UEdGraph* FUEBridgeCommonUtils::FindOrCreateEventGraph(UBlueprint* Blueprint)
 {
 	if (!Blueprint)
 	{
@@ -139,7 +139,7 @@ UEdGraph* FMCPCommonUtils::FindOrCreateEventGraph(UBlueprint* Blueprint)
 	return NewGraph;
 }
 
-UEdGraph* FMCPCommonUtils::FindFunctionGraph(UBlueprint* Blueprint, const FString& FunctionName)
+UEdGraph* FUEBridgeCommonUtils::FindFunctionGraph(UBlueprint* Blueprint, const FString& FunctionName)
 {
 	if (!Blueprint || FunctionName.IsEmpty())
 	{
@@ -157,7 +157,7 @@ UEdGraph* FMCPCommonUtils::FindFunctionGraph(UBlueprint* Blueprint, const FStrin
 	return nullptr;
 }
 
-UEdGraph* FMCPCommonUtils::FindGraphByName(UBlueprint* Blueprint, const FString& GraphName)
+UEdGraph* FUEBridgeCommonUtils::FindGraphByName(UBlueprint* Blueprint, const FString& GraphName)
 {
 	if (!Blueprint)
 	{
@@ -198,7 +198,7 @@ UEdGraph* FMCPCommonUtils::FindGraphByName(UBlueprint* Blueprint, const FString&
 	return nullptr;
 }
 
-USCS_Node* FMCPCommonUtils::FindComponentNode(UBlueprint* Blueprint, const FString& ComponentName)
+USCS_Node* FUEBridgeCommonUtils::FindComponentNode(UBlueprint* Blueprint, const FString& ComponentName)
 {
 	if (!Blueprint)
 	{
@@ -232,7 +232,7 @@ USCS_Node* FMCPCommonUtils::FindComponentNode(UBlueprint* Blueprint, const FStri
 // Property Setting Utilities
 // =========================================================================
 
-bool FMCPCommonUtils::SetObjectProperty(UObject* Object, const FString& PropertyName,
+bool FUEBridgeCommonUtils::SetObjectProperty(UObject* Object, const FString& PropertyName,
 	const TSharedPtr<FJsonValue>& Value, FString& OutErrorMessage)
 {
 	if (!Object)
@@ -454,7 +454,7 @@ bool FMCPCommonUtils::SetObjectProperty(UObject* Object, const FString& Property
 // Graph Node Utilities
 // =========================================================================
 
-UEdGraphPin* FMCPCommonUtils::FindPin(UEdGraphNode* Node, const FString& PinName, EEdGraphPinDirection Direction)
+UEdGraphPin* FUEBridgeCommonUtils::FindPin(UEdGraphNode* Node, const FString& PinName, EEdGraphPinDirection Direction)
 {
 	if (!Node)
 	{
@@ -483,7 +483,7 @@ UEdGraphPin* FMCPCommonUtils::FindPin(UEdGraphNode* Node, const FString& PinName
 	return nullptr;
 }
 
-UK2Node_Event* FMCPCommonUtils::FindExistingEventNode(UEdGraph* Graph, const FString& EventName)
+UK2Node_Event* FUEBridgeCommonUtils::FindExistingEventNode(UEdGraph* Graph, const FString& EventName)
 {
 	if (!Graph)
 	{
@@ -502,7 +502,7 @@ UK2Node_Event* FMCPCommonUtils::FindExistingEventNode(UEdGraph* Graph, const FSt
 	return nullptr;
 }
 
-UK2Node_Event* FMCPCommonUtils::CreateEventNode(UEdGraph* Graph, const FString& EventName, FVector2D Position)
+UK2Node_Event* FUEBridgeCommonUtils::CreateEventNode(UEdGraph* Graph, const FString& EventName, FVector2D Position)
 {
 	if (!Graph)
 	{
@@ -555,7 +555,7 @@ UK2Node_Event* FMCPCommonUtils::CreateEventNode(UEdGraph* Graph, const FString& 
 	return EventNode;
 }
 
-UK2Node_InputAction* FMCPCommonUtils::CreateInputActionNode(UEdGraph* Graph, const FString& ActionName, FVector2D Position)
+UK2Node_InputAction* FUEBridgeCommonUtils::CreateInputActionNode(UEdGraph* Graph, const FString& ActionName, FVector2D Position)
 {
 	if (!Graph)
 	{
@@ -580,7 +580,7 @@ UK2Node_InputAction* FMCPCommonUtils::CreateInputActionNode(UEdGraph* Graph, con
 	return InputActionNode;
 }
 
-UK2Node_CallFunction* FMCPCommonUtils::CreateFunctionCallNode(UEdGraph* Graph, UFunction* Function, FVector2D Position)
+UK2Node_CallFunction* FUEBridgeCommonUtils::CreateFunctionCallNode(UEdGraph* Graph, UFunction* Function, FVector2D Position)
 {
 	if (!Graph || !Function)
 	{
@@ -602,7 +602,7 @@ UK2Node_CallFunction* FMCPCommonUtils::CreateFunctionCallNode(UEdGraph* Graph, U
 	return FunctionNode;
 }
 
-UK2Node_Self* FMCPCommonUtils::CreateSelfReferenceNode(UEdGraph* Graph, FVector2D Position)
+UK2Node_Self* FUEBridgeCommonUtils::CreateSelfReferenceNode(UEdGraph* Graph, FVector2D Position)
 {
 	if (!Graph)
 	{
@@ -626,7 +626,7 @@ UK2Node_Self* FMCPCommonUtils::CreateSelfReferenceNode(UEdGraph* Graph, FVector2
 	return SelfNode;
 }
 
-TSharedPtr<FJsonObject> FMCPCommonUtils::CreateErrorResponse(const FString& ErrorMessage)
+TSharedPtr<FJsonObject> FUEBridgeCommonUtils::CreateErrorResponse(const FString& ErrorMessage)
 {
 	TSharedPtr<FJsonObject> Response = MakeShared<FJsonObject>();
 	Response->SetBoolField(TEXT("success"), false);
@@ -638,7 +638,7 @@ TSharedPtr<FJsonObject> FMCPCommonUtils::CreateErrorResponse(const FString& Erro
 // Actor Utilities
 // =========================================================================
 
-TSharedPtr<FJsonObject> FMCPCommonUtils::ActorToJsonObject(AActor* Actor)
+TSharedPtr<FJsonObject> FUEBridgeCommonUtils::ActorToJsonObject(AActor* Actor)
 {
 	if (!Actor)
 	{
@@ -673,7 +673,7 @@ TSharedPtr<FJsonObject> FMCPCommonUtils::ActorToJsonObject(AActor* Actor)
 	return ActorObject;
 }
 
-TSharedPtr<FJsonValue> FMCPCommonUtils::ActorToJsonValue(AActor* Actor)
+TSharedPtr<FJsonValue> FUEBridgeCommonUtils::ActorToJsonValue(AActor* Actor)
 {
 	TSharedPtr<FJsonObject> Obj = ActorToJsonObject(Actor);
 	if (Obj.IsValid())
@@ -687,7 +687,7 @@ TSharedPtr<FJsonValue> FMCPCommonUtils::ActorToJsonValue(AActor* Actor)
 // Pin Type Resolution
 // =========================================================================
 
-bool FMCPCommonUtils::ResolvePinTypeFromString(const FString& TypeName, FEdGraphPinType& OutPinType, FString& OutError)
+bool FUEBridgeCommonUtils::ResolvePinTypeFromString(const FString& TypeName, FEdGraphPinType& OutPinType, FString& OutError)
 {
 	OutPinType = FEdGraphPinType();
 
@@ -859,7 +859,7 @@ bool FMCPCommonUtils::ResolvePinTypeFromString(const FString& TypeName, FEdGraph
 #include "Editor.h"
 #include "Actions/EditorAction.h" // LogMCP
 
-FBlueprintEditor* FMCPCommonUtils::GetActiveBlueprintEditor(const FString& BlueprintName)
+FBlueprintEditor* FUEBridgeCommonUtils::GetActiveBlueprintEditor(const FString& BlueprintName)
 {
 	if (!GEditor)
 	{

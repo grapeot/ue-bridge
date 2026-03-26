@@ -6,20 +6,20 @@
 #include "Misc/OutputDevice.h"
 
 /**
- * FMCPLogCapture
+ * FUEBridgeLogCapture
  *
  * Custom FOutputDevice that hooks into GLog to capture editor log output.
  * Maintains a ring buffer of recent log entries, filterable by category
  * and verbosity.  Used by FGetEditorLogsAction to expose structured logs
- * to the MCP Python layer.
+	 * to the Python bridge layer.
  *
  * Thread-safe: Serialize() can be called from any thread; queries lock.
  */
-class UEBRIDGEEDITOR_API FMCPLogCapture : public FOutputDevice
+class UEBRIDGEEDITOR_API FUEBridgeLogCapture : public FOutputDevice
 {
 public:
 	/** Singleton accessor */
-	static FMCPLogCapture& Get();
+	static FUEBridgeLogCapture& Get();
 
 	/** Start capturing — adds this device to GLog */
 	void Start();
@@ -99,8 +99,8 @@ protected:
 	virtual void Serialize(const TCHAR* V, ELogVerbosity::Type Verbosity, const FName& Category) override;
 
 private:
-	FMCPLogCapture();
-	~FMCPLogCapture();
+	FUEBridgeLogCapture();
+	~FUEBridgeLogCapture();
 
 	mutable FCriticalSection Lock;
 	TArray<FLogEntry> RingBuffer;

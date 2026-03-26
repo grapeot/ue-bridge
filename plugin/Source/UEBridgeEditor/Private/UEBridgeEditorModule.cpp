@@ -15,8 +15,8 @@
 #include "Engine/Blueprint.h"
 #include "Editor.h"
 #include "UEBridgeEditorBridge.h"
-#include "MCPLogCapture.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeLogCapture.h"
+#include "UEBridgeCommonUtils.h"
 #include "Widgets/Docking/SDockTab.h"
 // P5.3: Material editor Auto Layout menu
 #include "MaterialEditorModule.h"
@@ -34,14 +34,14 @@
 #define LOCTEXT_NAMESPACE "FUEBridgeEditorModule"
 
 
-// GetActiveBlueprintEditorForCommand removed — use FMCPCommonUtils::GetActiveBlueprintEditor() instead.
+// GetActiveBlueprintEditorForCommand removed — use FUEBridgeCommonUtils::GetActiveBlueprintEditor() instead.
 
 
 // -------------- Command Execution Helpers -------------------
 
 static void ExecuteAutoLayoutSmart()
 {
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor();
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor();
 	if (!BPEditor)
 	{
 		UE_LOG(LogMCP, Warning, TEXT("AutoLayout: No focused Blueprint editor."));
@@ -132,7 +132,7 @@ static void ExecuteAutoLayoutSmart()
 
 static void ExecuteAutoLayoutSelected()
 {
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor();
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor();
 	if (!BPEditor)
 	{
 		UE_LOG(LogMCP, Warning, TEXT("AutoLayout: No focused Blueprint editor."));
@@ -167,7 +167,7 @@ static void ExecuteAutoLayoutSelected()
 
 static void ExecuteAutoLayoutSubtree()
 {
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor();
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor();
 	if (!BPEditor)
 	{
 		UE_LOG(LogMCP, Warning, TEXT("AutoLayout: No focused Blueprint editor."));
@@ -195,7 +195,7 @@ static void ExecuteAutoLayoutSubtree()
 
 static void ExecuteAutoLayoutGraph()
 {
-	FBlueprintEditor* BPEditor = FMCPCommonUtils::GetActiveBlueprintEditor();
+	FBlueprintEditor* BPEditor = FUEBridgeCommonUtils::GetActiveBlueprintEditor();
 	if (!BPEditor)
 	{
 		UE_LOG(LogMCP, Warning, TEXT("AutoLayout: No focused Blueprint editor."));
@@ -1013,7 +1013,7 @@ static void ExecuteMaterialAutoLayout()
 
 void FUEBridgeEditorModule::StartupModule()
 {
-	FMCPLogCapture::Get().Start();
+	FUEBridgeLogCapture::Get().Start();
 
 	UE_LOG(LogMCP, Log, TEXT("UEBridgeEditor: Module starting up"));
 
@@ -1029,7 +1029,7 @@ void FUEBridgeEditorModule::ShutdownModule()
 
 	UnregisterAutoLayoutCommands();
 
-	FMCPLogCapture::Get().Stop();
+	FUEBridgeLogCapture::Get().Stop();
 
 	// The Bridge will be automatically destroyed as an EditorSubsystem.
 }

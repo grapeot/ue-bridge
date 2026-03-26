@@ -15,7 +15,7 @@ class FEditorAction;
 /**
  * UUEEditorBridge
  *
- * Editor subsystem that manages the MCP server and routes commands
+	 * Editor subsystem that manages the local command server and routes commands
  * to appropriate action handlers.
  */
 UCLASS()
@@ -38,7 +38,7 @@ public:
 	// =========================================================================
 
 	/**
-	 * Execute a command received from the MCP server.
+	 * Execute a command received from the local command server.
 	 * Routes to appropriate action handler based on command type.
 	 *
 	 * @param CommandType The type of command (e.g., "create_blueprint")
@@ -81,7 +81,7 @@ private:
 	/** Execute internal command (called after validation) */
 	TSharedPtr<FJsonObject> ExecuteCommandInternal(const FString& CommandType, const TSharedPtr<FJsonObject>& Params);
 
-	/** The MCP TCP server (raw pointer - cleanup in Deinitialize) */
+	/** The local TCP command server (raw pointer - cleanup in Deinitialize) */
 	FEditorCommandServer* Server;
 
 	/** Editor context (persists across commands) */

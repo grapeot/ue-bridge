@@ -8,12 +8,6 @@
 class FExtender;
 class FUICommandList;
 
-/**
- * UE Editor MCP Module
- *
- * Provides an MCP bridge for external tools (like AI assistants) to
- * manipulate Blueprints and the Unreal Editor via TCP commands.
- */
 class FUEBridgeEditorModule : public IModuleInterface
 {
 public:

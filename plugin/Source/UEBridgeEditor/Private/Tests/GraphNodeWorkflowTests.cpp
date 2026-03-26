@@ -44,11 +44,11 @@ const TSharedPtr<FJsonObject>* FindPinByName(const TArray<TSharedPtr<FJsonValue>
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPGraphNodeWorkflowTest,
+	FUEBridgeEditorGraphNodeWorkflowTest,
 	"UEBridgeEditor.Graph.WorkflowA.CreateConnectDelete",
 	UEBridgeEditor::NodeTests::EditorOnlyFlags)
 
-bool FUEEditorMCPGraphNodeWorkflowTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorGraphNodeWorkflowTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::NodeTests::GetBridge();
 	if (!TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge))

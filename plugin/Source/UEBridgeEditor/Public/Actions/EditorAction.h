@@ -6,13 +6,13 @@
 #include "Dom/JsonObject.h"
 #include "../UEBridgeEditorContext.h"
 
-/** Log category for all MCP actions and infrastructure */
+/** Log category for bridge actions and infrastructure */
 DECLARE_LOG_CATEGORY_EXTERN(LogMCP, Log, All);
 
 /**
  * FEditorAction
  *
- * Base class for all MCP editor actions. Provides a unified execution
+	 * Base class for editor bridge actions. Provides a unified execution
  * pipeline with validation, crash protection, and auto-save.
  *
  * Subclasses override:

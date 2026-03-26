@@ -2,7 +2,7 @@
 
 #include "UEBridgeEditorContext.h"
 #include "Actions/EditorAction.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "Engine/Blueprint.h"
 #include "EdGraph/EdGraph.h"
 #include "Kismet2/BlueprintEditorUtils.h"
@@ -112,12 +112,12 @@ void FUEEditorContext::SaveDirtyPackages()
 	// UI dialogs (SVN checkout prompts, progress bars). These dialogs may spawn tiny
 	// windows (8x8 px) that trigger D3D12 swap chain creation, which fails with
 	// E_ACCESSDENIED (0x80070005) on some driver/GPU combos — causing a fatal crash.
-	// Direct UPackage::SavePackage is headless and safe for MCP automation context.
+	// Direct UPackage::SavePackage is headless and safe for the automation context.
 
 	int32 SavedCount = 0;
 	int32 FailedCount = 0;
 
-	// Save only the packages that MCP actions have dirtied
+	// Save only the packages that bridge actions have dirtied
 	for (UPackage* Package : DirtyPackages)
 	{
 		if (!Package || !Package->IsDirty())
@@ -479,7 +479,7 @@ UBlueprint* FUEEditorContext::GetBlueprintByNameOrCurrent(const FString& Bluepri
 	{
 		return CurrentBlueprint.Get();
 	}
-	return FMCPCommonUtils::FindBlueprint(BlueprintName);
+	return FUEBridgeCommonUtils::FindBlueprint(BlueprintName);
 }
 
 UEdGraph* FUEEditorContext::GetGraphByNameOrCurrent(const FString& GraphName) const

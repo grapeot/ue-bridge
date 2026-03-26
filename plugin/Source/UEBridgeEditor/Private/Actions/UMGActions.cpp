@@ -1,7 +1,7 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "Actions/UMGActions.h"
-#include "MCPCommonUtils.h"
+#include "UEBridgeCommonUtils.h"
 #include "Editor.h"
 #include "EditorAssetLibrary.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -189,7 +189,7 @@ static void ApplyCanvasSlot(UCanvasPanelSlot* Slot, const TSharedPtr<FJsonObject
  * Repair: populate WidgetVariableNameToGuidMap for any widget missing a GUID entry.
  *
  * Root cause (WBP_DanmakuLayer / WBP_DanmakuItem, 2026-02-19):
- * MCP's ConstructWidget API adds controls to the WidgetTree but never writes to
+ * The bridge-side ConstructWidget path adds controls to the WidgetTree but never writes to
  * WidgetVariableNameToGuidMap.  WidgetBlueprintCompiler.cpp line 794 then fires:
  *   ensure(WidgetBP->WidgetVariableNameToGuidMap.Contains(Widget->GetFName()))
  * for every named widget that is (or should be) a variable / BindWidget.
@@ -225,7 +225,7 @@ static void MarkWidgetBlueprintDirty(UWidgetBlueprint* WidgetBlueprint, FUEEdito
 	}
 
 	// Repair WidgetVariableNameToGuidMap before triggering compilation.
-	// MCP's ConstructWidget API adds controls to the WidgetTree but never writes to
+// The bridge-side ConstructWidget path adds controls to the WidgetTree but never writes to
 	// this map.  Without this repair, WidgetBlueprintCompiler asserts:
 	//   ensure(WidgetBP->WidgetVariableNameToGuidMap.Contains(Widget->GetFName()))
 	EnsureWidgetVariableGuids(WidgetBlueprint);
@@ -325,13 +325,13 @@ TSharedPtr<FJsonObject> FCreateUMGWidgetBlueprintAction::ExecuteInternal(const T
 	UPackage* Package = CreatePackage(*FullPath);
 	if (!Package)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create package"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create package"));
 	}
 
 	// Double-check cleanup worked
 	if (FindObject<UBlueprint>(Package, *AssetName))
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Failed to clean up existing Widget Blueprint '%s'. Try restarting the editor."), *AssetName));
 	}
 
@@ -349,7 +349,7 @@ TSharedPtr<FJsonObject> FCreateUMGWidgetBlueprintAction::ExecuteInternal(const T
 	UWidgetBlueprint* WidgetBlueprint = Cast<UWidgetBlueprint>(NewBlueprint);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Widget Blueprint"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Widget Blueprint"));
 	}
 
 	// Add default Canvas Panel
@@ -402,7 +402,7 @@ TSharedPtr<FJsonObject> FAddTextBlockToWidgetAction::ExecuteInternal(const TShar
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
@@ -425,7 +425,7 @@ TSharedPtr<FJsonObject> FAddTextBlockToWidgetAction::ExecuteInternal(const TShar
 	UTextBlock* TextBlock = WidgetBlueprint->WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), *WidgetName);
 	if (!TextBlock)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Text Block widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Text Block widget"));
 	}
 
 	TextBlock->SetText(FText::FromString(InitialText));
@@ -434,7 +434,7 @@ TSharedPtr<FJsonObject> FAddTextBlockToWidgetAction::ExecuteInternal(const TShar
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root Canvas Panel not found"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root Canvas Panel not found"));
 	}
 
 	UCanvasPanelSlot* PanelSlot = RootCanvas->AddChildToCanvas(TextBlock);
@@ -481,21 +481,21 @@ TSharedPtr<FJsonObject> FAddButtonToWidgetAction::ExecuteInternal(const TSharedP
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	// Create Button
 	UButton* Button = WidgetBlueprint->WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), *WidgetName);
 	if (!Button)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Button widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Button widget"));
 	}
 
 	// Create text block for button label
@@ -564,14 +564,14 @@ TSharedPtr<FJsonObject> FAddImageToWidgetAction::ExecuteInternal(const TSharedPt
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	// Optional parameters
@@ -625,7 +625,7 @@ TSharedPtr<FJsonObject> FAddImageToWidgetAction::ExecuteInternal(const TSharedPt
 	UImage* Image = WidgetBlueprint->WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), *WidgetName);
 	if (!Image)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Image widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Image widget"));
 	}
 
 	if (!TexturePath.IsEmpty())
@@ -634,7 +634,7 @@ TSharedPtr<FJsonObject> FAddImageToWidgetAction::ExecuteInternal(const TSharedPt
 		UTexture2D* Texture = Cast<UTexture2D>(TextureObj);
 		if (!Texture)
 		{
-			return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+			return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 				TEXT("Texture not found or invalid: %s"), *TexturePath));
 		}
 		Image->SetBrushFromTexture(Texture);
@@ -693,20 +693,20 @@ TSharedPtr<FJsonObject> FAddBorderToWidgetAction::ExecuteInternal(const TSharedP
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UBorder* Border = WidgetBlueprint->WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), *WidgetName);
 	if (!Border)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Border widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Border widget"));
 	}
 
 	FLinearColor Tint;
@@ -754,20 +754,20 @@ TSharedPtr<FJsonObject> FAddOverlayToWidgetAction::ExecuteInternal(const TShared
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UOverlay* Overlay = WidgetBlueprint->WidgetTree->ConstructWidget<UOverlay>(UOverlay::StaticClass(), *WidgetName);
 	if (!Overlay)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Overlay widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Overlay widget"));
 	}
 
 	UCanvasPanelSlot* Slot = RootCanvas->AddChildToCanvas(Overlay);
@@ -809,20 +809,20 @@ TSharedPtr<FJsonObject> FAddHorizontalBoxToWidgetAction::ExecuteInternal(const T
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UHorizontalBox* HorizontalBox = WidgetBlueprint->WidgetTree->ConstructWidget<UHorizontalBox>(UHorizontalBox::StaticClass(), *WidgetName);
 	if (!HorizontalBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create HorizontalBox widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create HorizontalBox widget"));
 	}
 
 	UCanvasPanelSlot* Slot = RootCanvas->AddChildToCanvas(HorizontalBox);
@@ -864,20 +864,20 @@ TSharedPtr<FJsonObject> FAddVerticalBoxToWidgetAction::ExecuteInternal(const TSh
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UVerticalBox* VerticalBox = WidgetBlueprint->WidgetTree->ConstructWidget<UVerticalBox>(UVerticalBox::StaticClass(), *WidgetName);
 	if (!VerticalBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create VerticalBox widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create VerticalBox widget"));
 	}
 
 	UCanvasPanelSlot* Slot = RootCanvas->AddChildToCanvas(VerticalBox);
@@ -919,20 +919,20 @@ TSharedPtr<FJsonObject> FAddSliderToWidgetAction::ExecuteInternal(const TSharedP
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	USlider* Slider = WidgetBlueprint->WidgetTree->ConstructWidget<USlider>(USlider::StaticClass(), *WidgetName);
 	if (!Slider)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create Slider widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create Slider widget"));
 	}
 
 	double Value = 0.0;
@@ -980,20 +980,20 @@ TSharedPtr<FJsonObject> FAddProgressBarToWidgetAction::ExecuteInternal(const TSh
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UProgressBar* ProgressBar = WidgetBlueprint->WidgetTree->ConstructWidget<UProgressBar>(UProgressBar::StaticClass(), *WidgetName);
 	if (!ProgressBar)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create ProgressBar widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create ProgressBar widget"));
 	}
 
 	double Percent = 0.0;
@@ -1047,20 +1047,20 @@ TSharedPtr<FJsonObject> FAddSizeBoxToWidgetAction::ExecuteInternal(const TShared
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	USizeBox* SizeBox = WidgetBlueprint->WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), *WidgetName);
 	if (!SizeBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create SizeBox widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create SizeBox widget"));
 	}
 
 	FVector2D OverrideSize;
@@ -1109,20 +1109,20 @@ TSharedPtr<FJsonObject> FAddScaleBoxToWidgetAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UScaleBox* ScaleBox = WidgetBlueprint->WidgetTree->ConstructWidget<UScaleBox>(UScaleBox::StaticClass(), *WidgetName);
 	if (!ScaleBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create ScaleBox widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create ScaleBox widget"));
 	}
 
 	UCanvasPanelSlot* Slot = RootCanvas->AddChildToCanvas(ScaleBox);
@@ -1164,20 +1164,20 @@ TSharedPtr<FJsonObject> FAddCanvasPanelToWidgetAction::ExecuteInternal(const TSh
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UCanvasPanel* CanvasPanel = WidgetBlueprint->WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), *WidgetName);
 	if (!CanvasPanel)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create CanvasPanel widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create CanvasPanel widget"));
 	}
 
 	UCanvasPanelSlot* Slot = RootCanvas->AddChildToCanvas(CanvasPanel);
@@ -1219,20 +1219,20 @@ TSharedPtr<FJsonObject> FAddComboBoxToWidgetAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UComboBoxString* ComboBox = WidgetBlueprint->WidgetTree->ConstructWidget<UComboBoxString>(UComboBoxString::StaticClass(), *WidgetName);
 	if (!ComboBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create ComboBoxString widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create ComboBoxString widget"));
 	}
 
 	// Add options
@@ -1295,20 +1295,20 @@ TSharedPtr<FJsonObject> FAddCheckBoxToWidgetAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UCheckBox* CheckBox = WidgetBlueprint->WidgetTree->ConstructWidget<UCheckBox>(UCheckBox::StaticClass(), *WidgetName);
 	if (!CheckBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create CheckBox widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create CheckBox widget"));
 	}
 
 	bool bIsChecked = false;
@@ -1369,20 +1369,20 @@ TSharedPtr<FJsonObject> FAddSpinBoxToWidgetAction::ExecuteInternal(const TShared
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	USpinBox* SpinBox = WidgetBlueprint->WidgetTree->ConstructWidget<USpinBox>(USpinBox::StaticClass(), *WidgetName);
 	if (!SpinBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create SpinBox widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create SpinBox widget"));
 	}
 
 	double Value = 0.0;
@@ -1448,20 +1448,20 @@ TSharedPtr<FJsonObject> FAddEditableTextBoxToWidgetAction::ExecuteInternal(const
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UEditableTextBox* TextBox = WidgetBlueprint->WidgetTree->ConstructWidget<UEditableTextBox>(UEditableTextBox::StaticClass(), *WidgetName);
 	if (!TextBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create EditableTextBox widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create EditableTextBox widget"));
 	}
 
 	FString InitialText;
@@ -1527,7 +1527,7 @@ TSharedPtr<FJsonObject> FBindWidgetEventAction::ExecuteInternal(const TSharedPtr
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -1540,7 +1540,7 @@ TSharedPtr<FJsonObject> FBindWidgetEventAction::ExecuteInternal(const TSharedPtr
 			if (W) AvailableWidgets.Add(W->GetName());
 		});
 		FString WidgetList = FString::Join(AvailableWidgets, TEXT(", "));
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found. Available: %s"), *WidgetComponentName, *WidgetList));
 	}
 
@@ -1563,7 +1563,7 @@ TSharedPtr<FJsonObject> FBindWidgetEventAction::ExecuteInternal(const TSharedPtr
 			AvailableDelegates.Add(It->GetName());
 		}
 		FString DelegateList = FString::Join(AvailableDelegates, TEXT(", "));
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Delegate '%s' not found. Available: %s"), *EventName, *DelegateList));
 	}
 
@@ -1571,7 +1571,7 @@ TSharedPtr<FJsonObject> FBindWidgetEventAction::ExecuteInternal(const TSharedPtr
 	UEdGraph* EventGraph = FBlueprintEditorUtils::FindEventGraph(WidgetBlueprint);
 	if (!EventGraph)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to find event graph"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to find event graph"));
 	}
 
 	// Check if Component Bound Event node already exists for this widget/delegate combo
@@ -1661,7 +1661,7 @@ TSharedPtr<FJsonObject> FAddWidgetToViewportAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -1671,7 +1671,7 @@ TSharedPtr<FJsonObject> FAddWidgetToViewportAction::ExecuteInternal(const TShare
 	UClass* WidgetClass = WidgetBlueprint->GeneratedClass;
 	if (!WidgetClass)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to get widget class"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to get widget class"));
 	}
 
 	TSharedPtr<FJsonObject> ResultObj = MakeShared<FJsonObject>();
@@ -1716,7 +1716,7 @@ TSharedPtr<FJsonObject> FSetTextBlockBindingAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -1731,7 +1731,7 @@ TSharedPtr<FJsonObject> FSetTextBlockBindingAction::ExecuteInternal(const TShare
 	UTextBlock* TextBlock = Cast<UTextBlock>(WidgetBlueprint->WidgetTree->FindWidget(FName(*WidgetName)));
 	if (!TextBlock)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("TextBlock '%s' not found"), *WidgetName));
 	}
 
@@ -1804,13 +1804,13 @@ TSharedPtr<FJsonObject> FListWidgetComponentsAction::ExecuteInternal(const TShar
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	if (!WidgetBlueprint->WidgetTree)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Widget Blueprint has no WidgetTree"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Widget Blueprint has no WidgetTree"));
 	}
 
 	TArray<TSharedPtr<FJsonValue>> Components;
@@ -1879,14 +1879,14 @@ TSharedPtr<FJsonObject> FReparentWidgetsAction::ExecuteInternal(const TSharedPtr
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	// --- Resolve or create the target container ---
@@ -1896,7 +1896,7 @@ TSharedPtr<FJsonObject> FReparentWidgetsAction::ExecuteInternal(const TSharedPtr
 		UClass* ContainerClass = ResolveContainerClass(ContainerType);
 		if (!ContainerClass)
 		{
-			return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+			return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 				TEXT("Unknown container_type '%s'. Supported: VerticalBox, HorizontalBox, Overlay, CanvasPanel, SizeBox, ScaleBox, Border"),
 				*ContainerType));
 		}
@@ -1905,7 +1905,7 @@ TSharedPtr<FJsonObject> FReparentWidgetsAction::ExecuteInternal(const TSharedPtr
 		TargetContainer = Cast<UPanelWidget>(NewWidget);
 		if (!TargetContainer)
 		{
-			return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+			return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 				TEXT("Failed to create container '%s' of type '%s'"), *TargetContainerName, *ContainerType));
 		}
 
@@ -2018,14 +2018,14 @@ TSharedPtr<FJsonObject> FSetWidgetPropertiesAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UWidget* TargetWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*TargetName));
 	if (!TargetWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found in '%s'"), *TargetName, *BlueprintName));
 	}
 
@@ -2578,13 +2578,13 @@ TSharedPtr<FJsonObject> FGetWidgetTreeAction::ExecuteInternal(const TSharedPtr<F
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	if (!WidgetBlueprint->WidgetTree || !WidgetBlueprint->WidgetTree->RootWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Widget Blueprint has no root widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Widget Blueprint has no root widget"));
 	}
 
 	TSharedPtr<FJsonObject> TreeNode = BuildWidgetNodeJson(WidgetBlueprint->WidgetTree->RootWidget, WidgetBlueprint->WidgetTree);
@@ -2623,21 +2623,21 @@ TSharedPtr<FJsonObject> FDeleteWidgetFromBlueprintAction::ExecuteInternal(const 
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UWidget* TargetWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*TargetName));
 	if (!TargetWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found in '%s'"), *TargetName, *BlueprintName));
 	}
 
 	// Cannot delete root widget
 	if (TargetWidget == WidgetBlueprint->WidgetTree->RootWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Cannot delete the root widget"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Cannot delete the root widget"));
 	}
 
 	// Remove from parent
@@ -2689,14 +2689,14 @@ TSharedPtr<FJsonObject> FRenameWidgetInBlueprintAction::ExecuteInternal(const TS
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UWidget* TargetWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*TargetName));
 	if (!TargetWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found in '%s'"), *TargetName, *BlueprintName));
 	}
 
@@ -2704,7 +2704,7 @@ TSharedPtr<FJsonObject> FRenameWidgetInBlueprintAction::ExecuteInternal(const TS
 	UWidget* ExistingWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*NewName));
 	if (ExistingWidget && ExistingWidget != TargetWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("A widget named '%s' already exists in '%s'"), *NewName, *BlueprintName));
 	}
 
@@ -2755,35 +2755,35 @@ TSharedPtr<FJsonObject> FAddWidgetChildAction::ExecuteInternal(const TSharedPtr<
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UWidget* ChildWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*ChildName));
 	if (!ChildWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Child widget '%s' not found in '%s'"), *ChildName, *BlueprintName));
 	}
 
 	UWidget* ParentWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*ParentName));
 	if (!ParentWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Parent widget '%s' not found in '%s'"), *ParentName, *BlueprintName));
 	}
 
 	UPanelWidget* ParentPanel = Cast<UPanelWidget>(ParentWidget);
 	if (!ParentPanel)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' is not a container (PanelWidget) and cannot have children"), *ParentName));
 	}
 
 	// Avoid circular parenting
 	if (ChildWidget == ParentWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Cannot parent a widget to itself"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Cannot parent a widget to itself"));
 	}
 
 	// Remove child from its current parent
@@ -2793,7 +2793,7 @@ TSharedPtr<FJsonObject> FAddWidgetChildAction::ExecuteInternal(const TSharedPtr<
 	UPanelSlot* Slot = ParentPanel->AddChild(ChildWidget);
 	if (!Slot)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Failed to add '%s' as child of '%s'"), *ChildName, *ParentName));
 	}
 
@@ -2830,7 +2830,7 @@ TSharedPtr<FJsonObject> FDeleteUMGWidgetBlueprintAction::ExecuteInternal(const T
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -2841,7 +2841,7 @@ TSharedPtr<FJsonObject> FDeleteUMGWidgetBlueprintAction::ExecuteInternal(const T
 	bool bDeleted = UEditorAssetLibrary::DeleteAsset(PackagePath);
 	if (!bDeleted)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Failed to delete Widget Blueprint '%s' at path '%s'"), *BlueprintName, *PackagePath));
 	}
 
@@ -2880,21 +2880,21 @@ TSharedPtr<FJsonObject> FSetComboBoxOptionsAction::ExecuteInternal(const TShared
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UWidget* TargetWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*TargetName));
 	if (!TargetWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found in '%s'"), *TargetName, *BlueprintName));
 	}
 
 	UComboBoxString* ComboBox = Cast<UComboBoxString>(TargetWidget);
 	if (!ComboBox)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' is not a ComboBoxString (actual: %s)"), *TargetName, *TargetWidget->GetClass()->GetName()));
 	}
 
@@ -2986,14 +2986,14 @@ TSharedPtr<FJsonObject> FSetWidgetTextAction::ExecuteInternal(const TSharedPtr<F
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UWidget* TargetWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*TargetName));
 	if (!TargetWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found in '%s'"), *TargetName, *BlueprintName));
 	}
 
@@ -3074,7 +3074,7 @@ TSharedPtr<FJsonObject> FSetWidgetTextAction::ExecuteInternal(const TSharedPtr<F
 	}
 	else
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' is not a TextBlock or Button (actual: %s)"), *TargetName, *TargetWidget->GetClass()->GetName()));
 	}
 
@@ -3121,21 +3121,21 @@ TSharedPtr<FJsonObject> FSetSliderPropertiesAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
 	UWidget* TargetWidget = WidgetBlueprint->WidgetTree->FindWidget(FName(*TargetName));
 	if (!TargetWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found in '%s'"), *TargetName, *BlueprintName));
 	}
 
 	USlider* Slider = Cast<USlider>(TargetWidget);
 	if (!Slider)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' is not a Slider (actual: %s)"), *TargetName, *TargetWidget->GetClass()->GetName()));
 	}
 
@@ -3243,27 +3243,27 @@ TSharedPtr<FJsonObject> FAddGenericWidgetAction::ExecuteInternal(const TSharedPt
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found in /Game/UI, /Game/Widgets, or /Game"), *BlueprintName));
 	}
 
 	UCanvasPanel* RootCanvas = Cast<UCanvasPanel>(WidgetBlueprint->WidgetTree->RootWidget);
 	if (!RootCanvas)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Root widget is not a Canvas Panel"));
 	}
 
 	UClass* WidgetClass = ResolveWidgetClass(ClassName);
 	if (!WidgetClass)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Unknown component class: %s"), *ClassName));
 	}
 
 	UWidget* NewWidget = WidgetBlueprint->WidgetTree->ConstructWidget<UWidget>(WidgetClass, *WidgetName);
 	if (!NewWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Failed to create %s widget"), *ClassName));
 	}
 
@@ -3402,7 +3402,7 @@ TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPt
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -3410,14 +3410,14 @@ TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPt
 	UClass* VMClass = ResolveClassByName(ViewModelClassName);
 	if (!VMClass)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("ViewModel class '%s' not found. Ensure it is compiled and loaded."), *ViewModelClassName));
 	}
 
 	// Verify it implements INotifyFieldValueChanged
 	if (!VMClass->ImplementsInterface(UNotifyFieldValueChanged::StaticClass()))
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Class '%s' does not implement INotifyFieldValueChanged. "
 			     "It must derive from UMVVMViewModelBase or implement the interface."),
 			*VMClass->GetName()));
@@ -3428,7 +3428,7 @@ TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPt
 		UWidgetBlueprintExtension::RequestExtension<UMVVMWidgetBlueprintExtension_View>(WidgetBlueprint);
 	if (!MVVMExt)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create MVVM extension on Widget Blueprint"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create MVVM extension on Widget Blueprint"));
 	}
 
 	// Ensure BlueprintView exists
@@ -3440,7 +3440,7 @@ TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPt
 	}
 	if (!BPView)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("Failed to create MVVM BlueprintView"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("Failed to create MVVM BlueprintView"));
 	}
 
 	// Check if ViewModel already exists with this name
@@ -3448,7 +3448,7 @@ TSharedPtr<FJsonObject> FMVVMAddViewModelAction::ExecuteInternal(const TSharedPt
 	const FMVVMBlueprintViewModelContext* ExistingVM = BPView->FindViewModel(VMFName);
 	if (ExistingVM)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("ViewModel '%s' already exists on this Widget Blueprint"), *ViewModelName));
 	}
 
@@ -3559,7 +3559,7 @@ TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -3568,14 +3568,14 @@ TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<
 		UWidgetBlueprintExtension::GetExtension<UMVVMWidgetBlueprintExtension_View>(WidgetBlueprint);
 	if (!MVVMExt)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(
+		return FUEBridgeCommonUtils::CreateErrorResponse(
 			TEXT("No MVVM extension found on Widget Blueprint. Use widget.mvvm_add_viewmodel first."));
 	}
 
 	UMVVMBlueprintView* BPView = MVVMExt->GetBlueprintView();
 	if (!BPView)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("No MVVM BlueprintView found."));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("No MVVM BlueprintView found."));
 	}
 
 	// Find the ViewModel context
@@ -3583,14 +3583,14 @@ TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<
 	const FMVVMBlueprintViewModelContext* VMContext = BPView->FindViewModel(VMFName);
 	if (!VMContext)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("ViewModel '%s' not found on this Widget Blueprint"), *ViewModelName));
 	}
 
 	UClass* VMClass = VMContext->GetViewModelClass();
 	if (!VMClass)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("ViewModel class is null"));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("ViewModel class is null"));
 	}
 
 	// Resolve source field on ViewModel (property or FieldNotify function)
@@ -3610,7 +3610,7 @@ TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<
 		}
 		else
 		{
-			return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+			return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 				TEXT("Property or function '%s' not found on ViewModel class '%s'"), *SourcePropName, *VMClass->GetName()));
 		}
 	}
@@ -3621,7 +3621,7 @@ TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<
 		: nullptr;
 	if (!DestWidget)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget '%s' not found in Widget Tree"), *DestWidgetName));
 	}
 
@@ -3641,7 +3641,7 @@ TSharedPtr<FJsonObject> FMVVMAddBindingAction::ExecuteInternal(const TSharedPtr<
 		}
 		else
 		{
-			return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+			return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 				TEXT("Property or function '%s' not found on widget '%s' (class: %s)"),
 				*DestPropName, *DestWidgetName, *DestWidget->GetClass()->GetName()));
 		}
@@ -3745,7 +3745,7 @@ TSharedPtr<FJsonObject> FMVVMGetBindingsAction::ExecuteInternal(const TSharedPtr
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -3895,7 +3895,7 @@ TSharedPtr<FJsonObject> FMVVMRemoveBindingAction::ExecuteInternal(const TSharedP
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -3904,13 +3904,13 @@ TSharedPtr<FJsonObject> FMVVMRemoveBindingAction::ExecuteInternal(const TSharedP
 		UWidgetBlueprintExtension::GetExtension<UMVVMWidgetBlueprintExtension_View>(WidgetBlueprint);
 	if (!MVVMExt)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("No MVVM extension found on Widget Blueprint."));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("No MVVM extension found on Widget Blueprint."));
 	}
 
 	UMVVMBlueprintView* BPView = MVVMExt->GetBlueprintView();
 	if (!BPView)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("No MVVM BlueprintView found."));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("No MVVM BlueprintView found."));
 	}
 
 	// Find and remove binding by ID
@@ -3930,7 +3930,7 @@ TSharedPtr<FJsonObject> FMVVMRemoveBindingAction::ExecuteInternal(const TSharedP
 
 	if (FoundIndex == INDEX_NONE)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Binding with ID '%s' not found"), *BindingIdStr));
 	}
 
@@ -3977,7 +3977,7 @@ TSharedPtr<FJsonObject> FMVVMRemoveViewModelAction::ExecuteInternal(const TShare
 	UWidgetBlueprint* WidgetBlueprint = FindWidgetBlueprintByName(BlueprintName);
 	if (!WidgetBlueprint)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("Widget Blueprint '%s' not found"), *BlueprintName));
 	}
 
@@ -3985,19 +3985,19 @@ TSharedPtr<FJsonObject> FMVVMRemoveViewModelAction::ExecuteInternal(const TShare
 		UWidgetBlueprintExtension::GetExtension<UMVVMWidgetBlueprintExtension_View>(WidgetBlueprint);
 	if (!MVVMExt)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("No MVVM extension found on Widget Blueprint."));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("No MVVM extension found on Widget Blueprint."));
 	}
 
 	UMVVMBlueprintView* BPView = MVVMExt->GetBlueprintView();
 	if (!BPView)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(TEXT("No MVVM BlueprintView found."));
+		return FUEBridgeCommonUtils::CreateErrorResponse(TEXT("No MVVM BlueprintView found."));
 	}
 
 	const FMVVMBlueprintViewModelContext* VMContext = BPView->FindViewModel(FName(*ViewModelName));
 	if (!VMContext)
 	{
-		return FMCPCommonUtils::CreateErrorResponse(FString::Printf(
+		return FUEBridgeCommonUtils::CreateErrorResponse(FString::Printf(
 			TEXT("ViewModel '%s' not found on this Widget Blueprint"), *ViewModelName));
 	}
 

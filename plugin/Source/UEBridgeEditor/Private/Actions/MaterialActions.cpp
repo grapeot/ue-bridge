@@ -2376,7 +2376,7 @@ static FVector2D EstimateMaterialExprNodeSize(UMaterialExpression* Expr)
 	double Width = 280.0;
 
 	// Custom node: always compute code-based size as minimum
-	// (MCP can't reliably read ShowCode from preview material, so be conservative)
+		// (The bridge can't reliably read ShowCode from preview material, so be conservative)
 	const UMaterialExpressionCustom* CustomExpr = Cast<UMaterialExpressionCustom>(Expr);
 	if (CustomExpr && !CustomExpr->Code.IsEmpty())
 	{

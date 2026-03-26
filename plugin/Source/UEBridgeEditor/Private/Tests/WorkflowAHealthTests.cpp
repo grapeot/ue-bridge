@@ -39,22 +39,22 @@ UUEEditorBridge* GetBridge()
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPModuleLoadedTest,
+	FUEBridgeEditorModuleLoadedTest,
 	"UEBridgeEditor.Health.WorkflowA.ModuleLoaded",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPModuleLoadedTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorModuleLoadedTest::RunTest(const FString& Parameters)
 {
 	TestTrue(TEXT("UEBridgeEditor module should be loaded in the host project"), FModuleManager::Get().IsModuleLoaded(TEXT("UEBridgeEditor")));
 	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPBridgeAvailableTest,
+	FUEBridgeEditorBridgeAvailableTest,
 	"UEBridgeEditor.Health.WorkflowA.BridgeAvailable",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPBridgeAvailableTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorBridgeAvailableTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::Tests::GetBridge();
 	TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge);
@@ -62,11 +62,11 @@ bool FUEEditorMCPBridgeAvailableTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPIsReadyCommandTest,
+	FUEBridgeEditorIsReadyCommandTest,
 	"UEBridgeEditor.Health.WorkflowA.IsReadyCommand",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPIsReadyCommandTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorIsReadyCommandTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge))
@@ -99,11 +99,11 @@ bool FUEEditorMCPIsReadyCommandTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPWorkflowAHealthSurfaceTest,
+	FUEBridgeEditorWorkflowAHealthSurfaceTest,
 	"UEBridgeEditor.Health.WorkflowA.HealthSurface",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPWorkflowAHealthSurfaceTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorWorkflowAHealthSurfaceTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge))
@@ -136,11 +136,11 @@ bool FUEEditorMCPWorkflowAHealthSurfaceTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPGetPIEStateStoppedTest,
+	FUEBridgeEditorGetPIEStateStoppedTest,
 	"UEBridgeEditor.Health.WorkflowA.GetPIEStateStopped",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPGetPIEStateStoppedTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorGetPIEStateStoppedTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge))
@@ -169,11 +169,11 @@ bool FUEEditorMCPGetPIEStateStoppedTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPLogControlSurfaceTest,
+	FUEBridgeEditorLogControlSurfaceTest,
 	"UEBridgeEditor.Health.WorkflowA.LogControlSurface",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPLogControlSurfaceTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorLogControlSurfaceTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge))
@@ -228,11 +228,11 @@ bool FUEEditorMCPLogControlSurfaceTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPPIESmokeLifecycleTest,
+	FUEBridgeEditorPIESmokeLifecycleTest,
 	"UEBridgeEditor.Health.WorkflowA.PIESmokeLifecycle",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPPIESmokeLifecycleTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorPIESmokeLifecycleTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge))
@@ -315,11 +315,11 @@ bool FUEEditorMCPPIESmokeLifecycleTest::RunTest(const FString& Parameters)
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(
-	FUEEditorMCPCreateAndCompileBlueprintTest,
+	FUEBridgeEditorCreateAndCompileBlueprintTest,
 	"UEBridgeEditor.Blueprint.WorkflowA.CreateAndCompile",
 	UEBridgeEditor::Tests::EditorOnlyFlags)
 
-bool FUEEditorMCPCreateAndCompileBlueprintTest::RunTest(const FString& Parameters)
+bool FUEBridgeEditorCreateAndCompileBlueprintTest::RunTest(const FString& Parameters)
 {
 	UUEEditorBridge* Bridge = UEBridgeEditor::Tests::GetBridge();
 	if (!TestNotNull(TEXT("UEBridgeEditor bridge subsystem should resolve from GEditor"), Bridge))
