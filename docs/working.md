@@ -4,6 +4,8 @@
 
 ### 2026-03-25
 
+- Added repo-native `docs/PRD.md` and `docs/RFC.md` so the AI-first product intent and architecture direction are no longer only implicit in code and chat history
+- Locked the design baseline around bridge-first concepts, repo-contained validation, machine-verifiable flows, and local transport retention
 - Began hotspot cleanup by extracting the Blueprint Auto Layout command handlers out of `UEBridgeEditorModule.cpp` into `UEBridgeEditorModuleAutoLayout.cpp/.h`
 - Verified the module split is behavior-preserving: the checked-in host still passes all 7 `UEBridgeEditor.Health.WorkflowA.*` automation tests after the extraction
 - Confirmed `UEBridgeEditorModule.cpp` is a worthwhile hotspot target because it mixes module lifecycle, menu wiring, and command execution helpers; the first split reduced that pressure without touching user behavior
@@ -105,4 +107,5 @@
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
 - The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front
 - AI-first usability is not only about API coverage; it is also about default pathways. If the docs still send the reader to GUI menus or raw logs first, the product is not actually AI-first yet, even if the CLI and tests are good
+- Once the product direction is encoded into repo-native PRD/RFC docs, later review and usability trial work becomes much easier to ground. Otherwise design intent drifts into chat history and becomes hard to audit
 - For unattended PIE smoke tests, the right success criterion is plugin behavior, not total engine silence. Engine-level warnings from unrelated subsystems (like audio device probing) can appear even when the lifecycle contract is healthy
