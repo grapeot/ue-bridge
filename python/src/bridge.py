@@ -664,6 +664,10 @@ class UEBridge:
     # Level / Map
     # -------------------------------------------------------------------------
 
+    def take_screenshot(self, output_path: str) -> dict:
+        """Capture the active viewport (PIE or editor) and save as PNG."""
+        return self._cmd("take_screenshot", {"output_path": output_path})
+
     def new_level(self, level_name: str = "NewMap",
                   path: str = "/Game/Maps",
                   template: str = "Empty") -> dict:

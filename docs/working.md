@@ -19,6 +19,11 @@
 - PIE verification passed: Boss timer fires 34 SPAWN BULLET messages in 4 seconds (rate=0.1s), confirming Blueprint logic works at runtime
 - Touhou Pilot Phase 2 continued: orthographic camera Blueprint (BP_TouhouCamera), collision logic (Boss HP -= 1 on overlap, Player Lives -= 1 on overlap), HUD Widget (WBP_TouhouHUD with Score/Lives/Bombs text + Boss HP bar)
 - Feature gap documented: set_actor_property cannot reach CameraComponent properties on CameraActor (only returns transform). Workaround: create Blueprint with CameraComponent and use set_component_property
+- New feature: take_screenshot command — captures editor viewport as PNG, works during PIE (uses editor viewport, not game viewport to avoid crash). Enables AI visual feedback loop
+- New feature: new_level command — creates and opens empty level (but doesn't persist across editor restart; need to set Editor Startup Map for that)
+- Standard practice: AI can self-restart UE Editor via `pkill -f UnrealEditor && sleep 3 && open <uproject>`, then poll `ue-bridge ping` until ready. Full crash recovery loop without human intervention
+- Known bug: setting DefaultGameMode on WorldSettings via set_actor_property causes PIE crash. Likely a class path format issue with TSubclassOf. Needs investigation — PIE works fine with default GameMode
+- Discovery: UE 5.7 uses TArray64<uint8> not TArray<uint8> for PNG compression output
 
 ### 2026-03-25
 

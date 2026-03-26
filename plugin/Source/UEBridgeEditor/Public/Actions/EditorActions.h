@@ -641,6 +641,28 @@ protected:
 };
 
 // =========================================================================
+// P7: Viewport Screenshot
+// =========================================================================
+
+/**
+ * FTakeScreenshotAction
+ * Captures the active editor viewport (or PIE viewport) and saves to disk.
+ * Params:
+ *   output_path (string, required) - Absolute file path for the PNG output
+ * Returns:
+ *   output_path, width, height, bytes_written
+ */
+class UEBRIDGEEDITOR_API FTakeScreenshotAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
+	virtual FString GetActionName() const override { return TEXT("take_screenshot"); }
+};
+
+// =========================================================================
 // P7: Asset Editor Actions
 // =========================================================================
 
