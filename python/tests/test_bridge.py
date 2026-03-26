@@ -1,13 +1,9 @@
 """Unit tests for bridge.py — parameter handling and default values."""
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from src.bridge import UEBridge
-from src.errors import UECommandError
+from ue_bridge import UEBridge, UECommandError
 
 
 def make_bridge_with_mock():
@@ -89,6 +85,22 @@ class TestErrorHandling:
         mock.send_command.return_value = {"success": True}
         assert ue.ping() is False
 
+    def test_raw_command_preserves_recoverable_and_data(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": False,
+            "error": "temporary failure",
+            "error_type": "temporary",
+            "recoverable": False,
+            "details": {"step": "compile"},
+        }
+
+        with pytest.raises(UECommandError) as exc_info:
+            ue.raw_command("compile_blueprint", {"blueprint_name": "BP_Bad"})
+
+        assert exc_info.value.recoverable is False
+        assert exc_info.value.data["details"] == {"step": "compile"}
+
 
 class TestParameterPassing:
     """Verify parameters are correctly assembled."""
@@ -156,3 +168,92 @@ class TestParameterPassing:
         result = ue.get_pins("BP_Test", "node123")
         assert len(result) == 1
         assert result[0]["name"] == "execute"
+
+    def test_find_actors_returns_list(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True,
+            "actors": [{"name": "Wall_01"}],
+        }
+
+        result = ue.find_actors("Wall*")
+
+        assert result == [{"name": "Wall_01"}]
+        assert mock.send_command.call_args[0][0] == "find_actors_by_name"
+
+    def test_spawn_blueprint_actor_location_as_list(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.spawn_blueprint_actor("BP_Foo", "Foo_01", location=(1, 2, 3))
+
+        params = mock.send_command.call_args[0][1]
+        assert params["blueprint_name"] == "BP_Foo"
+        assert params["location"] == [1, 2, 3]
+
+    def test_create_blueprint_optional_path(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.create_blueprint("BP_Foo", parent_class="Character", path="/Game/Test")
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {
+            "name": "BP_Foo",
+            "parent_class": "Character",
+            "path": "/Game/Test",
+        }
+
+    def test_create_input_mapping_context_default_path(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.create_input_mapping_context("IMC_Default")
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {"name": "IMC_Default", "path": "/Game/Input"}
+
+    def test_add_variable_optional_fields(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_variable(
+            "BP_Test",
+            "Speed",
+            "float",
+            default_value=600,
+            instance_editable=True,
+            category="Movement",
+        )
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {
+            "blueprint_name": "BP_Test",
+            "variable_name": "Speed",
+            "variable_type": "float",
+            "default_value": 600,
+            "is_instance_editable": True,
+            "category": "Movement",
+        }
+
+    def test_disconnect_param_names(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.disconnect("BP_Test", "node1", "execute")
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {
+            "blueprint_name": "BP_Test",
+            "node_id": "node1",
+            "pin_name": "execute",
+        }
+
+    def test_auto_layout_default_mode(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.auto_layout("BP_Test")
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {"blueprint_name": "BP_Test", "mode": "all"}

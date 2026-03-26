@@ -3,13 +3,10 @@
 import json
 import struct
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from src.connection import Connection
-from src.errors import UEConnectionError
+from ue_bridge.connection import Connection, MAX_MESSAGE_SIZE
+from ue_bridge.errors import UEConnectionError
 
 
 class TestFrameEncoding:
@@ -122,4 +119,34 @@ class TestRecvExact:
     def test_returns_none_when_not_connected(self):
         self.conn._socket = None
         result = self.conn._recv_exact(4)
+        assert result is None
+
+
+class TestConnectionContract:
+    def test_send_command_auto_connects(self):
+        conn = Connection.__new__(Connection)
+        conn.host = "127.0.0.1"
+        conn.port = 55558
+        conn.timeout = 30.0
+        conn._socket = None
+
+        conn.connect = MagicMock(side_effect=lambda: setattr(conn, "_socket", MagicMock()))
+        conn._send_raw = MagicMock()
+        conn._receive_raw = MagicMock(return_value={"success": True, "pong": True})
+
+        result = conn.send_command("ping")
+
+        conn.connect.assert_called_once()
+        assert result == {"success": True, "pong": True}
+
+    def test_receive_raw_rejects_too_large_messages(self):
+        conn = Connection.__new__(Connection)
+        conn.host = "127.0.0.1"
+        conn.port = 55558
+        conn.timeout = 30.0
+        conn._socket = MagicMock()
+        conn._recv_exact = MagicMock(return_value=(MAX_MESSAGE_SIZE + 1).to_bytes(4, byteorder="big"))
+
+        result = conn._receive_raw()
+
         assert result is None

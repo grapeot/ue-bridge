@@ -7,13 +7,9 @@ Skip if UE is not running (tests will be skipped, not failed).
 from __future__ import annotations
 
 import pytest
-import sys
-import os
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-
-from src.bridge import UEBridge
-from src.errors import UECommandError, UEConnectionError
+from ue_bridge import UEBridge
+from ue_bridge.errors import UECommandError, UEConnectionError
 
 
 def ue_available() -> bool:
