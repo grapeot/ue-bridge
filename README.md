@@ -1,6 +1,15 @@
 # ue-bridge
 
-A Python library and Unreal Engine C++ plugin for programmatic UE Editor automation. Write Python scripts that create Blueprints, wire nodes, configure input mappings, spawn actors, and compile -- all without touching the UE GUI.
+`ue-bridge` is an AI-first Unreal Editor bridge.
+
+It is designed so an AI agent can:
+
+- install the editor plugin into a UE project
+- verify readiness through machine-readable checks
+- use CLI for simple one-off tasks
+- use Python for multi-step editor automation
+
+The goal is not to teach a human to click through Unreal menus. The goal is to give an AI a short, reliable, verifiable path from installation to real editor work.
 
 ## Architecture
 
@@ -18,20 +27,39 @@ UE Editor (live session)
 
 The C++ plugin runs a TCP server inside the UE Editor process. The Python library (`ue-bridge`) sends JSON commands over a persistent TCP connection. Every editor action (spawn actor, add Blueprint node, connect pins, compile, etc.) is a single command/response round-trip.
 
+## Recommended Path
+
+If you are evaluating or developing the bridge itself, start with the checked-in host:
+
+```text
+hosts/UEBridgeHost/UEBridgeHost.uproject
+```
+
+If you are integrating into your own project, use your own `.uproject` instead.
+
+In both cases, the preferred flow is:
+
+1. install the plugin
+2. run `ue-bridge doctor`
+3. run `ue-bridge verify`
+4. if you want a repo-contained end-to-end check, run `scripts/run_python_unreal_integration.sh`
+
 ## Quick Start
 
 ### 1. Install the plugin
 
+The installation skill / docs are the primary path. The setup scripts are convenience helpers, not the product's main contract.
+
 ```bash
-# macOS — run the setup script
+# macOS convenience helper
 ./scripts/setup.sh /path/to/your/UE/project
 ```
 
-The setup script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, and compiles the plugin using UE 5.7's build tools.
+The helper script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, and compiles the plugin using UE 5.7's build tools.
 
 On **Windows**, copy `plugin/` into your project's `Plugins/` directory, then restart the editor.
 
-If you want a repo-contained validation host instead of wiring your own project first, use:
+If you want the repo-contained validation host instead of wiring your own project first, use:
 
 ```text
 hosts/UEBridgeHost/UEBridgeHost.uproject
@@ -47,6 +75,14 @@ ue-bridge verify
 ```
 
 If `verify` succeeds, the plugin is loaded, the local command server is reachable, and the editor is ready enough for automation.
+
+For a full repo-contained end-to-end check, run:
+
+```bash
+scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uproject
+```
+
+That script builds the checked-in host, launches Unreal, waits for `ue-bridge verify`, and runs the Python Workflow A integration suite.
 
 ### 3. Install the Python library
 
@@ -105,13 +141,7 @@ ue-bridge verify
 
 `doctor` returns a structured diagnosis report. `verify` is the stricter gate: it exits non-zero when the bridge is reachable but not fully ready.
 
-For a full repo-contained end-to-end check, you can also run:
-
-```bash
-scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uproject
-```
-
-That script builds the checked-in host, launches Unreal, waits for `ue-bridge verify`, and runs the Python Workflow A integration suite.
+These commands are the default path for both AI and humans. GUI inspection is a fallback, not the source of truth.
 
 ## Key Features
 
@@ -152,7 +182,7 @@ ue_bridge_skill/
 
 ## Detailed Documentation
 
-See `skills/` for comprehensive usage guides:
+See `skills/` for the primary AI-facing usage guides:
 
 - `skills/ue_editor_installation.md` -- Setup, prerequisites, and troubleshooting
 - `skills/ue_editor_usage.md` -- Full Python API reference, CLI reference, working principles, and a complete example
