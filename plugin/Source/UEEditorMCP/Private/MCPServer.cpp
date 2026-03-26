@@ -1,11 +1,10 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
 
 #include "MCPServer.h"
-#include "MCPBridge.h"
+#include "EditorCommandExecutor.h"
 #include "Actions/EditorAction.h"
-#include "Async/Async.h"
+#include "MCPBridge.h"
 #include "Serialization/JsonSerializer.h"
-#include "Serialization/JsonWriter.h"
 #include "Dom/JsonObject.h"
 
 // =============================================================================
@@ -235,130 +234,12 @@ void FMCPClientHandler::HandleClose()
 
 FString FMCPClientHandler::HandleGetContext()
 {
-	FString Result;
-	FEvent* DoneEvent = FPlatformProcess::GetSynchEventFromPool(false);
-
-	AsyncTask(ENamedThreads::GameThread, [this, &Result, DoneEvent]()
-	{
-		// Scope guard: ensure DoneEvent->Trigger() is always called,
-		// even if an unhandled exception occurs in the lambda body.
-		struct FTriggerOnExit
-		{
-			FEvent* Event;
-			~FTriggerOnExit() { Event->Trigger(); }
-		} TriggerGuard{DoneEvent};
-
-		if (!Bridge)
-		{
-			Result = TEXT("{\"status\":\"error\",\"error\":\"Bridge not available\"}");
-			return;
-		}
-
-		try
-		{
-			TSharedPtr<FJsonObject> ContextJson = Bridge->GetContext().ToJson();
-
-			TSharedPtr<FJsonObject> Response = MakeShared<FJsonObject>();
-			Response->SetStringField(TEXT("status"), TEXT("success"));
-			Response->SetObjectField(TEXT("result"), ContextJson);
-
-			FString ResponseStr;
-			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ResponseStr);
-			FJsonSerializer::Serialize(Response.ToSharedRef(), Writer);
-			Result = ResponseStr;
-		}
-		catch (...)
-		{
-			UE_LOG(LogMCP, Error, TEXT("UEEditorMCP: Exception in HandleGetContext"));
-			Result = TEXT("{\"status\":\"error\",\"error\":\"Exception during get_context\"}");
-		}
-	});
-
-	DoneEvent->Wait();
-	FPlatformProcess::ReturnSynchEventToPool(DoneEvent);
-
-	return Result;
+	return FEditorCommandExecutor::ExecuteGetContext(Bridge);
 }
 
 FString FMCPClientHandler::ExecuteOnGameThread(const FString& CommandType, TSharedPtr<FJsonObject> Params)
 {
-	// Heap-allocate Result so the lambda never writes to a dangling stack variable on timeout.
-	auto Result = MakeShared<FString>();
-	FEvent* DoneEvent = FPlatformProcess::GetSynchEventFromPool(false);
-
-	// Shared flag: when the caller times out it sets this to false,
-	// telling the lambda to return DoneEvent to the pool.
-	auto bCallerWaiting = MakeShared<TAtomic<bool>>(true);
-
-	// Capture CommandType by value to avoid dangling reference on timeout.
-	AsyncTask(ENamedThreads::GameThread, [this, CmdType = CommandType, Params, Result, DoneEvent, bCallerWaiting]()
-	{
-		// Scope guard: always trigger DoneEvent even if an exception propagates.
-		// If the caller already timed out, also return the event to the pool.
-		struct FCleanupGuard
-		{
-			FEvent* Event;
-			TSharedPtr<TAtomic<bool>> CallerWaiting;
-			~FCleanupGuard()
-			{
-				Event->Trigger();
-				if (!CallerWaiting->Load())
-				{
-					FPlatformProcess::ReturnSynchEventToPool(Event);
-				}
-			}
-		} Guard{DoneEvent, bCallerWaiting};
-
-		if (!Bridge)
-		{
-			*Result = TEXT("{\"status\":\"error\",\"error\":\"Bridge not available\"}");
-			return;
-		}
-
-		TSharedPtr<FJsonObject> Response;
-		try
-		{
-			Response = Bridge->ExecuteCommandSafe(CmdType, Params);
-		}
-		catch (...)
-		{
-			UE_LOG(LogMCP, Error, TEXT("UEEditorMCP: Unhandled exception in ExecuteCommandSafe for '%s'"), *CmdType);
-		}
-
-		if (Response.IsValid())
-		{
-			FString ResponseStr;
-			TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&ResponseStr);
-			FJsonSerializer::Serialize(Response.ToSharedRef(), Writer);
-			*Result = ResponseStr;
-		}
-		else
-		{
-			*Result = FString::Printf(
-				TEXT("{\"status\":\"error\",\"error\":\"Command '%s' returned null response\"}"),
-				*CmdType);
-		}
-	});
-
-	// Wait with timeout protection (240s). If the game thread is blocked for
-	// longer than this (e.g., during modal dialogs or heavy compilation),
-	// return a timeout error rather than hanging forever.
-	static constexpr uint32 GameThreadTimeoutMs = 240000;
-	if (!DoneEvent->Wait(GameThreadTimeoutMs))
-	{
-		UE_LOG(LogMCP, Error, TEXT("UEEditorMCP: Game thread execution timed out after %ds for command '%s'"),
-			GameThreadTimeoutMs / 1000, *CommandType);
-		// Signal lambda to return the event to pool when it eventually runs.
-		// Do NOT return to pool here — the lambda still holds a pointer to it.
-		bCallerWaiting->Store(false);
-		return FString::Printf(
-			TEXT("{\"status\":\"error\",\"error\":\"Game thread execution timed out after %ds for command: %s\"}"),
-			GameThreadTimeoutMs / 1000, *CommandType);
-	}
-
-	FPlatformProcess::ReturnSynchEventToPool(DoneEvent);
-
-	return MoveTemp(*Result);
+	return FEditorCommandExecutor::ExecuteCommand(Bridge, CommandType, Params);
 }
 
 // =============================================================================

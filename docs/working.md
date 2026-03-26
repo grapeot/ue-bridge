@@ -4,6 +4,9 @@
 
 ### 2026-03-25
 
+- Extracted the game-thread command execution path out of `MCPServer.cpp` into a dedicated `EditorCommandExecutor` boundary
+- Verified the server-boundary refactor is behavior-preserving: the checked-in `UEBridgeHost` still passes Workflow A health, Blueprint create/compile, and graph create/connect/delete after the extraction
+- Confirmed the de-MCP effort has now reached three safe internal seams in order: `ActionRegistry`, `MCPContext`, and the server-side command execution boundary
 - Tightened the AI-first docs so the default install/usage path now points at `UEBridgeHost`, `ue-bridge doctor`, `ue-bridge verify`, and `scripts/run_python_unreal_integration.sh` instead of manual GUI inspection
 - Removed the remaining doc-level dependence on checking Edit > Plugins or reading a specific startup log line as the primary success signal
 - Replaced the hottest direct-field `FMCPEditorContext` usages with explicit API methods for last-created node and material-session state access
@@ -73,6 +76,7 @@
 - For Blueprint contract tests, a unique per-run asset name is safer than create-then-delete on the same static path. Immediate deletion caused noisy AssetRegistry warnings; unique names kept the test signal clean enough for automation
 - The right first refactor target was not `MCPServer`, but the oversized `RegisterActions()` composition point. Extracting registration into a dedicated registry improved maintainability without reopening transport risk or forcing a naming migration too early
 - After `ActionRegistry`, the next safe de-MCP step was not a transport rewrite but shrinking direct state reach-through in `MCPContext`. Replacing field pokes with explicit context methods gave us a cleaner boundary without triggering a semantic migration
+- After `MCPContext`, the next safe step was to extract the game-thread execution logic out of `MCPServer` rather than rewriting the transport. That preserved the local TCP model while still shrinking MCP-shaped responsibilities inside the server implementation
 - A self-contained host only becomes real when it is versioned inside the plugin repo and the integration script can launch it from a clean shell. Creating a smallest host outside the repo was a useful proof, but checking it into `hosts/UEBridgeHost` was the point where it became a maintainable product asset
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
 - The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front
