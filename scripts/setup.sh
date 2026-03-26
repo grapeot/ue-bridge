@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# setup.sh -- One-click setup for ue-bridge on macOS.
+# setup.sh -- Convenience setup helper for ue-bridge on macOS.
 #
 # Usage:
 #   ./scripts/setup.sh /path/to/your/UE/project
@@ -150,10 +150,11 @@ fi
 # ---------------------------------------------------------------------------
 
 echo ""
-echo "=== Setup complete ==="
+echo "=== Setup helper complete ==="
 echo ""
 echo "Next steps:"
 echo "  1. Open $UPROJECT_FILE in Unreal Editor"
 echo "  2. Run: cd $PYTHON_DIR && source .venv/bin/activate && ue-bridge doctor"
 echo "  3. Run: cd $PYTHON_DIR && source .venv/bin/activate && ue-bridge verify"
-echo "  4. If verify fails, inspect the structured output and retry after the editor finishes loading"
+echo "  4. Optional full check: $REPO_ROOT/scripts/run_python_unreal_integration.sh $UPROJECT_FILE"
+echo "  5. If verify fails, inspect the structured output and retry after the editor finishes loading"

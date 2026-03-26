@@ -4,6 +4,7 @@
 
 ### 2026-03-25
 
+- Rewrote the default README and helper-script story so the preferred path is now explicitly AI-first: checked-in host first, installation docs first, `doctor` / `verify` first, and the repo-contained integration script as the end-to-end validation path
 - Closed the second major playability gap from the temporary third-person trial: `set_component_property` now accepts struct-shaped values, which made `RelativeScale3D` work for obstacle Blueprints
 - Verified the obstacle-building workflow end-to-end in the trial project: create Blueprint → add StaticMeshComponent → assign cube mesh → scale via struct value → compile → spawn into the world
 - In the real playability trial, the first bridge-side usability gap was concrete and actionable: `spawn_blueprint_actor()` used the wrong parameter name for the underlying command, and `set_static_mesh_properties` existed only as a raw command. Both were fixed directly from the trial

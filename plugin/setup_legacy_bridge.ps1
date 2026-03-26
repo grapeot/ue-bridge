@@ -2,6 +2,12 @@
 #  UE Bridge - Legacy Python Setup Helper (PowerShell)
 #  Automatically finds UE engine's built-in Python, creates a venv,
 #  and installs the Python package. No external Python installation required.
+#
+#  This helper is not the preferred installation path. The AI-first path is:
+#    1. install the plugin
+#    2. run ue-bridge doctor
+#    3. run ue-bridge verify
+#    4. optionally run the repo-contained integration script
 # ============================================================================
 
 param(
@@ -248,6 +254,7 @@ Write-Host "[4/4] Legacy helper notice..." -ForegroundColor Yellow
 Write-Host "  This helper belongs to the older local command-server flow." -ForegroundColor Yellow
 Write-Host "  It does not generate a valid setup for the current ue-bridge Python library + TCP plugin workflow." -ForegroundColor Yellow
 Write-Host "  Use README.md and skills/ue_editor_installation.md for the current installation path." -ForegroundColor Yellow
+Write-Host "  Prefer ue-bridge doctor / verify over manual inspection." -ForegroundColor Yellow
 Write-Host ""
 
 Write-Host "============================================" -ForegroundColor Cyan

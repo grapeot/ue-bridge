@@ -3,6 +3,12 @@ REM ============================================================================
 REM  UE Bridge - Legacy Python Setup Helper
 REM  Automatically finds UE engine's built-in Python, creates a venv,
 REM  and installs the Python package. No external Python installation required.
+REM
+REM  This helper is not the preferred installation path. The AI-first path is:
+REM    1. install the plugin
+REM    2. run ue-bridge doctor
+REM    3. run ue-bridge verify
+REM    4. optionally run the repo-contained integration script
 REM ============================================================================
 
 setlocal EnableDelayedExpansion
@@ -145,6 +151,7 @@ echo.
 echo   This helper belongs to the older local command-server flow.
 echo   It does not generate a valid setup for the current ue-bridge Python library + TCP plugin workflow.
 echo   Use README.md and skills\ue_editor_installation.md for the current installation path.
+echo   Prefer ue-bridge doctor / verify over manual inspection.
 echo.
 echo ============================================
 echo  Done! No external Python installation needed.
