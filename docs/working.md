@@ -10,6 +10,7 @@
 - Rewrote skills/ue_editor_usage.md: full usage guide with CLI quick reference, Python API quick reference (connection, scene, Blueprint nodes, input system, materials, raw commands), known limitations (inherited components, IMC read/cleanup, error handling), working principles, and a complete crouch example. Removed outdated path references
 - Created docs/working.md (this file)
 - Updated README.md to make the CLI/library split explicit and added docs/working.md to the project structure
+- Marked plugin/setup_mcp.bat and plugin/setup_mcp.ps1 as legacy MCP helpers so they no longer generate outdated `ue_editor_mcp.server_*` config for the current ue-bridge workflow
 
 ## Lessons Learned
 

@@ -243,43 +243,11 @@ if (-not $installed) {
 }
 Write-Host ""
 
-# --- Step 4: Generate .vscode/mcp.json ---
-Write-Host "[4/4] Generating .vscode/mcp.json..." -ForegroundColor Yellow
-
-$venvPython = (Join-Path $VenvDir "Scripts\python.exe").Replace('\', '/')
-$pythonPath = $PythonDir.Replace('\', '/')
-
-# Write JSON directly to avoid PowerShell's ConvertTo-Json alignment quirks
-$mcpJson = @"
-{
-  "servers": {
-    "ue-editor-mcp": {
-      "command": "$venvPython",
-      "args": ["-m", "ue_editor_mcp.server_unified"],
-      "env": {
-        "PYTHONPATH": "$pythonPath"
-      }
-        },
-        "ue-editor-mcp-logs": {
-            "command": "$venvPython",
-            "args": ["-m", "ue_editor_mcp.server_unreal_logs"],
-            "env": {
-                "PYTHONPATH": "$pythonPath"
-            }
-    }
-  }
-}
-"@
-
-$vscodePath = Join-Path $ProjectRoot ".vscode"
-if (-not (Test-Path $vscodePath)) {
-    New-Item -ItemType Directory -Path $vscodePath -Force | Out-Null
-}
-
-$mcpJsonPath = Join-Path $vscodePath "mcp.json"
-[System.IO.File]::WriteAllText($mcpJsonPath, $mcpJson, [System.Text.UTF8Encoding]::new($false))
-
-Write-Host "  Generated: $mcpJsonPath" -ForegroundColor Green
+# --- Step 4: Legacy notice ---
+Write-Host "[4/4] Legacy MCP notice..." -ForegroundColor Yellow
+Write-Host "  This helper belongs to the older MCP server flow." -ForegroundColor Yellow
+Write-Host "  It does not generate a valid setup for the current ue-bridge Python library + TCP plugin workflow." -ForegroundColor Yellow
+Write-Host "  Use README.md and skills/ue_editor_installation.md for the current installation path." -ForegroundColor Yellow
 Write-Host ""
 
 Write-Host "============================================" -ForegroundColor Cyan
@@ -288,7 +256,7 @@ Write-Host " No external Python installation needed." -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host " Next steps:" -ForegroundColor Yellow
-Write-Host "   1. Open your UE project in the Editor"
-Write-Host "   2. Open VS Code - both ue-editor-mcp and ue-editor-mcp-logs servers will auto-start"
-Write-Host "   3. Use Copilot Chat to control Blueprints"
+Write-Host "   1. Open README.md in the repo root"
+Write-Host "   2. Follow skills/ue_editor_installation.md for the current ue-bridge install path"
+Write-Host "   3. Verify connectivity with: ue-bridge ping"
 Write-Host ""
