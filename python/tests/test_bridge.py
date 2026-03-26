@@ -191,7 +191,45 @@ class TestParameterPassing:
 
         params = mock.send_command.call_args[0][1]
         assert params["blueprint_name"] == "BP_Foo"
+        assert params["actor_name"] == "Foo_01"
         assert params["location"] == [1, 2, 3]
+
+    def test_set_component_property_preserves_value_shape(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.set_component_property(
+            "BP_Test",
+            "ObstacleMesh",
+            "RelativeScale3D",
+            {"X": 2.0, "Y": 2.0, "Z": 1.0},
+        )
+
+        params = mock.send_command.call_args[0][1]
+        assert params["property_value"] == {"X": 2.0, "Y": 2.0, "Z": 1.0}
+
+    def test_set_static_mesh_properties_wrapper(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.set_static_mesh_properties(
+            "BP_Obstacle",
+            "ObstacleMesh",
+            static_mesh="/Engine/BasicShapes/Cube.Cube",
+            mobility="Static",
+            materials=["/Game/M_Test"],
+        )
+
+        assert mock.send_command.call_args[0] == (
+            "set_static_mesh_properties",
+            {
+                "blueprint_name": "BP_Obstacle",
+                "component_name": "ObstacleMesh",
+                "static_mesh": "/Engine/BasicShapes/Cube.Cube",
+                "mobility": "Static",
+                "materials": ["/Game/M_Test"],
+            },
+        )
 
     def test_create_blueprint_optional_path(self):
         ue, mock = make_bridge_with_mock()

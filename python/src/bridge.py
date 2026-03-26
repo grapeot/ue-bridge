@@ -263,7 +263,7 @@ class UEBridge:
                               scale: tuple[float, float, float] = (1, 1, 1)) -> dict:
         return self._cmd("spawn_blueprint_actor", {
             "blueprint_name": blueprint_name,
-            "name": name,
+            "actor_name": name,
             "location": list(location),
             "rotation": list(rotation),
             "scale": list(scale),
@@ -363,8 +363,24 @@ class UEBridge:
             "blueprint_name": blueprint_name,
             "component_name": component_name,
             "property_name": property_name,
-            "property_value": str(property_value),
+            "property_value": property_value,
         })
+
+    def set_static_mesh_properties(self, blueprint_name: str, component_name: str,
+                                   static_mesh: str | None = None,
+                                   mobility: str | None = None,
+                                   materials: list[str] | None = None) -> dict:
+        params: dict[str, Any] = {
+            "blueprint_name": blueprint_name,
+            "component_name": component_name,
+        }
+        if static_mesh is not None:
+            params["static_mesh"] = static_mesh
+        if mobility is not None:
+            params["mobility"] = mobility
+        if materials is not None:
+            params["materials"] = materials
+        return self._cmd("set_static_mesh_properties", params)
 
     def set_blueprint_parent_class(self, blueprint_name: str,
                                     parent_class: str) -> dict:
