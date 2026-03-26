@@ -4,6 +4,16 @@
 
 ### 2026-03-25
 
+- Expanded the Unreal Automation baseline from 4 tests to 6 deterministic Workflow A tests across both `UEBridgeHost` and `CharacterActionRoom`
+- Added `UEEditorMCP.Health.WorkflowA.GetPIEStateStopped` and `UEEditorMCP.Health.WorkflowA.LogControlSurface`
+- Verified the expanded Workflow A batch passes in both hosts: 6 passed, 0 failed, exit code 0
+- Added the first Blueprint-heavy representative test: `UEEditorMCP.Blueprint.WorkflowA.CreateAndCompile`
+- Verified `CreateAndCompile` passes cleanly in both `UEBridgeHost` and `CharacterActionRoom`: 1 passed, 0 failed, 0 warnings
+- Confirmed the current Unreal test matrix now protects the most important pre-refactor seams: module load, bridge availability, readiness, logs, PIE baseline state, and Blueprint create/compile
+- Created the smallest reusable automation host project at `self_learning/ue_bridge_host/UEBridgeHost` from the UE 5.7 `TP_Blank` template
+- Renamed the template module/target from `TP_Blank` to `UEBridgeHost`, set `EngineAssociation` to `5.7`, and symlinked `Plugins/UEEditorMCP` to the maintained `ue_bridge_skill/plugin`
+- Built `UEBridgeHostEditor` successfully and verified the same `UEEditorMCP.Health` suite passes in the smallest host project: 4 passed, 0 failed, exit code 0
+- Confirmed we now have two useful host tiers: `UEBridgeHost` for stable automation baseline and `CharacterActionRoom` for higher-noise smoke/integration coverage
 - Added the first Unreal Automation Tests for Workflow A health checks in `plugin/Source/UEEditorMCP/Private/Tests/WorkflowAHealthTests.cpp`
 - Pointed `CharacterActionRoom/Plugins/UEEditorMCP` at the maintained `ue_bridge_skill/plugin` via symlink so the host project runs the real plugin under development
 - Built `CharacterActionRoomEditor` with the symlinked project plugin to ensure `UEEditorMCP` was discoverable as a project plugin module
@@ -41,3 +51,7 @@
 - Workflow A should aggregate existing Unreal primitives before inventing new ones. This repo already had `ping`, `get_context`, `is_ready`, and log actions in C++; the missing layer was the Python/CLI contract that turns them into a usable install/verify/diagnose workflow
 - For Unreal Automation Tests, the first real blocker was not test code but host-project plugin loading. Pointing the host project at the maintained plugin and explicitly building the editor target before running tests was necessary to get stable results
 - The safest first Unreal test batch is editor-only health checks executed through `UMCPBridge::ExecuteCommand`, not socket-level or asset-heavy scenarios. That keeps failures attributable to plugin bootstrap and command contracts rather than project content noise
+- For a smallest reproducible host on macOS installed builds, copying `TP_Blank` was more reliable than trying to synthesize a project from scratch or using a content-only template. The extra C++ module/targets were worth it because they made command-line builds and automation runs straightforward
+- A two-host strategy is now justified: one tiny host for deterministic automation, one real example project for smoke coverage. That should remain the testing architecture unless Unreal CI requirements force a different split
+- Build and automation execution for the same host must be serialized, not parallelized. Running the editor before the project plugin dylib is deployed can produce false "module could not be found" failures that look like product bugs but are really orchestration mistakes
+- For Blueprint contract tests, a unique per-run asset name is safer than create-then-delete on the same static path. Immediate deletion caused noisy AssetRegistry warnings; unique names kept the test signal clean enough for automation

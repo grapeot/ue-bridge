@@ -3,7 +3,9 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Dom/JsonObject.h"
+#include "Actions/EditorAction.h"
 #include "Editor.h"
+#include "EditorAssetLibrary.h"
 #include "MCPBridge.h"
 #include "Modules/ModuleManager.h"
 
@@ -129,6 +131,153 @@ bool FUEEditorMCPWorkflowAHealthSurfaceTest::RunTest(const FString& Parameters)
 	FString ErrorType;
 	TestTrue(TEXT("invalid command should return an error-shaped response"), InvalidResponse.IsValid() && InvalidResponse->TryGetBoolField(TEXT("success"), bInvalidSuccess) && !bInvalidSuccess);
 	TestTrue(TEXT("invalid command should report unknown_command"), InvalidResponse.IsValid() && InvalidResponse->TryGetStringField(TEXT("error_type"), ErrorType) && ErrorType == TEXT("unknown_command"));
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FUEEditorMCPGetPIEStateStoppedTest,
+	"UEEditorMCP.Health.WorkflowA.GetPIEStateStopped",
+	UEEditorMCP::Tests::EditorOnlyFlags)
+
+bool FUEEditorMCPGetPIEStateStoppedTest::RunTest(const FString& Parameters)
+{
+	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
+	{
+		return false;
+	}
+
+	TSharedPtr<FJsonObject> Response = Bridge->ExecuteCommand(TEXT("get_pie_state"), MakeShared<FJsonObject>());
+	bool bSuccess = false;
+	TestTrue(TEXT("get_pie_state should return success"), Response.IsValid() && Response->TryGetBoolField(TEXT("success"), bSuccess) && bSuccess);
+
+	const TSharedPtr<FJsonObject>& ResultObject = UEEditorMCP::Tests::GetFlatSuccessObject(*this, Response);
+	if (!ResultObject.IsValid())
+	{
+		return false;
+	}
+
+	FString State;
+	bool bPlaySessionInProgress = true;
+	TestTrue(TEXT("get_pie_state should expose state"), ResultObject->TryGetStringField(TEXT("state"), State));
+	TestTrue(TEXT("get_pie_state should expose is_play_session_in_progress"), ResultObject->TryGetBoolField(TEXT("is_play_session_in_progress"), bPlaySessionInProgress));
+	TestEqual(TEXT("PIE should be stopped in baseline automation run"), State, FString(TEXT("Stopped")));
+	TestFalse(TEXT("No play session should be in progress during baseline state test"), bPlaySessionInProgress);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FUEEditorMCPLogControlSurfaceTest,
+	"UEEditorMCP.Health.WorkflowA.LogControlSurface",
+	UEEditorMCP::Tests::EditorOnlyFlags)
+
+bool FUEEditorMCPLogControlSurfaceTest::RunTest(const FString& Parameters)
+{
+	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
+	{
+		return false;
+	}
+
+	TSharedPtr<FJsonObject> ClearParams = MakeShared<FJsonObject>();
+	ClearParams->SetStringField(TEXT("tag"), TEXT("workflow_a_log_control_surface"));
+	TSharedPtr<FJsonObject> ClearResponse = Bridge->ExecuteCommand(TEXT("clear_logs"), ClearParams);
+	bool bClearSuccess = false;
+	TestTrue(TEXT("clear_logs should return success"), ClearResponse.IsValid() && ClearResponse->TryGetBoolField(TEXT("success"), bClearSuccess) && bClearSuccess);
+
+	const TSharedPtr<FJsonObject>& ClearResult = UEEditorMCP::Tests::GetFlatSuccessObject(*this, ClearResponse);
+	if (!ClearResult.IsValid())
+	{
+		return false;
+	}
+	TestTrue(TEXT("clear_logs should return new_cursor"), ClearResult->HasField(TEXT("new_cursor")));
+
+	TSharedPtr<FJsonObject> AssertParams = MakeShared<FJsonObject>();
+	AssertParams->SetStringField(TEXT("since_cursor"), ClearResult->GetStringField(TEXT("new_cursor")));
+	TArray<TSharedPtr<FJsonValue>> Assertions;
+	TSharedPtr<FJsonObject> Assertion = MakeShared<FJsonObject>();
+	Assertion->SetStringField(TEXT("keyword"), TEXT("workflow_a_keyword_that_should_not_exist"));
+	Assertion->SetNumberField(TEXT("expected_count"), 1);
+	Assertion->SetStringField(TEXT("comparison"), TEXT(">="));
+	Assertions.Add(MakeShared<FJsonValueObject>(Assertion));
+	AssertParams->SetArrayField(TEXT("assertions"), Assertions);
+
+	TSharedPtr<FJsonObject> AssertResponse = Bridge->ExecuteCommand(TEXT("assert_log"), AssertParams);
+	bool bAssertSuccess = false;
+	TestTrue(TEXT("assert_log should return success-shaped response"), AssertResponse.IsValid() && AssertResponse->TryGetBoolField(TEXT("success"), bAssertSuccess) && bAssertSuccess);
+
+	const TSharedPtr<FJsonObject>& AssertResult = UEEditorMCP::Tests::GetFlatSuccessObject(*this, AssertResponse);
+	if (!AssertResult.IsValid())
+	{
+		return false;
+	}
+
+	FString Overall;
+	double PassedCount = 0.0;
+	double FailedCount = 0.0;
+	TestTrue(TEXT("assert_log should expose overall field"), AssertResult->TryGetStringField(TEXT("overall"), Overall));
+	TestEqual(TEXT("assert_log should report a failed assertion when the keyword is absent"), Overall, FString(TEXT("fail")));
+	TestTrue(TEXT("assert_log should expose passed field"), AssertResult->TryGetNumberField(TEXT("passed"), PassedCount));
+	TestTrue(TEXT("assert_log should expose failed field"), AssertResult->TryGetNumberField(TEXT("failed"), FailedCount));
+	TestEqual(TEXT("assert_log should report zero passing assertions for absent keyword"), PassedCount, 0.0);
+	TestTrue(TEXT("assert_log should report at least one failed assertion for absent keyword"), FailedCount >= 1.0);
+
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(
+	FUEEditorMCPCreateAndCompileBlueprintTest,
+	"UEEditorMCP.Blueprint.WorkflowA.CreateAndCompile",
+	UEEditorMCP::Tests::EditorOnlyFlags)
+
+bool FUEEditorMCPCreateAndCompileBlueprintTest::RunTest(const FString& Parameters)
+{
+	UMCPBridge* Bridge = UEEditorMCP::Tests::GetBridge();
+	if (!TestNotNull(TEXT("UEEditorMCP bridge subsystem should resolve from GEditor"), Bridge))
+	{
+		return false;
+	}
+
+	const FString BlueprintName = FString::Printf(TEXT("AT_WorkflowA_BP_%s"), *FGuid::NewGuid().ToString(EGuidFormats::Digits));
+	const FString BlueprintFolder = TEXT("/Game/UEBridgeAutomation");
+	const FString BlueprintAssetPath = BlueprintFolder / BlueprintName;
+
+	TSharedPtr<FJsonObject> CreateParams = MakeShared<FJsonObject>();
+	CreateParams->SetStringField(TEXT("name"), BlueprintName);
+	CreateParams->SetStringField(TEXT("parent_class"), TEXT("Actor"));
+	CreateParams->SetStringField(TEXT("path"), BlueprintFolder);
+
+	TSharedPtr<FJsonObject> CreateResponse = Bridge->ExecuteCommand(TEXT("create_blueprint"), CreateParams);
+	bool bCreateSuccess = false;
+	TestTrue(TEXT("create_blueprint should return success"), CreateResponse.IsValid() && CreateResponse->TryGetBoolField(TEXT("success"), bCreateSuccess) && bCreateSuccess);
+	const TSharedPtr<FJsonObject>& CreateResult = UEEditorMCP::Tests::GetFlatSuccessObject(*this, CreateResponse);
+	if (!CreateResult.IsValid())
+	{
+		return false;
+	}
+	TestEqual(TEXT("create_blueprint should return the created name"), CreateResult->GetStringField(TEXT("name")), BlueprintName);
+	TestTrue(TEXT("created blueprint asset should exist on disk"), UEditorAssetLibrary::DoesAssetExist(BlueprintAssetPath));
+
+	TSharedPtr<FJsonObject> CompileParams = MakeShared<FJsonObject>();
+	CompileParams->SetStringField(TEXT("blueprint_name"), BlueprintName);
+	TSharedPtr<FJsonObject> CompileResponse = Bridge->ExecuteCommand(TEXT("compile_blueprint"), CompileParams);
+	bool bCompileSuccess = false;
+	TestTrue(TEXT("compile_blueprint should return success"), CompileResponse.IsValid() && CompileResponse->TryGetBoolField(TEXT("success"), bCompileSuccess) && bCompileSuccess);
+	const TSharedPtr<FJsonObject>& CompileResult = UEEditorMCP::Tests::GetFlatSuccessObject(*this, CompileResponse);
+	if (!CompileResult.IsValid())
+	{
+		UEditorAssetLibrary::DeleteAsset(BlueprintAssetPath);
+		return false;
+	}
+
+	bool bCompiled = false;
+	double ErrorCount = -1.0;
+	TestTrue(TEXT("compile_blueprint should expose compiled field"), CompileResult->TryGetBoolField(TEXT("compiled"), bCompiled));
+	TestTrue(TEXT("compile_blueprint should expose error_count field"), CompileResult->TryGetNumberField(TEXT("error_count"), ErrorCount));
+	TestTrue(TEXT("compiled blueprint should report compiled=true"), bCompiled);
+	TestEqual(TEXT("compiled blueprint should have zero compile errors"), ErrorCount, 0.0);
 
 	return true;
 }
