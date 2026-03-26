@@ -3488,6 +3488,56 @@ TSharedPtr<FJsonObject> FGetOutlinerTreeAction::ExecuteInternal(const TSharedPtr
 
 
 // ============================================================================
+// FNewLevelAction — Create and open a new empty level
+// ============================================================================
+
+TSharedPtr<FJsonObject> FNewLevelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	FString LevelName = GetOptionalString(Params, TEXT("level_name"), TEXT("NewMap"));
+	FString PackagePath = GetOptionalString(Params, TEXT("path"), TEXT("/Game/Maps"));
+	FString Template = GetOptionalString(Params, TEXT("template"), TEXT("Empty"));
+
+	if (!PackagePath.EndsWith(TEXT("/")))
+	{
+		PackagePath += TEXT("/");
+	}
+
+	// Create a new map
+	if (Template.Equals(TEXT("Empty"), ESearchCase::IgnoreCase))
+	{
+		GEditor->NewMap();
+	}
+	else
+	{
+		// Use default template
+		GEditor->NewMap();
+	}
+
+	UWorld* NewWorld = GEditor->GetEditorWorldContext().World();
+	if (!NewWorld)
+	{
+		return CreateErrorResponse(TEXT("Failed to create new level"));
+	}
+
+	// Save the level to the specified path
+	FString FullPath = PackagePath + LevelName;
+	FString Filename = FPackageName::LongPackageNameToFilename(FullPath, FPackageName::GetMapPackageExtension());
+
+	bool bSaved = FEditorFileUtils::SaveLevel(NewWorld->GetCurrentLevel(), Filename);
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("level_name"), LevelName);
+	Result->SetStringField(TEXT("path"), FullPath);
+	Result->SetStringField(TEXT("filename"), Filename);
+	Result->SetBoolField(TEXT("saved"), bSaved);
+	Result->SetStringField(TEXT("world_name"), NewWorld->GetName());
+
+	UE_LOG(LogMCP, Log, TEXT("Created new level: %s (saved=%s)"), *FullPath, bSaved ? TEXT("true") : TEXT("false"));
+
+	return CreateSuccessResponse(Result);
+}
+
+// ============================================================================
 // FOpenAssetEditorAction — Open an asset editor and optionally focus it
 // ============================================================================
 

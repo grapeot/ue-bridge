@@ -661,6 +661,20 @@ class UEBridge:
         })
 
     # -------------------------------------------------------------------------
+    # Level / Map
+    # -------------------------------------------------------------------------
+
+    def new_level(self, level_name: str = "NewMap",
+                  path: str = "/Game/Maps",
+                  template: str = "Empty") -> dict:
+        """Create and open a new empty level."""
+        return self._cmd("new_level", {
+            "level_name": level_name,
+            "path": path,
+            "template": template,
+        })
+
+    # -------------------------------------------------------------------------
     # PIE (Play In Editor)
     # -------------------------------------------------------------------------
 

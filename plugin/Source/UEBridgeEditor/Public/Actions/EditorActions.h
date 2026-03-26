@@ -619,6 +619,28 @@ protected:
 
 
 // =========================================================================
+// P7: Level / Map Actions
+// =========================================================================
+
+/**
+ * FNewLevelAction
+ * Creates a new empty level and opens it in the editor.
+ * Params:
+ *   level_name (string, optional) - Name for the level asset (e.g. "TouhouLevel")
+ *   path (string, optional, default "/Game/Maps") - Package path to save the level
+ *   template (string, optional, default "Empty") - "Empty" or "Default"
+ */
+class UEBRIDGEEDITOR_API FNewLevelAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override { return true; }
+	virtual FString GetActionName() const override { return TEXT("new_level"); }
+};
+
+// =========================================================================
 // P7: Asset Editor Actions
 // =========================================================================
 
