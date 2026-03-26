@@ -142,3 +142,7 @@
 - Root cause found: set_actor_property("WorldSettings", "DefaultGameMode", class_path) crashes PIE, but setting GlobalDefaultGameMode in DefaultEngine.ini works perfectly. The bridge command sets the value correctly at edit time but something goes wrong at PIE startup. Workaround: modify DefaultEngine.ini directly
 - Confirmed: BP_TouhouPlayer as DefaultPawnClass works (no crash). The crash was entirely caused by how DefaultGameMode was being set, not the pawn itself
 - Confirmed: take_screenshot captures editor viewport (not game viewport during PIE). This is useful for observing the editor state but doesn't show the player's in-game camera view
+- Critical discovery: modifying Blueprints and immediately running PIE in the same editor session causes crash. Workaround: save all → restart editor → then PIE. This means the AI workflow should be: edit BPs → save → restart UE (pkill + open) → PIE verify. This is a fundamental constraint on the feedback loop
+- Discovery: `open .uproject` on macOS may not work reliably for auto-restart. Direct binary launch works: `"/Users/Shared/Epic Games/UE_5.7/Engine/Binaries/Mac/UnrealEditor" <uproject> &`
+- Discovery: take_screenshot captures editor viewport only. Game viewport (PIE camera) capture needs separate implementation (ReadPixels on game viewport crashes). For now, the user sees the game viewport directly while AI observes via editor viewport
+- Confirmed working: GM_Touhou (via DefaultEngine.ini) + BP_TouhouPlayer (with orthographic CameraComponent) produces correct top-down view after editor restart
