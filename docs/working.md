@@ -15,6 +15,10 @@
 - Discovery: EventTick output pin is "then" not "execute"; Branch output pins are "then"/"else" not "True"/"False"; CustomEvent has no input execute pin (it's an event source)
 - Touhou Pilot Phase 1 complete: created BP_TouhouPlayer (13 nodes), BP_Bullet (8 nodes, movement logic), BP_Boss (timer logic with PrintString placeholder), input system (4 actions + IMC_Touhou + 7 key bindings), Gemini-generated textures (player/boss/bullet)
 - Touhou Pilot Phase 2 partial: Player movement + focus toggle wired, Bullet Tick movement wired, Boss timer logic wired with PrintString placeholder. SpawnActorFromClass blocked by crash bug
+- New feature: new_level command — creates and opens empty level, used to replace Open World template with clean TouhouLevel
+- PIE verification passed: Boss timer fires 34 SPAWN BULLET messages in 4 seconds (rate=0.1s), confirming Blueprint logic works at runtime
+- Touhou Pilot Phase 2 continued: orthographic camera Blueprint (BP_TouhouCamera), collision logic (Boss HP -= 1 on overlap, Player Lives -= 1 on overlap), HUD Widget (WBP_TouhouHUD with Score/Lives/Bombs text + Boss HP bar)
+- Feature gap documented: set_actor_property cannot reach CameraComponent properties on CameraActor (only returns transform). Workaround: create Blueprint with CameraComponent and use set_component_property
 
 ### 2026-03-25
 
