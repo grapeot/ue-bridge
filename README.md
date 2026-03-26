@@ -1,0 +1,139 @@
+# ue-bridge
+
+A Python library and Unreal Engine C++ plugin for programmatic UE Editor automation. Write Python scripts that create Blueprints, wire nodes, configure input mappings, spawn actors, and compile -- all without touching the UE GUI.
+
+## Architecture
+
+```
+Python script (your code)
+      |
+      |  TCP :55558
+      v
+C++ plugin (UEEditorMCP)
+      |
+      |  Unreal Engine API
+      v
+UE Editor (live session)
+```
+
+The C++ plugin runs a TCP server inside the UE Editor process. The Python library (`ue-bridge`) sends JSON commands over a persistent TCP connection. Every editor action (spawn actor, add Blueprint node, connect pins, compile, etc.) is a single command/response round-trip.
+
+## Quick Start
+
+### 1. Install the plugin
+
+```bash
+# Clone this repo
+git clone https://github.com/grapeot/ue-bridge.git
+cd ue-bridge
+
+# Run the setup script (macOS)
+./scripts/setup.sh /path/to/your/UE/project
+```
+
+The setup script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, compiles the plugin using UE 5.7's build tools, and creates a Python virtualenv.
+
+On **Windows**, copy `plugin/` into `<YourProject>/Plugins/UEEditorMCP/` manually, then run `plugin/setup_mcp.bat` or `plugin/setup_mcp.ps1`.
+
+### 2. Restart Unreal Editor
+
+Open your project in UE. Go to Edit > Plugins and verify UEEditorMCP is enabled. You should see "MCP Server started on port 55558" in the Output Log.
+
+### 3. Run a Python script
+
+```python
+from src import UEBridge
+
+with UEBridge() as ue:
+    print(ue.ping())  # True
+
+    # Spawn an actor
+    ue.spawn_actor("StaticMeshActor", "Wall_01", location=(100, 0, 0))
+
+    # Create an input action and bind it
+    ue.create_input_action("IA_Crouch", value_type="Digital")
+    ue.add_key_mapping("IMC_Default", "IA_Crouch", "C")
+
+    # Add Blueprint nodes and wire them
+    bp = "BP_ThirdPersonCharacter"
+    input_node = ue.add_enhanced_input_action_node(bp, "IA_Crouch")
+    crouch_node = ue.add_function_node(bp, "Crouch")
+    ue.connect(input_node, "Started", crouch_node, "execute")
+
+    ue.compile(bp)
+    ue.save_all()
+```
+
+Or use the CLI:
+
+```bash
+cd python
+python3 -m src ping
+python3 -m src get-actors
+python3 -m src compile --blueprint BP_ThirdPersonCharacter
+```
+
+## Key Features
+
+**Blueprint automation** -- Create Blueprints, add nodes (function calls, events, Enhanced Input actions, branches, casts, variable get/set), connect pins, and compile. Full graph construction from Python.
+
+**Enhanced Input support** -- `create_input_action` automatically configures Pressed + Released triggers. `add_key_mapping` binds keys to Input Mapping Contexts. `read_imc` inspects existing mappings.
+
+**Inherited component properties** -- `set_inherited_component_property` modifies properties on components inherited from parent classes (e.g., CharacterMovement.bCanCrouch), which the standard `set_component_property` cannot reach.
+
+**Nested property paths** -- Property setters accept dot-separated paths for nested UE properties.
+
+**Scene management** -- Spawn/delete/transform actors, query the level, manage the viewport camera.
+
+**Materials** -- Create materials and material instances, add expressions, connect to outputs, compile.
+
+**77+ raw commands** -- Every C++ action is accessible through `raw_command()` for anything the high-level API doesn't wrap yet.
+
+**Error handling** -- Operations raise `UECommandError` with structured error types, so scripts can catch and recover.
+
+## Project Structure
+
+```
+ue-bridge/
+  plugin/           C++ UE plugin (copy into your project's Plugins/)
+    Source/          Plugin source code
+    UEEditorMCP.uplugin
+    setup_mcp.ps1   Windows setup helper
+    setup_mcp.bat   Windows setup helper
+  python/            Python library
+    src/             ue_bridge package (UEBridge, Connection, CLI, errors)
+    tests/           Unit and integration tests
+    pyproject.toml
+  skills/            Usage documentation for AI agents
+    ue_editor_installation.md
+    ue_editor_usage.md
+  scripts/
+    setup.sh         One-click Mac setup
+```
+
+## Detailed Documentation
+
+See `skills/` for comprehensive usage guides:
+
+- `skills/ue_editor_installation.md` -- Setup, prerequisites, and troubleshooting
+- `skills/ue_editor_usage.md` -- Full Python API reference, CLI reference, working principles, and a complete example
+
+## Running Tests
+
+```bash
+cd python
+
+# Unit tests (no UE Editor needed)
+python3 -m pytest tests/ -v -k "not integration"
+
+# Integration tests (requires UE Editor running with plugin enabled)
+python3 -m pytest tests/test_integration.py -v -m integration
+```
+
+## Credits
+
+The C++ plugin is based on [lilklon/UEBlueprintMCP](https://github.com/lilklon/UEBlueprintMCP) (MIT license), with significant extensions for Enhanced Input, inherited components, IMC read/write, material editing, MVVM bindings, and more.
+
+## License
+
+MIT -- see [LICENSE](LICENSE).
