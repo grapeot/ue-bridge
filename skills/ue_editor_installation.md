@@ -5,7 +5,7 @@
 - macOS or Windows
 - Unreal Engine 5.7+
 - Python 3.10+
-- UE Editor running with the UEEditorMCP plugin enabled
+- UE Editor running with the bridge plugin enabled
 
 ## Repo Layout
 
@@ -32,12 +32,12 @@ cd ue_bridge_skill
 ./scripts/setup.sh /path/to/your/UE/project
 ```
 
-The script copies the plugin into `<YourProject>/Plugins/UEEditorMCP/`, patches the RTTI build flag for macOS compatibility, and compiles using UE 5.7's build tools.
+The script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, and compiles using UE 5.7's build tools.
 
 **Windows** — copy manually:
 
 ```
-Copy ue_bridge_skill/plugin/ → <YourProject>/Plugins/UEEditorMCP/
+Copy ue_bridge_skill/plugin/ → <YourProject>/Plugins/
 ```
 
 Then restart the UE Editor.
@@ -96,7 +96,7 @@ scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uprojec
 
 ## Troubleshooting
 
-**"Cannot connect to Unreal Editor"**: UE Editor is not running, or the UEEditorMCP plugin is not enabled. Check Edit > Plugins in UE.
+**"Cannot connect to Unreal Editor"**: UE Editor is not running, or the bridge plugin is not enabled.
 
 **"Connection refused on port 55558"**: The plugin's local command server may not have started. Re-run `ue-bridge doctor` after the editor finishes loading.
 
@@ -106,4 +106,4 @@ scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uprojec
 
 **macOS RTTI build error**: The setup script patches `bUseRTTI=false` automatically. If building manually, ensure `.uplugin` or `.Build.cs` has `bUseRTTI = false`.
 
-**Windows plugin not loading**: Ensure the plugin folder is at `<YourProject>/Plugins/UEEditorMCP/` and contains `UEEditorMCP.uplugin`. Restart the editor after copying.
+**Windows plugin not loading**: Ensure the plugin folder is present under `<YourProject>/Plugins/` and restart the editor after copying.

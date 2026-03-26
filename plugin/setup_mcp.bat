@@ -1,8 +1,8 @@
 @echo off
 REM ============================================================================
-REM  UEEditorMCP - One-Click Python Setup
+REM  UE Bridge - Legacy Python Setup Helper
 REM  Automatically finds UE engine's built-in Python, creates a venv,
-REM  and installs the MCP package. No external Python installation required.
+REM  and installs the Python package. No external Python installation required.
 REM ============================================================================
 
 setlocal EnableDelayedExpansion
@@ -14,7 +14,7 @@ REM ProjectRoot = go up two levels from Plugins/UEEditorMCP
 for %%I in ("%PLUGIN_DIR%..\..\") do set "PROJECT_ROOT=%%~fI"
 
 echo ============================================
-echo  UEEditorMCP - Python Environment Setup
+echo  UE Bridge - Legacy Python Setup Helper
 echo ============================================
 echo.
 
