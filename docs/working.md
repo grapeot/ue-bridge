@@ -4,6 +4,8 @@
 
 ### 2026-03-25
 
+- Deleted the obsolete `plugin/setup_mcp.bat` and `plugin/setup_mcp.ps1` entrypoints from the repo once the bridge-native helper names were in place
+- Confirmed that the repo no longer exposes MCP-named helper scripts as active entrypoints; only `setup_legacy_bridge.*` remains as the explicit compatibility path
 - Renamed the remaining helper-layer classes from `FMCPCommonUtils` / `FMCPLogCapture` to `FUEBridgeCommonUtils` / `FUEBridgeLogCapture`, and renamed the legacy setup helpers to `setup_legacy_bridge.*`
 - Verified the tail cleanup is still behavior-preserving: the checked-in host builds, Workflow A health remains green, and Python ↔ Unreal integration still passes 5/5 after the helper cleanup
 - Confirmed that MCP now survives mostly as historical changelog language and a few compatibility-oriented comments, not as a core code or packaging surface
