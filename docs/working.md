@@ -4,16 +4,6 @@
 
 ### 2026-03-25
 
-- Phase 1 kickoff: AI-first documentation surface — docs-only changes, no code changes, non-breaking
-- Rewrote README.md: replaced combat_game-centric README with a standalone project README covering architecture, quick start, key features, project structure, test instructions, and credits
-- Rewrote skills/ue_editor_installation.md: self-contained installation guide with repo layout, 4-step setup (plugin install, verify, Python install, ping), and troubleshooting section. Removed all `combat_game/tools/ue_editor` paths and `sys.path.insert` hacks
-- Rewrote skills/ue_editor_usage.md: full usage guide with CLI quick reference, Python API quick reference (connection, scene, Blueprint nodes, input system, materials, raw commands), known limitations (inherited components, IMC read/cleanup, error handling), working principles, and a complete crouch example. Removed outdated path references
-- Created docs/working.md (this file)
-- Updated README.md to make the CLI/library split explicit and added docs/working.md to the project structure
-- Marked plugin/setup_mcp.bat and plugin/setup_mcp.ps1 as legacy MCP helpers so they no longer generate outdated `ue_editor_mcp.server_*` config for the current ue-bridge workflow
-
-### 2026-03-26
-
 - Started Phase 2/3 contract-hardening branch after merging Phase 1 into master
 - Added canonical `python/ue_bridge/` package surface while keeping `python/src/` as a compatibility layer
 - Updated `pyproject.toml` so the `ue-bridge` console script points at `ue_bridge.cli:main` and editable installs include both `ue_bridge*` and `src*`
@@ -22,6 +12,13 @@
 - Ran local unit suite successfully: 56 passed, 8 deselected
 - Added `.github/workflows/ci.yml` to run the non-integration contract suite on push and pull request
 - Verified editable install + canonical entrypoint smoke test: `from ue_bridge import UEBridge` and `python -m ue_bridge ping`
+- Phase 1 kickoff: AI-first documentation surface — docs-only changes, no code changes, non-breaking
+- Rewrote README.md: replaced combat_game-centric README with a standalone project README covering architecture, quick start, key features, project structure, test instructions, and credits
+- Rewrote skills/ue_editor_installation.md: self-contained installation guide with repo layout, 4-step setup (plugin install, verify, Python install, ping), and troubleshooting section. Removed all `combat_game/tools/ue_editor` paths and `sys.path.insert` hacks
+- Rewrote skills/ue_editor_usage.md: full usage guide with CLI quick reference, Python API quick reference (connection, scene, Blueprint nodes, input system, materials, raw commands), known limitations (inherited components, IMC read/cleanup, error handling), working principles, and a complete crouch example. Removed outdated path references
+- Created docs/working.md (this file)
+- Updated README.md to make the CLI/library split explicit and added docs/working.md to the project structure
+- Marked plugin/setup_mcp.bat and plugin/setup_mcp.ps1 as legacy MCP helpers so they no longer generate outdated `ue_editor_mcp.server_*` config for the current ue-bridge workflow
 
 ## Lessons Learned
 
