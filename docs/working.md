@@ -4,6 +4,9 @@
 
 ### 2026-03-25
 
+- Began hotspot cleanup by extracting the Blueprint Auto Layout command handlers out of `UEBridgeEditorModule.cpp` into `UEBridgeEditorModuleAutoLayout.cpp/.h`
+- Verified the module split is behavior-preserving: the checked-in host still passes all 7 `UEBridgeEditor.Health.WorkflowA.*` automation tests after the extraction
+- Confirmed `UEBridgeEditorModule.cpp` is a worthwhile hotspot target because it mixes module lifecycle, menu wiring, and command execution helpers; the first split reduced that pressure without touching user behavior
 - Deleted the obsolete `plugin/setup_mcp.bat` and `plugin/setup_mcp.ps1` entrypoints from the repo once the bridge-native helper names were in place
 - Confirmed that the repo no longer exposes MCP-named helper scripts as active entrypoints; only `setup_legacy_bridge.*` remains as the explicit compatibility path
 - Renamed the remaining helper-layer classes from `FMCPCommonUtils` / `FMCPLogCapture` to `FUEBridgeCommonUtils` / `FUEBridgeLogCapture`, and renamed the legacy setup helpers to `setup_legacy_bridge.*`
