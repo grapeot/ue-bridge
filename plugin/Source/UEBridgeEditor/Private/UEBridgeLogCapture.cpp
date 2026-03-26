@@ -1,4 +1,5 @@
 // Copyright (c) 2025 zolnoor. All rights reserved.
+// Refactored and extended in 2026 by Yan Wang.
 
 #include "UEBridgeLogCapture.h"
 #include "Actions/EditorAction.h"
