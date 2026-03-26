@@ -4,7 +4,7 @@ TCP connection to Unreal Editor's MCP Bridge plugin.
 Protocol: 4-byte big-endian length prefix + UTF-8 JSON payload.
 Default endpoint: 127.0.0.1:55558.
 
-Adapted from UEEditorMCP/Python/ue_editor_mcp/connection.py.
+Adapted from UEBridgeEditor/Python/ue_editor_mcp/connection.py.
 Simplified: no heartbeat thread (library is used in short-lived scripts),
 but keeps persistent connection, auto-reconnect, and context manager.
 """
@@ -48,7 +48,7 @@ class Connection:
         except (socket.error, socket.timeout, ConnectionRefusedError) as e:
             raise UEConnectionError(
                 f"Cannot connect to Unreal Editor at {self.host}:{self.port}. "
-                f"Is the editor running with UEEditorMCP plugin enabled? Error: {e}"
+                f"Is the editor running with UEBridgeEditor plugin enabled? Error: {e}"
             ) from e
 
     def disconnect(self) -> None:

@@ -1,5 +1,5 @@
 """
-Integration tests — require a running Unreal Editor with UEEditorMCP plugin.
+Integration tests — require a running Unreal Editor with UEBridgeEditor plugin.
 
 Run with: python3 -m pytest tests/test_integration.py -v -m integration
 Skip if UE is not running (tests will be skipped, not failed).

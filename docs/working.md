@@ -4,13 +4,16 @@
 
 ### 2026-03-25
 
+- Completed the packaging-layer rename from `UEEditorMCP` to `UEBridgeEditor`: uplugin file, module name, source directory, module implementation file, and checked-in host plugin path all now use the bridge-native name
+- Verified the deep packaging rename is behavior-preserving on the checked-in host: `UEBridgeEditor.Health`, `UEBridgeEditor.Blueprint`, `UEBridgeEditor.Graph`, and Python ↔ Unreal integration all remain green
+- Confirmed that the remaining MCP residue is now mostly limited to a few helper/file names, historical comments, and compatibility helper script names rather than the plugin's primary packaging surface
 - Renamed the transport-adjacent runtime types from `FMCPServer` to `FEditorCommandServer` and from `FMCPClientHandler` to `FEditorCommandClientHandler`
 - Verified the transport-adjacent rename is behavior-preserving on the checked-in host: health, blueprint, graph, PIE, and Python integration all remain green after the migration
 - Confirmed that MCP is now largely pushed out of user-facing text, editor-domain types, and transport-adjacent runtime names; the remaining MCP footprint is concentrated in module/file/package legacy layers
 - Renamed the core editor-domain types from `UMCPBridge` to `UUEEditorBridge` and `FMCPEditorContext` to `FUEEditorContext` across the plugin source while leaving transport behavior unchanged
 - Verified the domain rename is behavior-preserving on the checked-in host: Workflow A health (including PIE smoke), Blueprint create/compile, and graph create/connect/delete still pass after the migration
 - Confirmed that MCP is no longer embedded in the primary editor-domain type names; remaining MCP usage is now concentrated in transport/module/file legacy layers
-- Added `UEEditorMCP.Health.WorkflowA.PIESmokeLifecycle` and verified a non-destructive runtime lifecycle path on the checked-in host (start PIE → observe running → stop PIE → observe quiesced state)
+- Added `UEBridgeEditor.Health.WorkflowA.PIESmokeLifecycle` and verified a non-destructive runtime lifecycle path on the checked-in host (start PIE → observe running → stop PIE → observe quiesced state)
 - Added a direct raw-socket representative case to `python/tests/test_integration_workflow_a.py` so the end-to-end integration flow now checks the length-prefixed JSON protocol, not just the Python wrapper
 - Verified the repo-contained integration flow now passes 5 Python integration tests end-to-end, including the raw socket ping/close path
 - Accepted one PIE warning from the engine audio layer during unattended runs as environmental noise rather than a plugin failure; the test itself completed successfully with zero plugin-side errors
@@ -22,31 +25,31 @@
 - Replaced the hottest direct-field `FMCPEditorContext` usages with explicit API methods for last-created node and material-session state access
 - Added `FMCPEditorContext` helpers for current material access, registered material node lookup/removal, and last-node tracking so actions stop reaching into context internals as freely
 - Verified the `MCPContext` API refactor is behavior-preserving: Workflow A health, Blueprint create/compile, and graph create/connect/delete all still pass in the checked-in `UEBridgeHost`
-- Added the first graph/node workflow automation test: `UEEditorMCP.Graph.WorkflowA.CreateConnectDelete`
+- Added the first graph/node workflow automation test: `UEBridgeEditor.Graph.WorkflowA.CreateConnectDelete`
 - Verified the node workflow passes in the checked-in `hosts/UEBridgeHost` host: create blueprint, add nodes, inspect pins, connect, delete, and confirm missing-node failure shape
 - Confirmed the coverage net now protects not only host health and Blueprint compile, but also the first high-value node add/delete/connect path that future graph refactors will depend on
 - Moved `UEBridgeHost` into `ue_bridge_skill/hosts/UEBridgeHost`, so the repository now contains a checked-in self-contained automation host instead of depending on an external sibling project
-- Repointed the in-repo host's `Plugins/UEEditorMCP` symlink to the maintained repo-local `plugin/` directory and verified the host still builds as `UEBridgeHostEditor`
+- Repointed the in-repo host's `Plugins/UEBridgeEditor` symlink to the maintained repo-local `plugin/` directory and verified the host still builds as `UEBridgeHostEditor`
 - Added `python/tests/test_integration_workflow_a.py` as a host-agnostic Python ↔ Unreal integration suite covering `doctor`, `verify`, `get_context`, `create_blueprint`, and `compile`
 - Added `scripts/run_python_unreal_integration.sh` to build a host, launch Unreal, wait for `ue-bridge verify`, and run the Workflow A Python integration suite end-to-end
 - Verified the checked-in `hosts/UEBridgeHost/UEBridgeHost.uproject` can run the integration flow successfully from the repo: 4 Python integration tests passed end-to-end
 - Extracted the monolithic `UMCPBridge::RegisterActions()` body into a dedicated `FUEEditorActionRegistry` composition layer (`ActionRegistry.h/.cpp`)
-- Verified the `ActionRegistry` refactor is behavior-preserving: `UEBridgeHost` still passes the 6-test Workflow A suite and the `UEEditorMCP.Blueprint.WorkflowA.CreateAndCompile` contract test with exit code 0
+- Verified the `ActionRegistry` refactor is behavior-preserving: `UEBridgeHost` still passes the 6-test Workflow A suite and the `UEBridgeEditor.Blueprint.WorkflowA.CreateAndCompile` contract test with exit code 0
 - Confirmed the first structural de-MCP step can proceed under existing coverage without changing transport or public command semantics
 - Expanded the Unreal Automation baseline from 4 tests to 6 deterministic Workflow A tests across both `UEBridgeHost` and `CharacterActionRoom`
-- Added `UEEditorMCP.Health.WorkflowA.GetPIEStateStopped` and `UEEditorMCP.Health.WorkflowA.LogControlSurface`
+- Added `UEBridgeEditor.Health.WorkflowA.GetPIEStateStopped` and `UEBridgeEditor.Health.WorkflowA.LogControlSurface`
 - Verified the expanded Workflow A batch passes in both hosts: 6 passed, 0 failed, exit code 0
-- Added the first Blueprint-heavy representative test: `UEEditorMCP.Blueprint.WorkflowA.CreateAndCompile`
+- Added the first Blueprint-heavy representative test: `UEBridgeEditor.Blueprint.WorkflowA.CreateAndCompile`
 - Verified `CreateAndCompile` passes cleanly in both `UEBridgeHost` and `CharacterActionRoom`: 1 passed, 0 failed, 0 warnings
 - Confirmed the current Unreal test matrix now protects the most important pre-refactor seams: module load, bridge availability, readiness, logs, PIE baseline state, and Blueprint create/compile
 - Created the smallest reusable automation host project at `self_learning/ue_bridge_host/UEBridgeHost` from the UE 5.7 `TP_Blank` template
-- Renamed the template module/target from `TP_Blank` to `UEBridgeHost`, set `EngineAssociation` to `5.7`, and symlinked `Plugins/UEEditorMCP` to the maintained `ue_bridge_skill/plugin`
-- Built `UEBridgeHostEditor` successfully and verified the same `UEEditorMCP.Health` suite passes in the smallest host project: 4 passed, 0 failed, exit code 0
+- Renamed the template module/target from `TP_Blank` to `UEBridgeHost`, set `EngineAssociation` to `5.7`, and symlinked `Plugins/UEBridgeEditor` to the maintained `ue_bridge_skill/plugin`
+- Built `UEBridgeHostEditor` successfully and verified the same `UEBridgeEditor.Health` suite passes in the smallest host project: 4 passed, 0 failed, exit code 0
 - Confirmed we now have two useful host tiers: `UEBridgeHost` for stable automation baseline and `CharacterActionRoom` for higher-noise smoke/integration coverage
-- Added the first Unreal Automation Tests for Workflow A health checks in `plugin/Source/UEEditorMCP/Private/Tests/WorkflowAHealthTests.cpp`
-- Pointed `CharacterActionRoom/Plugins/UEEditorMCP` at the maintained `ue_bridge_skill/plugin` via symlink so the host project runs the real plugin under development
-- Built `CharacterActionRoomEditor` with the symlinked project plugin to ensure `UEEditorMCP` was discoverable as a project plugin module
-- Ran Unreal Automation Tests successfully against `CharacterActionRoom.uproject` with `UEEditorMCP.Health` filter: 4 passed, 0 failed, exit code 0
+- Added the first Unreal Automation Tests for Workflow A health checks in `plugin/Source/UEBridgeEditor/Private/Tests/WorkflowAHealthTests.cpp`
+- Pointed `CharacterActionRoom/Plugins/UEBridgeEditor` at the maintained `ue_bridge_skill/plugin` via symlink so the host project runs the real plugin under development
+- Built `CharacterActionRoomEditor` with the symlinked project plugin to ensure `UEBridgeEditor` was discoverable as a project plugin module
+- Ran Unreal Automation Tests successfully against `CharacterActionRoom.uproject` with `UEBridgeEditor.Health` filter: 4 passed, 0 failed, exit code 0
 - Verified the first Automation batch covers module load, bridge subsystem availability, `is_ready` success shape, `get_editor_logs` success shape, and safe unknown-command failure handling
 - Started Workflow A on branch `workflow-a-doctor-verify`
 - Added Python bridge wrappers for `is_ready`, `get_editor_logs`, `get_unreal_logs`, plus aggregated `doctor()` and `verify_installation()` helpers
@@ -89,6 +92,7 @@
 - After `MCPContext`, the next safe step was to extract the game-thread execution logic out of `MCPServer` rather than rewriting the transport. That preserved the local TCP model while still shrinking MCP-shaped responsibilities inside the server implementation
 - Once health, blueprint, graph, PIE, and raw-socket seams were all protected, a true internal domain rename became tractable. The safe pattern was to rename domain types first while deliberately leaving transport/file/module legacy names for a later layer
 - After the domain rename landed cleanly, the next safe step was to rename the transport-adjacent runtime layer while still leaving protocol shape, file names, and module wiring untouched. This kept the migration incremental and reviewable
+- Once the runtime-adjacent layer was stable, the next viable step was the deep packaging rename. Doing module/uplugin/source-tree migration only after all representative tests were green kept the blast radius manageable
 - A self-contained host only becomes real when it is versioned inside the plugin repo and the integration script can launch it from a clean shell. Creating a smallest host outside the repo was a useful proof, but checking it into `hosts/UEBridgeHost` was the point where it became a maintainable product asset
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
 - The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front

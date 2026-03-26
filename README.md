@@ -139,7 +139,7 @@ ue_bridge_skill/
     working.md       Current changelog and lessons learned
   plugin/           C++ UE plugin (copy into your project's Plugins/)
     Source/          Plugin source code
-    UEEditorMCP.uplugin
+    UEBridgeEditor.uplugin
   python/            Python library (pip install -e .)
     ue_bridge/       Canonical package surface
     src/             Compatibility package surface
