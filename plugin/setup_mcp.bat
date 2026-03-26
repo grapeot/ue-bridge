@@ -139,38 +139,16 @@ if %ERRORLEVEL% neq 0 (
 echo   Dependencies installed successfully.
 echo.
 
-REM --- Step 4: Generate mcp.json ---
-echo [4/4] Generating mcp.json...
+REM --- Step 4: Legacy notice ---
+echo [4/4] Legacy MCP notice...
 echo.
-echo  Generating .vscode/mcp.json...
-
-set "VSCODE_DIR=%PROJECT_ROOT%\.vscode"
-if not exist "%VSCODE_DIR%" mkdir "%VSCODE_DIR%"
-
-set "MCP_JSON=%VSCODE_DIR%\mcp.json"
-set "VP=%VENV_DIR:\=/%"
-set "PP=%PYTHON_DIR:\=/%"
-
->  "%MCP_JSON%" echo {
->> "%MCP_JSON%" echo   "servers": {
->> "%MCP_JSON%" echo     "ue-editor-mcp": {
->> "%MCP_JSON%" echo       "command": "%VP%/Scripts/python.exe",
->> "%MCP_JSON%" echo       "args": ["-m", "ue_editor_mcp.server_unified"],
->> "%MCP_JSON%" echo       "env": { "PYTHONPATH": "%PP%" }
->> "%MCP_JSON%" echo     },
->> "%MCP_JSON%" echo     "ue-editor-mcp-logs": {
->> "%MCP_JSON%" echo       "command": "%VP%/Scripts/python.exe",
->> "%MCP_JSON%" echo       "args": ["-m", "ue_editor_mcp.server_unreal_logs"],
->> "%MCP_JSON%" echo       "env": { "PYTHONPATH": "%PP%" }
->> "%MCP_JSON%" echo     }
->> "%MCP_JSON%" echo   }
->> "%MCP_JSON%" echo }
-
-echo   Generated: %MCP_JSON%
+echo   This helper belongs to the older MCP server flow.
+echo   It does not generate a valid setup for the current ue-bridge Python library + TCP plugin workflow.
+echo   Use README.md and skills\ue_editor_installation.md for the current installation path.
 echo.
 echo ============================================
 echo  Done! No external Python installation needed.
-echo  Configured servers: ue-editor-mcp + ue-editor-mcp-logs
+echo  Legacy MCP setup generation skipped.
 echo ============================================
 
 pause

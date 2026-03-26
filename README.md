@@ -23,23 +23,26 @@ The C++ plugin runs a TCP server inside the UE Editor process. The Python librar
 ### 1. Install the plugin
 
 ```bash
-# Clone this repo
-git clone https://github.com/grapeot/ue-bridge.git
-cd ue-bridge
-
-# Run the setup script (macOS)
+# macOS — run the setup script
 ./scripts/setup.sh /path/to/your/UE/project
 ```
 
-The setup script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, compiles the plugin using UE 5.7's build tools, and creates a Python virtualenv.
+The setup script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, and compiles the plugin using UE 5.7's build tools.
 
-On **Windows**, copy `plugin/` into `<YourProject>/Plugins/UEEditorMCP/` manually, then run `plugin/setup_mcp.bat` or `plugin/setup_mcp.ps1`.
+On **Windows**, copy `plugin/` into `<YourProject>/Plugins/UEEditorMCP/` manually, then restart the editor.
 
 ### 2. Restart Unreal Editor
 
 Open your project in UE. Go to Edit > Plugins and verify UEEditorMCP is enabled. You should see "MCP Server started on port 55558" in the Output Log.
 
-### 3. Run a Python script
+### 3. Install the Python library
+
+```bash
+cd python
+pip install -e ".[dev]"
+```
+
+### 4. Run a Python script
 
 ```python
 from src import UEBridge
@@ -67,11 +70,12 @@ with UEBridge() as ue:
 Or use the CLI:
 
 ```bash
-cd python
-python3 -m src ping
-python3 -m src get-actors
-python3 -m src compile --blueprint BP_ThirdPersonCharacter
+ue-bridge ping
+ue-bridge get-actors
+ue-bridge compile --blueprint BP_ThirdPersonCharacter
 ```
+
+The CLI is the thin surface for simple one-off tasks. For multi-step automation, use the Python library.
 
 ## Key Features
 
@@ -94,21 +98,19 @@ python3 -m src compile --blueprint BP_ThirdPersonCharacter
 ## Project Structure
 
 ```
-ue-bridge/
+ue_bridge_skill/
+  docs/
+    working.md       Current changelog and lessons learned
   plugin/           C++ UE plugin (copy into your project's Plugins/)
     Source/          Plugin source code
     UEEditorMCP.uplugin
-    setup_mcp.ps1   Windows setup helper
-    setup_mcp.bat   Windows setup helper
-  python/            Python library
-    src/             ue_bridge package (UEBridge, Connection, CLI, errors)
+  python/            Python library (pip install -e .)
+    src/             Package: UEBridge, Connection, CLI, errors
     tests/           Unit and integration tests
     pyproject.toml
-  skills/            Usage documentation for AI agents
-    ue_editor_installation.md
-    ue_editor_usage.md
+  skills/            AI-facing installation and usage docs
   scripts/
-    setup.sh         One-click Mac setup
+    setup.sh         macOS setup helper
 ```
 
 ## Detailed Documentation

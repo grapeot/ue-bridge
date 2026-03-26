@@ -1,63 +1,83 @@
-# Skill: UE Editor 自动化 — 安装
+# Skill: UE Editor Automation — Installation
 
-## 前置条件
+## Prerequisites
 
-- macOS 或 Windows
-- Unreal Engine 5.7+，已安装 UEEditorMCP 插件并编译通过（见 `docs/ue_editor_mcp_mac_setup.md`）
-- Python 3.9+
-- UE Editor 正在运行，插件已 Enabled
+- macOS or Windows
+- Unreal Engine 5.7+
+- Python 3.10+
+- UE Editor running with the UEEditorMCP plugin enabled
 
-## 安装 ue_bridge
+## Repo Layout
 
-ue_bridge 是一个纯 Python 库，位于 `combat_game/tools/ue_editor/`。不需要 pip install，直接用路径引用。
+This skill lives in `ue_bridge_skill/`. The key directories:
 
-### 在脚本中使用
-
-```python
-import sys
-sys.path.insert(0, "/path/to/combat_game/tools/ue_editor")
-
-from src import UEBridge
-
-ue = UEBridge()
-print(ue.ping())  # True
-ue.close()
+```
+ue_bridge_skill/
+  plugin/           C++ UE plugin (copy into your project's Plugins/)
+  python/           Python library (install with pip)
+  skills/           AI-facing documentation (this file)
+  scripts/          Platform-specific setup helpers
 ```
 
-### CLI 使用
+## Installation
+
+This markdown guide is the primary installation surface for AI agents. The setup scripts are convenience helpers, not exhaustive error-handling wrappers. If a step fails, inspect the exact failure and continue from there instead of assuming the script can recover automatically.
+
+### Step 1: Install the C++ plugin
+
+**macOS** — use the setup script:
 
 ```bash
-cd /path/to/combat_game/tools/ue_editor
-python3 -m src ping
-python3 -m src get-actors
-python3 -m src compile --blueprint BP_PlatformingCharacter
+cd ue_bridge_skill
+./scripts/setup.sh /path/to/your/UE/project
 ```
 
-### 运行测试
+The script copies the plugin into `<YourProject>/Plugins/UEEditorMCP/`, patches the RTTI build flag for macOS compatibility, and compiles using UE 5.7's build tools.
+
+**Windows** — copy manually:
+
+```
+Copy ue_bridge_skill/plugin/ → <YourProject>/Plugins/UEEditorMCP/
+```
+
+Then restart the UE Editor.
+
+### Step 2: Verify the plugin is running
+
+After restarting UE, the plugin auto-starts a TCP server on port 55558. Verification:
+
+- Output Log should contain `MCP Server started on port 55558`.
+- If using the CLI (Step 3), `ue-bridge ping` will confirm end-to-end connectivity.
+
+### Step 3: Install the Python library
 
 ```bash
-cd /path/to/combat_game/tools/ue_editor
-
-# 单元测试（不需要 UE）
-python3 -m pytest tests/ -v -k "not integration"
-
-# 集成测试（需要 UE 运行）
-python3 -m pytest tests/test_integration.py -v -m integration
+cd ue_bridge_skill/python
+pip install -e ".[dev]"
 ```
 
-## 确认安装成功
+This installs the `ue-bridge` package in editable mode with test dependencies. It provides:
+
+- **Python import**: `from src import UEBridge`
+- **CLI command**: `ue-bridge` (available after install)
+- **Module invocation**: `python3 -m src` (from the `python/` directory)
+
+### Step 4: Confirm end-to-end connectivity
 
 ```bash
-cd /path/to/combat_game/tools/ue_editor
-python3 -m src ping
+ue-bridge ping
 ```
 
-返回 `{"pong": true}` 即表示 Python -> TCP -> UE Plugin 全链路通了。
+Returns `{"pong": true}` if Python -> TCP -> UE Plugin is working. This is the single verification step — if ping succeeds, installation is complete.
 
-## 故障排查
+## Troubleshooting
 
-**"Cannot connect to Unreal Editor"**：UE Editor 没开或者 UEEditorMCP 插件没加载。检查 Edit > Plugins 里 UEEditorMCP 是否 Enabled。
+**"Cannot connect to Unreal Editor"**: UE Editor is not running, or the UEEditorMCP plugin is not enabled. Check Edit > Plugins in UE.
 
-**"Connection refused on port 55558"**：插件可能没启动 TCP server。在 UE 的 Output Log 里搜 "MCP" 看有没有启动日志。
+**"Connection refused on port 55558"**: The plugin's TCP server may not have started. Search for "MCP" in UE's Output Log.
 
-**Python import 报错**：确认 sys.path 里加了 `tools/ue_editor` 目录，且 `src/__init__.py` 存在。
+**Python import errors**: Ensure you ran `pip install -e .` from the `python/` directory. The package name is `ue-bridge` and the import is `from src import UEBridge`.
+
+**macOS RTTI build error**: The setup script patches `bUseRTTI=false` automatically. If building manually, ensure `.uplugin` or `.Build.cs` has `bUseRTTI = false`.
+
+**Windows plugin not loading**: Ensure the plugin folder is at `<YourProject>/Plugins/UEEditorMCP/` and contains `UEEditorMCP.uplugin`. Restart the editor after copying.
