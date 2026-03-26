@@ -12,7 +12,7 @@ $ErrorActionPreference = "Stop"
 $PluginDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PythonDir  = Join-Path $PluginDir "Python"
 $VenvDir    = Join-Path $PythonDir ".venv"
-$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PluginDir)  # Up from Plugins/UEEditorMCP
+$ProjectRoot = Split-Path -Parent (Split-Path -Parent $PluginDir)  # Up from Plugins/UEBridgeEditor
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan

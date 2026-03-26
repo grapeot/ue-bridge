@@ -10,7 +10,7 @@ setlocal EnableDelayedExpansion
 set "PLUGIN_DIR=%~dp0"
 set "PYTHON_DIR=%PLUGIN_DIR%Python"
 set "VENV_DIR=%PYTHON_DIR%\.venv"
-REM ProjectRoot = go up two levels from Plugins/UEEditorMCP
+REM ProjectRoot = go up two levels from Plugins/UEBridgeEditor
 for %%I in ("%PLUGIN_DIR%..\..\") do set "PROJECT_ROOT=%%~fI"
 
 echo ============================================

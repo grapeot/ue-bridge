@@ -6,7 +6,7 @@
 #   ./scripts/setup.sh /path/to/your/UE/project
 #
 # What it does:
-#   1. Copies plugin/ into <project>/Plugins/UEEditorMCP/
+#   1. Copies plugin/ into <project>/Plugins/UEBridgeEditor/
 #   2. Patches bUseRTTI = true -> false in Build.cs (Mac linker fix)
 #   3. Finds UE 5.7 RunUBT.sh and compiles the project
 #   4. Creates a Python venv in python/.venv if it doesn't exist
@@ -49,7 +49,7 @@ echo "Found project: $UPROJECT_NAME ($UPROJECT_FILE)"
 # Step 1: Copy plugin
 # ---------------------------------------------------------------------------
 
-PLUGIN_DEST="$UE_PROJECT_DIR/Plugins/UEEditorMCP"
+PLUGIN_DEST="$UE_PROJECT_DIR/Plugins/UEBridgeEditor"
 echo ""
 echo "==> Copying plugin to $PLUGIN_DEST ..."
 
@@ -66,7 +66,7 @@ echo "    Done."
 # Step 2: Fix RTTI in Build.cs
 # ---------------------------------------------------------------------------
 
-BUILD_CS="$PLUGIN_DEST/Source/UEEditorMCP/UEEditorMCP.Build.cs"
+BUILD_CS="$PLUGIN_DEST/Source/UEBridgeEditor/UEBridgeEditor.Build.cs"
 if [[ -f "$BUILD_CS" ]]; then
     echo ""
     echo "==> Patching RTTI in Build.cs ..."
