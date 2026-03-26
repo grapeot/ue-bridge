@@ -221,6 +221,15 @@ void FMCPEditorContext::RegisterMaterialNode(const FString& NodeName, UMaterialE
 	}
 }
 
+void FMCPEditorContext::UnregisterMaterialNode(const FString& NodeName)
+{
+	MaterialNodeMap.Remove(NodeName);
+	if (LastCreatedMaterialNodeName == NodeName)
+	{
+		LastCreatedMaterialNodeName.Empty();
+	}
+}
+
 UMaterialExpression* FMCPEditorContext::GetMaterialNode(const FString& NodeName) const
 {
 	// Handle special alias for last created node
@@ -333,10 +342,43 @@ UMaterialExpression* FMCPEditorContext::GetMaterialNode(const FString& NodeName)
 	return nullptr;
 }
 
+FString FMCPEditorContext::FindRegisteredMaterialNodeName(const UMaterialExpression* Expr) const
+{
+	if (!Expr)
+	{
+		return FString();
+	}
+
+	for (const auto& Pair : MaterialNodeMap)
+	{
+		if (Pair.Value.IsValid() && Pair.Value.Get() == Expr)
+		{
+			return Pair.Key;
+		}
+	}
+
+	return FString();
+}
+
 void FMCPEditorContext::ClearMaterialNodes()
 {
 	MaterialNodeMap.Empty();
 	LastCreatedMaterialNodeName.Empty();
+}
+
+bool FMCPEditorContext::HasCurrentMaterial() const
+{
+	return CurrentMaterial.IsValid();
+}
+
+UMaterial* FMCPEditorContext::GetCurrentMaterial() const
+{
+	return CurrentMaterial.Get();
+}
+
+const TMap<FString, TWeakObjectPtr<UMaterialExpression>>& FMCPEditorContext::GetRegisteredMaterialNodes() const
+{
+	return MaterialNodeMap;
 }
 
 UMaterial* FMCPEditorContext::GetMaterialByNameOrCurrent(const FString& MaterialName) const
@@ -344,7 +386,7 @@ UMaterial* FMCPEditorContext::GetMaterialByNameOrCurrent(const FString& Material
 	// If name is empty, use current
 	if (MaterialName.IsEmpty())
 	{
-		return CurrentMaterial.Get();
+		return GetCurrentMaterial();
 	}
 
 	// Search for Material by name in asset registry
@@ -492,4 +534,9 @@ FGuid FMCPEditorContext::ResolveNodeId(const FString& NodeIdOrAlias) const
 
 	// Invalid
 	return FGuid();
+}
+
+void FMCPEditorContext::SetLastCreatedNodeId(const FGuid& NodeId)
+{
+	LastCreatedNodeId = NodeId;
 }

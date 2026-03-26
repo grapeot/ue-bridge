@@ -4,6 +4,9 @@
 
 ### 2026-03-25
 
+- Replaced the hottest direct-field `FMCPEditorContext` usages with explicit API methods for last-created node and material-session state access
+- Added `FMCPEditorContext` helpers for current material access, registered material node lookup/removal, and last-node tracking so actions stop reaching into context internals as freely
+- Verified the `MCPContext` API refactor is behavior-preserving: Workflow A health, Blueprint create/compile, and graph create/connect/delete all still pass in the checked-in `UEBridgeHost`
 - Added the first graph/node workflow automation test: `UEEditorMCP.Graph.WorkflowA.CreateConnectDelete`
 - Verified the node workflow passes in the checked-in `hosts/UEBridgeHost` host: create blueprint, add nodes, inspect pins, connect, delete, and confirm missing-node failure shape
 - Confirmed the coverage net now protects not only host health and Blueprint compile, but also the first high-value node add/delete/connect path that future graph refactors will depend on
@@ -67,6 +70,7 @@
 - Build and automation execution for the same host must be serialized, not parallelized. Running the editor before the project plugin dylib is deployed can produce false "module could not be found" failures that look like product bugs but are really orchestration mistakes
 - For Blueprint contract tests, a unique per-run asset name is safer than create-then-delete on the same static path. Immediate deletion caused noisy AssetRegistry warnings; unique names kept the test signal clean enough for automation
 - The right first refactor target was not `MCPServer`, but the oversized `RegisterActions()` composition point. Extracting registration into a dedicated registry improved maintainability without reopening transport risk or forcing a naming migration too early
+- After `ActionRegistry`, the next safe de-MCP step was not a transport rewrite but shrinking direct state reach-through in `MCPContext`. Replacing field pokes with explicit context methods gave us a cleaner boundary without triggering a semantic migration
 - A self-contained host only becomes real when it is versioned inside the plugin repo and the integration script can launch it from a clean shell. Creating a smallest host outside the repo was a useful proof, but checking it into `hosts/UEBridgeHost` was the point where it became a maintainable product asset
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
 - The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front
