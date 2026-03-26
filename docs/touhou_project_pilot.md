@@ -132,9 +132,35 @@ PIE 控制对于课程的方法论意义：它直接体现了"AI 需要 visibili
 4. 贴图替换（占位符 → Gemini 生成）
 5. **最终 PIE 验证**：完整一局游戏流程
 
+## 执行中发现的问题
+
+### Bug: add_spawn_actor_from_class_node 导致 editor 崩溃
+
+**现象**：传入合法的 Blueprint 类名（如 "BP_Bullet"）创建 SpawnActorFromClass 节点时，editor 直接 crash，没有错误返回。
+
+**已修复部分（PR #30）**：当 Blueprint 或 Graph 为 null 时，新增 null check 返回错误而不是崩溃。传入不存在的类名现在能正确返回 "Class not found" 错误。
+
+**未修复部分**：传入存在的 Blueprint 类名时，class 查找成功，但 `UK2Node_SpawnActorFromClass` 的 `SpawnNode<>` 或 `ReconstructNode()` 内部仍然崩溃。这是 UE 引擎层面的问题，需要更深入的调查。
+
+**当前 workaround**：Boss 的 timer 逻辑通过 bridge 自动搭建，但 SpawnActorFromClass 节点需要人手动在 Blueprint 编辑器中添加并连接。
+
+**课程价值**：这恰好是课程方法论的一个真实案例——AI 在操作编辑器时遇到了 control 层面的边界，需要人工介入。记录这个 gap 本身就是有价值的教学材料。
+
+### Discovery: UE 5.7 数学函数命名变化
+
+UE 5.7 将 Blueprint 数学函数从 Float 改为 Double：`Add_FloatFloat` → `Add_DoubleDouble`，`Multiply_FloatFloat` → `Multiply_DoubleDouble`。AI 在首次调用时会失败，但通过错误信息可以自我修正。这是 feedback loop 有效性的一个小例证。
+
+### Discovery: Blueprint Pin 命名约定
+
+- EventTick 输出 pin 是 `then` 不是 `execute`
+- Branch 输出 pin 是 `then`/`else` 不是 `True`/`False`
+- CustomEvent 只有输出 pin，没有输入 execute pin（它是事件源）
+
+这些命名差异在首次使用时会导致连接失败，但错误信息会列出可用 pin，AI 可以据此修正。
+
 ## 成功标准
 
-1. AI 通过 UE Bridge 独立完成 Phase 1-3，人工干预仅限关键审美判断（第四层）
+1. AI 通过 UE Bridge 独立完成 Phase 1-3，人工干预仅限关键审美判断（第四层）和已知 bug workaround
 2. 最终产物是一个可玩的一关弹幕 demo：玩家能移动、射击、躲避弹幕、打败 Boss
 3. 构建过程中，AI 能通过 PIE 控制命令自行发现和修复至少一个运行时 bug（验证 feedback loop 有效性）
 4. 整个过程可作为课程案例，展示 visibility / control / feedback loop 方法论的实际应用

@@ -9,7 +9,12 @@
 - Phase 0 Step 1: Adding Python wrappers for PIE control (start_pie, stop_pie, get_pie_state) to bridge.py, CLI commands, and unit tests
 - Phase 0 Step 2: Added Python wrappers for 24 UMG Widget commands to bridge.py (create/delete widget blueprint, add text/progress bar/image/button/canvas/vertical box/horizontal box/size box/overlay/border/generic widget, set text/properties/binding, add to viewport, bind event, list/get tree/reparent/delete/rename/add child) plus 16 unit tests
 - Phase 0 Step 3: Updated skill doc (ue_editor_usage.md) with PIE CLI commands, PIE Python API section, and comprehensive UMG Widget Python API section
-- Bug fix: add_spawn_actor_from_class_node crashes editor when Blueprint/Graph not found — added null checks for GetTargetBlueprint and GetTargetGraph before SpawnNode call. Discovered during Touhou Pilot Phase 2 when passing "BP_Bullet" as class_to_spawn caused editor crash instead of error response
+- Bug fix (PR #30): add_spawn_actor_from_class_node crashes editor when Blueprint/Graph not found — added null checks for GetTargetBlueprint and GetTargetGraph before SpawnNode call
+- Known bug (still open): add_spawn_actor_from_class_node crashes even when Blueprint IS found. Null check fix prevents crash on invalid class names, but valid Blueprint classes (e.g., "BP_Bullet") still crash inside UK2Node_SpawnActorFromClass::SpawnNode or ReconstructNode. Root cause likely in UE's internal node reconstruction. Workaround: manually add SpawnActorFromClass node in Blueprint editor
+- Discovery: UE 5.7 math functions use Double not Float — Add_FloatFloat/Multiply_FloatFloat don't exist, must use Add_DoubleDouble/Multiply_DoubleDouble/GreaterEqual_DoubleDouble
+- Discovery: EventTick output pin is "then" not "execute"; Branch output pins are "then"/"else" not "True"/"False"; CustomEvent has no input execute pin (it's an event source)
+- Touhou Pilot Phase 1 complete: created BP_TouhouPlayer (13 nodes), BP_Bullet (8 nodes, movement logic), BP_Boss (timer logic with PrintString placeholder), input system (4 actions + IMC_Touhou + 7 key bindings), Gemini-generated textures (player/boss/bullet)
+- Touhou Pilot Phase 2 partial: Player movement + focus toggle wired, Bullet Tick movement wired, Boss timer logic wired with PrintString placeholder. SpawnActorFromClass blocked by crash bug
 
 ### 2026-03-25
 
