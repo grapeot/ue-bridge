@@ -437,7 +437,7 @@ void FBlueprintNodeAction::RegisterCreatedNode(UEdGraphNode* Node, FMCPEditorCon
 {
 	if (Node)
 	{
-		Context.LastCreatedNodeId = Node->NodeGuid;
+		Context.SetLastCreatedNodeId(Node->NodeGuid);
 	}
 }
 

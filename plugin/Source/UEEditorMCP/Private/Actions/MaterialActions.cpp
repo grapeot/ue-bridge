@@ -308,7 +308,7 @@ UMaterial* FMaterialAction::GetMaterialByNameOrCurrent(const TSharedPtr<FJsonObj
 	UMaterial* Result = nullptr;
 	if (MaterialName.IsEmpty())
 	{
-		Result = Context.CurrentMaterial.Get();
+		Result = Context.GetCurrentMaterial();
 		if (!Result)
 		{
 			OutError = TEXT("No current material set. Specify material_name or create a material first.");
@@ -1273,7 +1273,7 @@ bool FCompileMaterialAction::Validate(const TSharedPtr<FJsonObject>& Params, FMC
 {
 	// Allow compiling the current material if material_name is omitted.
 	const FString MaterialName = GetOptionalString(Params, TEXT("material_name"));
-	if (MaterialName.IsEmpty() && !Context.CurrentMaterial.IsValid())
+	if (MaterialName.IsEmpty() && !Context.HasCurrentMaterial())
 	{
 		OutError = TEXT("No current material set. Specify material_name or create/select a material first.");
 		return false;
@@ -1358,16 +1358,9 @@ TSharedPtr<FJsonObject> FCompileMaterialAction::ExecuteInternal(const TSharedPtr
 
 				// Try to find the registered node_name from context
 				FString NodeName;
-				if (Context.MaterialNodeMap.Num() > 0)
+				if (Context.GetRegisteredMaterialNodes().Num() > 0)
 				{
-					for (const auto& Pair : Context.MaterialNodeMap)
-					{
-						if (Pair.Value == ErrExpr)
-						{
-							NodeName = Pair.Key;
-							break;
-						}
-					}
+					NodeName = Context.FindRegisteredMaterialNodeName(ErrExpr);
 				}
 				if (!NodeName.IsEmpty())
 				{
@@ -1985,7 +1978,7 @@ TSharedPtr<FJsonObject> FGetMaterialSummaryAction::ExecuteInternal(const TShared
 	TMap<UMaterialExpression*, FString> ExprToName;
 
 	// First, populate from Context's MaterialNodeMap
-	for (const auto& CtxPair : Context.MaterialNodeMap)
+	for (const auto& CtxPair : Context.GetRegisteredMaterialNodes())
 	{
 		if (CtxPair.Value.IsValid())
 		{
@@ -2219,7 +2212,7 @@ TSharedPtr<FJsonObject> FRemoveMaterialExpressionAction::ExecuteInternal(const T
 		Material->GetExpressionCollection().RemoveExpression(Expr);
 
 		// Remove from context
-		Context.MaterialNodeMap.Remove(NodeName);
+	Context.UnregisterMaterialNode(NodeName);
 
 		Removed.Add(MakeShared<FJsonValueString>(NodeName));
 	}
@@ -3527,14 +3520,7 @@ TSharedPtr<FJsonObject> FGetMaterialSelectedNodesAction::ExecuteInternal(const T
 
 		// Build node name: check session map, Desc, parameter name, then fallback
 		FString NodeName;
-		for (const auto& Pair : Context.MaterialNodeMap)
-		{
-			if (Pair.Value.IsValid() && Pair.Value.Get() == Expr)
-			{
-				NodeName = Pair.Key;
-				break;
-			}
-		}
+		NodeName = Context.FindRegisteredMaterialNodeName(Expr);
 
 		if (NodeName.IsEmpty() && !Expr->Desc.IsEmpty())
 		{

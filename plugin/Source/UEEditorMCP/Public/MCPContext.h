@@ -104,11 +104,21 @@ public:
 	/** Register a created expression by name for later connection */
 	void RegisterMaterialNode(const FString& NodeName, UMaterialExpression* Expr);
 
+	void UnregisterMaterialNode(const FString& NodeName);
+
 	/** Get expression by registered name */
 	UMaterialExpression* GetMaterialNode(const FString& NodeName) const;
 
+	FString FindRegisteredMaterialNodeName(const UMaterialExpression* Expr) const;
+
 	/** Clear material nodes map (when switching materials) */
 	void ClearMaterialNodes();
+
+	bool HasCurrentMaterial() const;
+
+	UMaterial* GetCurrentMaterial() const;
+
+	const TMap<FString, TWeakObjectPtr<UMaterialExpression>>& GetRegisteredMaterialNodes() const;
 
 	/** Get Material by name, or use current if name is empty */
 	UMaterial* GetMaterialByNameOrCurrent(const FString& MaterialName) const;
@@ -125,4 +135,6 @@ public:
 
 	/** Resolve $last_node to actual node ID */
 	FGuid ResolveNodeId(const FString& NodeIdOrAlias) const;
+
+	void SetLastCreatedNodeId(const FGuid& NodeId);
 };

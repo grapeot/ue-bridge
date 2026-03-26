@@ -1338,7 +1338,7 @@ FPatchOpResult FApplyPatchAction::ExecuteAddNode(const FPatchOp& Op, UBlueprint*
 		TempIdMap.Add(TempId, CreatedNode->NodeGuid);
 
 		// Register in context for $last_node
-		Context.LastCreatedNodeId = CreatedNode->NodeGuid;
+		Context.SetLastCreatedNodeId(CreatedNode->NodeGuid);
 
 		Result.bSuccess = true;
 		Result.NodeId = CreatedNode->NodeGuid.ToString();
