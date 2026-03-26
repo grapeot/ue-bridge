@@ -24,6 +24,8 @@ htmlcov/
 *~
 .DS_Store
 tmp/
+hosts/UEBridgeHost/Content/UEBridgeAutomation/*.uasset
+hosts/UEBridgeHost/Content/UEBridgePythonIntegration/*.uasset
 
 # Unreal Engine build artifacts
 Binaries/
