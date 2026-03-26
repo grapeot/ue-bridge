@@ -139,3 +139,6 @@
 - AI-first usability is not only about API coverage; it is also about default pathways. If the docs still send the reader to GUI menus or raw logs first, the product is not actually AI-first yet, even if the CLI and tests are good
 - Once the product direction is encoded into repo-native PRD/RFC docs, later review and usability trial work becomes much easier to ground. Otherwise design intent drifts into chat history and becomes hard to audit
 - For unattended PIE smoke tests, the right success criterion is plugin behavior, not total engine silence. Engine-level warnings from unrelated subsystems (like audio device probing) can appear even when the lifecycle contract is healthy
+- Root cause found: set_actor_property("WorldSettings", "DefaultGameMode", class_path) crashes PIE, but setting GlobalDefaultGameMode in DefaultEngine.ini works perfectly. The bridge command sets the value correctly at edit time but something goes wrong at PIE startup. Workaround: modify DefaultEngine.ini directly
+- Confirmed: BP_TouhouPlayer as DefaultPawnClass works (no crash). The crash was entirely caused by how DefaultGameMode was being set, not the pawn itself
+- Confirmed: take_screenshot captures editor viewport (not game viewport during PIE). This is useful for observing the editor state but doesn't show the player's in-game camera view
