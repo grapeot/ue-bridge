@@ -9,7 +9,7 @@ Python script (your code)
       |
       |  TCP :55558
       v
-C++ plugin (UEEditorMCP)
+C++ plugin (local editor bridge)
       |
       |  Unreal Engine API
       v
@@ -29,7 +29,7 @@ The C++ plugin runs a TCP server inside the UE Editor process. The Python librar
 
 The setup script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, and compiles the plugin using UE 5.7's build tools.
 
-On **Windows**, copy `plugin/` into `<YourProject>/Plugins/UEEditorMCP/` manually, then restart the editor.
+On **Windows**, copy `plugin/` into your project's `Plugins/` directory, then restart the editor.
 
 If you want a repo-contained validation host instead of wiring your own project first, use:
 

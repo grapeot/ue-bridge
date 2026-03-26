@@ -1,7 +1,7 @@
 # ============================================================================
-#  UEEditorMCP - One-Click Python Setup (PowerShell)
+#  UE Bridge - Legacy Python Setup Helper (PowerShell)
 #  Automatically finds UE engine's built-in Python, creates a venv,
-#  and installs the MCP package. No external Python installation required.
+#  and installs the Python package. No external Python installation required.
 # ============================================================================
 
 param(
@@ -16,7 +16,7 @@ $ProjectRoot = Split-Path -Parent (Split-Path -Parent $PluginDir)  # Up from Plu
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host " UEEditorMCP - Python Environment Setup"  -ForegroundColor Cyan
+Write-Host " UE Bridge - Legacy Python Setup Helper"  -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
