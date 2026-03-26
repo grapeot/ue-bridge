@@ -132,6 +132,18 @@ def cmd_add_key_mapping(ue: UEBridge, args):
                                   action_path=args.action_path))
 
 
+def cmd_start_pie(ue: UEBridge, args):
+    _json_out(ue.start_pie(mode=args.mode))
+
+
+def cmd_stop_pie(ue: UEBridge, args):
+    _json_out(ue.stop_pie())
+
+
+def cmd_pie_state(ue: UEBridge, args):
+    _json_out(ue.get_pie_state())
+
+
 def cmd_raw(ue: UEBridge, args):
     params = json.loads(args.params) if args.params else None
     _json_out(ue.raw_command(args.command_type, params))
@@ -218,6 +230,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--key", required=True)
     p.add_argument("--action-path", default="/Game/Input/Actions")
 
+    p = sub.add_parser("start-pie", help="Start Play In Editor session")
+    p.add_argument("--mode", default="SelectedViewport",
+                   choices=["SelectedViewport", "NewWindow", "Simulate"])
+
+    sub.add_parser("stop-pie", help="Stop Play In Editor session")
+    sub.add_parser("pie-state", help="Query PIE session state")
+
     p = sub.add_parser("raw", help="Send raw command")
     p.add_argument("command_type")
     p.add_argument("--params", default=None, help="JSON params string")
@@ -250,6 +269,9 @@ COMMAND_MAP = {
     "create-input-action": cmd_create_input_action,
     "create-input-mapping-context": cmd_create_input_mapping_context,
     "add-key-mapping": cmd_add_key_mapping,
+    "start-pie": cmd_start_pie,
+    "stop-pie": cmd_stop_pie,
+    "pie-state": cmd_pie_state,
     "raw": cmd_raw,
     "auto-layout": cmd_auto_layout,
 }

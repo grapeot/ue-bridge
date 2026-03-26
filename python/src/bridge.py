@@ -659,3 +659,33 @@ class UEBridge:
             "blueprint_name": blueprint_name,
             "mode": mode,
         })
+
+    # -------------------------------------------------------------------------
+    # PIE (Play In Editor)
+    # -------------------------------------------------------------------------
+
+    def start_pie(self, mode: str = "SelectedViewport") -> dict:
+        """Start a Play In Editor session.
+
+        Args:
+            mode: "SelectedViewport" (default), "NewWindow", or "Simulate".
+
+        Returns:
+            dict with mode, message, is_async fields.
+            The session starts asynchronously; poll get_pie_state() to confirm.
+        """
+        return self._cmd("start_pie", {"mode": mode})
+
+    def stop_pie(self) -> dict:
+        """Stop the current PIE session."""
+        return self._cmd("stop_pie")
+
+    def get_pie_state(self) -> dict:
+        """Query current PIE session state.
+
+        Returns:
+            dict with 'state' ("Running" or "Stopped") and, when running:
+            world_name, is_paused, is_simulating, engine_time,
+            is_play_session_in_progress.
+        """
+        return self._cmd("get_pie_state")

@@ -2,6 +2,13 @@
 
 ## Changelog
 
+### 2026-03-26
+
+- Added `docs/touhou_project_pilot.md`: PRD + RFC for building a Touhou-style bullet hell game to validate AI end-to-end game production via UE Bridge
+- Key discovery during Phase 0 planning: C++ plugin already has PIE commands (start_pie, stop_pie, get_pie_state) and comprehensive UMG Widget actions (35+ commands). The gap is Python wrapper + CLI + tests, not C++ implementation
+- Phase 0 Step 1: Adding Python wrappers for PIE control (start_pie, stop_pie, get_pie_state) to bridge.py, CLI commands, and unit tests
+- Phase 0 Step 2: Adding Python wrappers for UMG Widget commands to bridge.py and unit tests
+
 ### 2026-03-25
 
 - Rewrote the default README and helper-script story so the preferred path is now explicitly AI-first: checked-in host first, installation docs first, `doctor` / `verify` first, and the repo-contained integration script as the end-to-end validation path
