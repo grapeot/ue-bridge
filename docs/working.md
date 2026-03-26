@@ -4,6 +4,9 @@
 
 ### 2026-03-25
 
+- Added the first graph/node workflow automation test: `UEEditorMCP.Graph.WorkflowA.CreateConnectDelete`
+- Verified the node workflow passes in the checked-in `hosts/UEBridgeHost` host: create blueprint, add nodes, inspect pins, connect, delete, and confirm missing-node failure shape
+- Confirmed the coverage net now protects not only host health and Blueprint compile, but also the first high-value node add/delete/connect path that future graph refactors will depend on
 - Moved `UEBridgeHost` into `ue_bridge_skill/hosts/UEBridgeHost`, so the repository now contains a checked-in self-contained automation host instead of depending on an external sibling project
 - Repointed the in-repo host's `Plugins/UEEditorMCP` symlink to the maintained repo-local `plugin/` directory and verified the host still builds as `UEBridgeHostEditor`
 - Added `python/tests/test_integration_workflow_a.py` as a host-agnostic Python ↔ Unreal integration suite covering `doctor`, `verify`, `get_context`, `create_blueprint`, and `compile`
@@ -66,3 +69,4 @@
 - The right first refactor target was not `MCPServer`, but the oversized `RegisterActions()` composition point. Extracting registration into a dedicated registry improved maintainability without reopening transport risk or forcing a naming migration too early
 - A self-contained host only becomes real when it is versioned inside the plugin repo and the integration script can launch it from a clean shell. Creating a smallest host outside the repo was a useful proof, but checking it into `hosts/UEBridgeHost` was the point where it became a maintainable product asset
 - Host-agnostic Python integration tests are a better long-term base than project-specific ones. They let us verify the core Workflow A contract without depending on arbitrary gameplay assets from a larger example project
+- The first graph/node test should stay workflow-shaped instead of node-taxonomy-shaped. A single create→inspect→connect→delete scenario gave much better signal than trying to enumerate every node class up front
