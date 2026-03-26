@@ -2604,7 +2604,16 @@ TSharedPtr<FJsonObject> FAddSpawnActorFromClassNodeAction::ExecuteInternal(const
 	FVector2D Position = GetNodePosition(Params);
 
 	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
+	if (!Blueprint)
+	{
+		return CreateErrorResponse(TEXT("Blueprint not found"));
+	}
+
 	UEdGraph* TargetGraph = GetTargetGraph(Params, Context);
+	if (!TargetGraph)
+	{
+		return CreateErrorResponse(TEXT("Target graph not found"));
+	}
 
 	// Find the class to spawn
 	UClass* SpawnClass = nullptr;

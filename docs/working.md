@@ -9,6 +9,7 @@
 - Phase 0 Step 1: Adding Python wrappers for PIE control (start_pie, stop_pie, get_pie_state) to bridge.py, CLI commands, and unit tests
 - Phase 0 Step 2: Added Python wrappers for 24 UMG Widget commands to bridge.py (create/delete widget blueprint, add text/progress bar/image/button/canvas/vertical box/horizontal box/size box/overlay/border/generic widget, set text/properties/binding, add to viewport, bind event, list/get tree/reparent/delete/rename/add child) plus 16 unit tests
 - Phase 0 Step 3: Updated skill doc (ue_editor_usage.md) with PIE CLI commands, PIE Python API section, and comprehensive UMG Widget Python API section
+- Bug fix: add_spawn_actor_from_class_node crashes editor when Blueprint/Graph not found — added null checks for GetTargetBlueprint and GetTargetGraph before SpawnNode call. Discovered during Touhou Pilot Phase 2 when passing "BP_Bullet" as class_to_spawn caused editor crash instead of error response
 
 ### 2026-03-25
 
