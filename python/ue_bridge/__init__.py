@@ -1,5 +1,3 @@
-"""ue_bridge — Python library for Unreal Editor automation via TCP."""
-
 from .bridge import UEBridge
 from .connection import Connection
 from .errors import UECommandError, UEConnectionError
