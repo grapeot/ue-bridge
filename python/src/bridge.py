@@ -689,3 +689,210 @@ class UEBridge:
             is_play_session_in_progress.
         """
         return self._cmd("get_pie_state")
+
+    # -------------------------------------------------------------------------
+    # UMG Widgets
+    # -------------------------------------------------------------------------
+
+    def create_widget_blueprint(self, widget_name: str,
+                                path: str = "/Game/UI/") -> dict:
+        params: dict[str, Any] = {"widget_name": widget_name}
+        if path:
+            params["path"] = path
+        return self._cmd("create_umg_widget_blueprint", params)
+
+    def delete_widget_blueprint(self, widget_name: str) -> dict:
+        return self._cmd("delete_umg_widget_blueprint", {"widget_name": widget_name})
+
+    def add_text_block(self, widget_name: str, text_block_name: str,
+                       text: str | None = None,
+                       position: tuple[float, float] | None = None) -> dict:
+        params: dict[str, Any] = {
+            "widget_name": widget_name,
+            "text_block_name": text_block_name,
+        }
+        if text is not None:
+            params["text"] = text
+        if position is not None:
+            params["position"] = list(position)
+        return self._cmd("add_text_block_to_widget", params)
+
+    def add_progress_bar(self, widget_name: str, progress_bar_name: str,
+                         percent: float | None = None,
+                         color: tuple[float, float, float, float] | None = None,
+                         position: tuple[float, float] | None = None,
+                         size: tuple[float, float] | None = None) -> dict:
+        params: dict[str, Any] = {
+            "widget_name": widget_name,
+            "progress_bar_name": progress_bar_name,
+        }
+        if percent is not None:
+            params["percent"] = percent
+        if color is not None:
+            params["color"] = list(color)
+        if position is not None:
+            params["position"] = list(position)
+        if size is not None:
+            params["size"] = list(size)
+        return self._cmd("add_progress_bar_to_widget", params)
+
+    def add_image(self, widget_name: str, image_name: str,
+                  position: tuple[float, float] | None = None,
+                  size: tuple[float, float] | None = None) -> dict:
+        params: dict[str, Any] = {
+            "widget_name": widget_name,
+            "image_name": image_name,
+        }
+        if position is not None:
+            params["position"] = list(position)
+        if size is not None:
+            params["size"] = list(size)
+        return self._cmd("add_image_to_widget", params)
+
+    def add_button(self, widget_name: str, button_name: str,
+                   position: tuple[float, float] | None = None) -> dict:
+        params: dict[str, Any] = {
+            "widget_name": widget_name,
+            "button_name": button_name,
+        }
+        if position is not None:
+            params["position"] = list(position)
+        return self._cmd("add_button_to_widget", params)
+
+    def add_canvas_panel(self, widget_name: str,
+                         canvas_name: str) -> dict:
+        return self._cmd("add_canvas_panel_to_widget", {
+            "widget_name": widget_name,
+            "canvas_name": canvas_name,
+        })
+
+    def add_vertical_box(self, widget_name: str,
+                         box_name: str) -> dict:
+        return self._cmd("add_vertical_box_to_widget", {
+            "widget_name": widget_name,
+            "vertical_box_name": box_name,
+        })
+
+    def add_horizontal_box(self, widget_name: str,
+                           box_name: str) -> dict:
+        return self._cmd("add_horizontal_box_to_widget", {
+            "widget_name": widget_name,
+            "horizontal_box_name": box_name,
+        })
+
+    def add_size_box(self, widget_name: str,
+                     size_box_name: str) -> dict:
+        return self._cmd("add_size_box_to_widget", {
+            "widget_name": widget_name,
+            "size_box_name": size_box_name,
+        })
+
+    def add_overlay(self, widget_name: str,
+                    overlay_name: str) -> dict:
+        return self._cmd("add_overlay_to_widget", {
+            "widget_name": widget_name,
+            "overlay_name": overlay_name,
+        })
+
+    def add_border(self, widget_name: str,
+                   border_name: str) -> dict:
+        return self._cmd("add_border_to_widget", {
+            "widget_name": widget_name,
+            "border_name": border_name,
+        })
+
+    def add_generic_widget(self, widget_name: str,
+                           component_class: str,
+                           component_name: str) -> dict:
+        return self._cmd("add_generic_widget_to_widget", {
+            "widget_name": widget_name,
+            "component_class": component_class,
+            "component_name": component_name,
+        })
+
+    def set_widget_text(self, widget_name: str, target: str,
+                        text: str,
+                        font_size: int | None = None,
+                        color: tuple[float, float, float, float] | None = None) -> dict:
+        params: dict[str, Any] = {
+            "widget_name": widget_name,
+            "target": target,
+            "text": text,
+        }
+        if font_size is not None:
+            params["font_size"] = font_size
+        if color is not None:
+            params["color"] = list(color)
+        return self._cmd("set_widget_text", params)
+
+    def set_widget_properties(self, widget_name: str, target: str,
+                              **properties: Any) -> dict:
+        params: dict[str, Any] = {
+            "widget_name": widget_name,
+            "target": target,
+        }
+        params.update(properties)
+        return self._cmd("set_widget_properties", params)
+
+    def set_text_block_binding(self, widget_name: str,
+                               text_block_name: str,
+                               binding_property: str) -> dict:
+        return self._cmd("set_text_block_binding", {
+            "widget_name": widget_name,
+            "text_block_name": text_block_name,
+            "binding_property": binding_property,
+        })
+
+    def add_widget_to_viewport(self, widget_name: str,
+                               z_order: int = 0) -> dict:
+        params: dict[str, Any] = {"widget_name": widget_name}
+        if z_order:
+            params["z_order"] = z_order
+        return self._cmd("add_widget_to_viewport", params)
+
+    def bind_widget_event(self, widget_name: str, target: str,
+                          event_name: str,
+                          function_name: str) -> dict:
+        return self._cmd("bind_widget_event", {
+            "widget_name": widget_name,
+            "target": target,
+            "event_name": event_name,
+            "function_name": function_name,
+        })
+
+    def list_widget_components(self, widget_name: str) -> dict:
+        return self._cmd("list_widget_components", {"widget_name": widget_name})
+
+    def get_widget_tree(self, widget_name: str) -> dict:
+        return self._cmd("get_widget_tree", {"widget_name": widget_name})
+
+    def reparent_widgets(self, widget_name: str,
+                         target_parent: str,
+                         children: list[str]) -> dict:
+        return self._cmd("reparent_widgets", {
+            "widget_name": widget_name,
+            "target_parent": target_parent,
+            "children": children,
+        })
+
+    def delete_widget(self, widget_name: str, target: str) -> dict:
+        return self._cmd("delete_widget_from_blueprint", {
+            "widget_name": widget_name,
+            "target": target,
+        })
+
+    def rename_widget(self, widget_name: str, target: str,
+                      new_name: str) -> dict:
+        return self._cmd("rename_widget_in_blueprint", {
+            "widget_name": widget_name,
+            "target": target,
+            "new_name": new_name,
+        })
+
+    def add_widget_child(self, widget_name: str, parent: str,
+                         child: str) -> dict:
+        return self._cmd("add_widget_child", {
+            "widget_name": widget_name,
+            "parent": parent,
+            "child": child,
+        })

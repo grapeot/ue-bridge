@@ -507,3 +507,199 @@ class TestWorkflowADiagnostics:
             "context": True,
             "editor_ready": False,
         }
+
+
+class TestUMGWidgetWrappers:
+    """Verify UMG Widget wrappers assemble correct parameters."""
+
+    def test_create_widget_blueprint(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.create_widget_blueprint("WBP_HUD", path="/Game/UI/")
+
+        assert mock.send_command.call_args[0] == (
+            "create_umg_widget_blueprint",
+            {"widget_name": "WBP_HUD", "path": "/Game/UI/"},
+        )
+
+    def test_delete_widget_blueprint(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.delete_widget_blueprint("WBP_HUD")
+
+        assert mock.send_command.call_args[0] == (
+            "delete_umg_widget_blueprint",
+            {"widget_name": "WBP_HUD"},
+        )
+
+    def test_add_text_block_minimal(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_text_block("WBP_HUD", "ScoreText")
+
+        params = mock.send_command.call_args[0][1]
+        assert params["widget_name"] == "WBP_HUD"
+        assert params["text_block_name"] == "ScoreText"
+        assert "text" not in params
+
+    def test_add_text_block_with_options(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_text_block("WBP_HUD", "ScoreText", text="Score: 0", position=(10, 20))
+
+        params = mock.send_command.call_args[0][1]
+        assert params["text"] == "Score: 0"
+        assert params["position"] == [10, 20]
+
+    def test_add_progress_bar_with_color(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_progress_bar("WBP_HUD", "BossHP", percent=1.0, color=(1, 0, 0, 1))
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {
+            "widget_name": "WBP_HUD",
+            "progress_bar_name": "BossHP",
+            "percent": 1.0,
+            "color": [1, 0, 0, 1],
+        }
+
+    def test_add_image(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_image("WBP_HUD", "LifeIcon", position=(5, 5), size=(32, 32))
+
+        params = mock.send_command.call_args[0][1]
+        assert params["image_name"] == "LifeIcon"
+        assert params["position"] == [5, 5]
+        assert params["size"] == [32, 32]
+
+    def test_add_canvas_panel(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_canvas_panel("WBP_HUD", "MainCanvas")
+
+        assert mock.send_command.call_args[0] == (
+            "add_canvas_panel_to_widget",
+            {"widget_name": "WBP_HUD", "canvas_name": "MainCanvas"},
+        )
+
+    def test_add_vertical_box(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_vertical_box("WBP_HUD", "InfoBox")
+
+        assert mock.send_command.call_args[0] == (
+            "add_vertical_box_to_widget",
+            {"widget_name": "WBP_HUD", "vertical_box_name": "InfoBox"},
+        )
+
+    def test_set_widget_text_with_font_size(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.set_widget_text("WBP_HUD", "ScoreText", "Score: 1000", font_size=24)
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {
+            "widget_name": "WBP_HUD",
+            "target": "ScoreText",
+            "text": "Score: 1000",
+            "font_size": 24,
+        }
+
+    def test_set_widget_properties_passes_kwargs(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.set_widget_properties("WBP_HUD", "ScoreText",
+                                 position=[100, 50], visibility="Visible")
+
+        params = mock.send_command.call_args[0][1]
+        assert params["widget_name"] == "WBP_HUD"
+        assert params["target"] == "ScoreText"
+        assert params["position"] == [100, 50]
+        assert params["visibility"] == "Visible"
+
+    def test_set_text_block_binding(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.set_text_block_binding("WBP_HUD", "ScoreText", "ScoreVar")
+
+        assert mock.send_command.call_args[0] == (
+            "set_text_block_binding",
+            {
+                "widget_name": "WBP_HUD",
+                "text_block_name": "ScoreText",
+                "binding_property": "ScoreVar",
+            },
+        )
+
+    def test_add_widget_to_viewport(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True, "class_path": "/Game/UI/WBP_HUD.WBP_HUD_C"}
+
+        result = ue.add_widget_to_viewport("WBP_HUD", z_order=10)
+
+        params = mock.send_command.call_args[0][1]
+        assert params == {"widget_name": "WBP_HUD", "z_order": 10}
+        assert result["class_path"] == "/Game/UI/WBP_HUD.WBP_HUD_C"
+
+    def test_list_widget_components(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True, "components": [{"name": "ScoreText"}]}
+
+        result = ue.list_widget_components("WBP_HUD")
+
+        assert mock.send_command.call_args[0] == (
+            "list_widget_components", {"widget_name": "WBP_HUD"},
+        )
+
+    def test_get_widget_tree(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True, "tree": {}}
+
+        ue.get_widget_tree("WBP_HUD")
+
+        assert mock.send_command.call_args[0] == (
+            "get_widget_tree", {"widget_name": "WBP_HUD"},
+        )
+
+    def test_reparent_widgets(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.reparent_widgets("WBP_HUD", "MainCanvas", ["ScoreText", "BossHP"])
+
+        assert mock.send_command.call_args[0] == (
+            "reparent_widgets",
+            {
+                "widget_name": "WBP_HUD",
+                "target_parent": "MainCanvas",
+                "children": ["ScoreText", "BossHP"],
+            },
+        )
+
+    def test_add_generic_widget(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.add_generic_widget("WBP_HUD", "ScrollBox", "MyScrollBox")
+
+        assert mock.send_command.call_args[0] == (
+            "add_generic_widget_to_widget",
+            {
+                "widget_name": "WBP_HUD",
+                "component_class": "ScrollBox",
+                "component_name": "MyScrollBox",
+            },
+        )
