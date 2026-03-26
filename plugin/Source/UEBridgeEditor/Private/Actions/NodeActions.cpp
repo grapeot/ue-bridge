@@ -2660,11 +2660,20 @@ TSharedPtr<FJsonObject> FAddSpawnActorFromClassNodeAction::ExecuteInternal(const
 		return CreateErrorResponse(FString::Printf(TEXT("Class to spawn not found: %s"), *ClassToSpawn));
 	}
 
+	// Create the SpawnActorFromClass node.
+	// Note: the signal-based crash protection in ExecuteWithCrashProtection
+	// will catch any access violation. If we crash here, the whole action
+	// returns a "crash prevented" error — the editor stays alive.
 	UK2Node_SpawnActorFromClass* SpawnNode = FEdGraphSchemaAction_K2NewNode::SpawnNode<UK2Node_SpawnActorFromClass>(
 		TargetGraph, Position, EK2NewNodeFlags::None
 	);
 
-	// Set the class to spawn (must be done after pins are allocated)
+	if (!SpawnNode)
+	{
+		return CreateErrorResponse(TEXT("Failed to create SpawnActorFromClass node"));
+	}
+
+	// Set the class to spawn via the class pin
 	UEdGraphPin* ClassPin = SpawnNode->GetClassPin();
 	if (ClassPin)
 	{
@@ -2674,6 +2683,8 @@ TSharedPtr<FJsonObject> FAddSpawnActorFromClassNodeAction::ExecuteInternal(const
 			K2Schema->TrySetDefaultObject(*ClassPin, SpawnClass);
 		}
 	}
+
+	// ReconstructNode updates pins based on the class.
 	SpawnNode->ReconstructNode();
 
 	MarkBlueprintModified(Blueprint, Context);

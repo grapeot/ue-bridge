@@ -107,6 +107,40 @@ static DWORD SEH_TryCall(void (*Func)(void*), void* UserData)
 #pragma warning(pop)
 #endif
 
+// -- Unix signal-based crash protection for macOS/Linux --
+#if !PLATFORM_WINDOWS || !defined(_MSC_VER)
+#include <signal.h>
+#include <setjmp.h>
+
+static thread_local sigjmp_buf GSignalJmpBuf;
+static thread_local bool GSignalGuardActive = false;
+static thread_local struct sigaction GOldSIGSEGV;
+static thread_local struct sigaction GOldSIGBUS;
+static thread_local struct sigaction GOldSIGABRT;
+
+static void SignalCrashHandler(int Signal)
+{
+	if (GSignalGuardActive)
+	{
+		GSignalGuardActive = false;
+		siglongjmp(GSignalJmpBuf, Signal);
+	}
+	// Not in our guard — call original handler
+	struct sigaction* OldAction = (Signal == SIGSEGV) ? &GOldSIGSEGV :
+	                               (Signal == SIGBUS) ? &GOldSIGBUS : &GOldSIGABRT;
+	if (OldAction->sa_handler != SIG_DFL && OldAction->sa_handler != SIG_IGN)
+	{
+		OldAction->sa_handler(Signal);
+	}
+	else
+	{
+		// Re-raise with default handler
+		signal(Signal, SIG_DFL);
+		raise(Signal);
+	}
+}
+#endif
+
 TSharedPtr<FJsonObject> FEditorAction::ExecuteWithCrashProtection(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
 {
 #if PLATFORM_WINDOWS && defined(_MSC_VER)
@@ -121,7 +155,39 @@ TSharedPtr<FJsonObject> FEditorAction::ExecuteWithCrashProtection(const TSharedP
 	}
 	return OutResult;
 #else
-	return ExecuteInternal(Params, Context);
+	// macOS/Linux: use signal handler to catch SIGSEGV/SIGBUS/SIGABRT
+	struct sigaction NewAction;
+	FMemory::Memzero(&NewAction, sizeof(NewAction));
+	NewAction.sa_handler = SignalCrashHandler;
+	sigemptyset(&NewAction.sa_mask);
+	NewAction.sa_flags = 0;
+
+	sigaction(SIGSEGV, &NewAction, &GOldSIGSEGV);
+	sigaction(SIGBUS, &NewAction, &GOldSIGBUS);
+	sigaction(SIGABRT, &NewAction, &GOldSIGABRT);
+
+	GSignalGuardActive = true;
+	int SignalCaught = sigsetjmp(GSignalJmpBuf, 1);
+	if (SignalCaught != 0)
+	{
+		// We caught a crash signal
+		GSignalGuardActive = false;
+		sigaction(SIGSEGV, &GOldSIGSEGV, nullptr);
+		sigaction(SIGBUS, &GOldSIGBUS, nullptr);
+		sigaction(SIGABRT, &GOldSIGABRT, nullptr);
+
+		UE_LOG(LogMCP, Error, TEXT("Signal %d caught in action '%s' — crash prevented"), SignalCaught, *GetActionName());
+		return CreateCrashPreventedResponse();
+	}
+
+	TSharedPtr<FJsonObject> Result = ExecuteInternal(Params, Context);
+
+	GSignalGuardActive = false;
+	sigaction(SIGSEGV, &GOldSIGSEGV, nullptr);
+	sigaction(SIGBUS, &GOldSIGBUS, nullptr);
+	sigaction(SIGABRT, &GOldSIGABRT, nullptr);
+
+	return Result;
 #endif
 }
 
