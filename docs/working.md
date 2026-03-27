@@ -156,3 +156,7 @@
 - Confirmed bullets spawning and moving in PIE: Boss timer fires every 0.5s, bullets fly from Boss toward Player at speed 100, visible in game viewport
 - Discovery: get_actors and take_screenshot only access editor world, not PIE world. Bullets spawned during PIE are invisible to both. Need game viewport screenshot for full observability (future work)
 - Discovery: set_variable_default for Vector type uses UE string format "(X=0.0,Y=-1.0,Z=0.0)"
+- Root cause of player not moving: GetWorldDeltaSeconds returns 0 inside Enhanced Input event callback (Triggered). Fix: removed DeltaSeconds multiply from movement chain, adjusted speed values. Enhanced Input Triggered fires every frame during key hold, so dt multiplication is unnecessary
+- Discovery: Enhanced Input Axis2D WASD requires Swizzle/Negate modifiers — W=Swizzle, S=Negate+Swizzle, A=Negate, D=none
+- New infra: simulate_key (Slate-level keyboard simulation), but Enhanced Input events only fire when game viewport has focus — simulate_key triggers Slate events but not Enhanced Input unless viewport is focused
+- Player movement confirmed working: WASD moves the blue sphere in top-down view
