@@ -160,3 +160,8 @@
 - Discovery: Enhanced Input Axis2D WASD requires Swizzle/Negate modifiers — W=Swizzle, S=Negate+Swizzle, A=Negate, D=none
 - New infra: simulate_key (Slate-level keyboard simulation), but Enhanced Input events only fire when game viewport has focus — simulate_key triggers Slate events but not Enhanced Input unless viewport is focused
 - Player movement confirmed working: WASD moves the blue sphere in top-down view
+- Fixed camera solution: bAbsoluteLocation/bAbsoluteRotation on CDO gets reset by compile. set_component_property for bAbsoluteRotation crashes. SetViewTarget to spawned CameraActor is the only reliable approach
+- Critical bug: movement and camera shared same MakeVector node — movement Z was 2000 (camera height), causing Player to fly off screen. Root cause: deleting "camera MakeVector" also deleted movement MakeVector because detection heuristic was wrong. Fix: separate MakeVector nodes for movement (Z=0) and camera (Z=500)
+- Discovery: PlayerCameraManager always follows possessed pawn's CameraComponent. Only SetViewTarget to a separate actor can break this
+- Discovery: set_pin_default doesn't work for TSubclassOf (class reference) pins. CameraActor class was set successfully via some path but shows empty in pin query
+- Confirmed: Player WASD movement working (position changes verified via get_pie_actor_property), fixed camera at (0,150,500), Boss spiral bullets, all in same frame
