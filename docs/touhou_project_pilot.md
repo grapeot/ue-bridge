@@ -132,35 +132,147 @@ PIE 控制对于课程的方法论意义：它直接体现了"AI 需要 visibili
 4. 贴图替换（占位符 → Gemini 生成）
 5. **最终 PIE 验证**：完整一局游戏流程
 
-## 执行中发现的问题
+## 执行中发现的问题和教训
 
-### Bug: add_spawn_actor_from_class_node 导致 editor 崩溃
+以下按类别整理了整个 pilot 过程中发现的所有 bug、feature gap、和关键 discovery。每一条都是课程教学素材的候选，标注了对方法论的意义。
 
-**现象**：传入合法的 Blueprint 类名（如 "BP_Bullet"）创建 SpawnActorFromClass 节点时，editor 直接 crash，没有错误返回。
+### 1. Crash 和稳定性
 
-**已修复部分（PR #30）**：当 Blueprint 或 Graph 为 null 时，新增 null check 返回错误而不是崩溃。传入不存在的类名现在能正确返回 "Class not found" 错误。
+#### 1.1 UK2Node_SpawnActorFromClass 在 macOS 上必崩
 
-**未修复部分**：传入存在的 Blueprint 类名时，class 查找成功，但 `UK2Node_SpawnActorFromClass` 的 `SpawnNode<>` 或 `ReconstructNode()` 内部仍然崩溃。这是 UE 引擎层面的问题，需要更深入的调查。
+**现象**：通过 bridge 创建 SpawnActorFromClass 节点，无论传入 native class 还是 Blueprint class，editor 都会 crash（access violation in SpawnNode 或 ReconstructNode）。
 
-**当前 workaround**：Boss 的 timer 逻辑通过 bridge 自动搭建，但 SpawnActorFromClass 节点需要人手动在 Blueprint 编辑器中添加并连接。
+**修复历程**：
+- PR #30：加了 null check，修复了传入无效 class 名时的崩溃
+- PR #34：实现了 macOS signal-based crash protection（sigsetjmp/siglongjmp），捕获 SIGSEGV/SIGBUS/SIGABRT。崩溃不再杀死 editor，而是返回 "CRASH PREVENTED" 错误
 
-**课程价值**：这恰好是课程方法论的一个真实案例——AI 在操作编辑器时遇到了 control 层面的边界，需要人工介入。记录这个 gap 本身就是有价值的教学材料。
+**最终 workaround**：用 `BeginDeferredActorSpawnFromClass` + `FinishSpawningActor`（普通函数调用节点）替代。这两个是 GameplayStatics 的标准函数，通过 `add_function_node` 创建，完全不触发崩溃。
 
-### Discovery: UE 5.7 数学函数命名变化
+**课程价值**：展示了 AI 遇到 control 边界时的三层应对策略：(1) 修 bug，(2) 加 crash protection 兜底，(3) 找替代方案绕过。
 
-UE 5.7 将 Blueprint 数学函数从 Float 改为 Double：`Add_FloatFloat` → `Add_DoubleDouble`，`Multiply_FloatFloat` → `Multiply_DoubleDouble`。AI 在首次调用时会失败，但通过错误信息可以自我修正。这是 feedback loop 有效性的一个小例证。
+#### 1.2 同 session 修改 Blueprint 后 PIE 必崩
 
-### Discovery: Blueprint Pin 命名约定
+**现象**：在同一个 editor session 内通过 bridge 修改 Blueprint（编译保存后），立即启动 PIE 会 crash。重启 editor 后 PIE 正常。
+
+**根因**：可能是 Blueprint 的 CDO（Class Default Object）在 hot reload 后状态不一致。
+
+**workaround**：修改 BP 后必须 save → 重启 editor → 再 PIE。AI 工作流已适配：每次修改后自动重启。
+
+**课程价值**：这是 feedback loop 的核心约束——AI 不能"改完立刻验"，必须经过一个 restart 周期。
+
+#### 1.3 focus_viewport 导致 editor crash
+
+**现象**：调用 `focus_viewport` 时 editor crash。
+
+**workaround**：避免使用，用 `set_viewport_transform` 代替（虽然效果有时也不生效）。
+
+#### 1.4 set_actor_property 设 DefaultGameMode 导致 PIE crash
+
+**现象**：通过 `set_actor_property("WorldSettings", "DefaultGameMode", class_path)` 设置后，PIE 启动即 crash。
+
+**根因**：`set_actor_property` 设置 TSubclassOf 属性的方式在运行时可能不兼容。
+
+**workaround**：通过修改 `DefaultEngine.ini` 的 `GlobalDefaultGameMode` 设置。重启后生效，PIE 正常。
+
+**课程价值**：同一个功能通过不同路径实现，一个崩溃一个正常——体现了 UE 内部不同 API 路径的差异。
+
+### 2. Observability（可见性）
+
+#### 2.1 editor world vs PIE world 的隔离
+
+**现象**：`get_actors`、`get_actor_properties`、`take_screenshot` 只能访问 editor world。PIE 运行时 spawn 的 actor（子弹等）在 editor world 中不可见。
+
+**修复**：新增了 `get_pie_actors` 和 `get_pie_actor_property` 命令（PR #35），直接遍历 PIE world 的 `TActorIterator`。
+
+**课程价值**：这是 visibility 方法论的核心挑战——AI 操作的世界和运行时的世界是两个不同的 world context，必须有对应的 API 才能观察运行时状态。
+
+#### 2.2 take_screenshot 只抓 editor viewport
+
+**现象**：`take_screenshot` 抓的是 editor viewport（3D 编辑器视角），不是 PIE 的 game viewport（玩家相机视角）。PIE 期间 game viewport 的 ReadPixels 会导致 crash。
+
+**当前状态**：editor viewport 截图可用于观察编辑器状态，但无法看到玩家视角。
+
+**课程价值**：即使有截图能力，"看到什么"取决于截图来源。真正的 game feel 验证仍然需要人。
+
+#### 2.3 AI 自动重启 UE Editor
+
+**实现**：`pkill -f UnrealEditor && sleep 3 && /path/to/UnrealEditor project.uproject &`，然后 poll `ue-bridge ping` 等待就绪。约 12 秒恢复。
+
+**发现**：`open .uproject` 在 macOS 上不可靠，直接调 UnrealEditor binary 更稳定。
+
+**课程价值**：crash recovery 是 AI 自主工作的基础能力。没有自动重启，每次 crash 都需要人介入。
+
+### 3. UE 5.7 / Enhanced Input 特性
+
+#### 3.1 数学函数用 Double 不用 Float
+
+UE 5.7 的 Blueprint 数学函数改名了：`Add_FloatFloat` → `Add_DoubleDouble`，`Multiply_FloatFloat` → `Multiply_DoubleDouble`，`GreaterEqual_FloatFloat` → `GreaterEqual_DoubleDouble`。
+
+AI 在首次调用时失败，但错误信息 "Function not found" 引导 AI 尝试替代名称并自我修正。这是 feedback loop 的一个小而完美的例证。
+
+#### 3.2 Blueprint Pin 命名不符合直觉
 
 - EventTick 输出 pin 是 `then` 不是 `execute`
 - Branch 输出 pin 是 `then`/`else` 不是 `True`/`False`
-- CustomEvent 只有输出 pin，没有输入 execute pin（它是事件源）
+- CustomEvent 只有输出 pin（事件源），没有输入 execute pin
 
-这些命名差异在首次使用时会导致连接失败，但错误信息会列出可用 pin，AI 可以据此修正。
+错误信息会列出所有可用 pin，AI 可以据此修正。
+
+#### 3.3 Enhanced Input Axis2D 需要 Swizzle/Negate 修饰符
+
+WASD 映射到 Axis2D 时，每个键需要不同的 modifier：
+- W: Swizzle(YXZ) — 把 1D 值映射到 Y 轴
+- S: Negate + Swizzle — Y 轴负方向
+- A: Negate — X 轴负方向
+- D: 无 modifier — X 轴正方向
+
+不加 modifier 时所有键发送相同的原始值，导致移动完全无效。Bridge 的 `add_key_mapping` 已支持 `modifiers` 参数。
+
+#### 3.4 GetWorldDeltaSeconds 在 Enhanced Input 回调中返回 0
+
+**现象**：Player 移动逻辑完全正确（graph describe 验证了全部连接），但 player 不动。
+
+**根因**：移动链中用了 `GetWorldDeltaSeconds` 乘以速度，但在 Enhanced Input 的 `Triggered` 事件回调中，`GetWorldDeltaSeconds` 返回 0。
+
+**修复**：去掉 DeltaSeconds 乘法。Enhanced Input 的 `Triggered` 事件在按键 held 时每帧触发，不需要手动乘 dt。
+
+**课程价值**：这是 feedback loop 最有力的案例之一——AI 通过 `describe_graph` 分析全部连接（确认正确），推理出 DeltaSeconds 可能为零（数据问题而非连接问题），修改后验证通过。整个诊断过程无人工参与。
+
+### 4. World Partition 和关卡管理
+
+#### 4.1 Open World 模板的 World Partition 导致 actor 丢失
+
+**现象**：通过 `spawn_blueprint_actor` 创建的 actor 在 editor 重启后消失。
+
+**根因**：Open World 模板使用 World Partition streaming 系统，动态 spawn 的 actor 没有被正确持久化到 streaming cell。
+
+**修复**：用 `new_level` 创建无 World Partition 的空关卡。设置 `DefaultEngine.ini` 的 `EditorStartupMap` 和 `GameDefaultMap` 确保重启后加载正确关卡。
+
+#### 4.2 spawn_actor 不支持所有 actor 类
+
+`PlayerStart`、`SkyLight` 等类无法通过 `spawn_actor` 创建（"Unknown actor type"）。支持的类型有限（StaticMeshActor、DirectionalLight、PointLight、SpotLight、CameraActor 等）。
+
+**workaround**：不 spawn PlayerStart，GameMode 会在原点 (0,0,0) spawn pawn。
+
+### 5. 新增的基础设施
+
+以下是在 pilot 过程中为了解决问题而新增的 bridge 能力：
+
+| 命令 | PR | 用途 |
+|------|-----|------|
+| `start_pie` / `stop_pie` / `get_pie_state` | #26 | PIE 生命周期控制 |
+| UMG Widget 24 个方法 | #27 | HUD 构建 |
+| `take_screenshot` | #32 | Editor viewport 截图 |
+| `new_level` | 直接 push | 创建空关卡 |
+| macOS crash protection | #34 | 信号级崩溃捕获 |
+| `execute_console_command` | #35 | PIE 控制台命令 |
+| `get_pie_actors` | #35 | PIE world actor 查询 |
+| `get_pie_actor_property` | #35 | PIE world actor 属性读取 |
+| `simulate_key` | #35 | Slate 级键盘模拟 |
 
 ## 成功标准
 
 1. AI 通过 UE Bridge 独立完成 Phase 1-3，人工干预仅限关键审美判断（第四层）和已知 bug workaround
 2. 最终产物是一个可玩的一关弹幕 demo：玩家能移动、射击、躲避弹幕、打败 Boss
-3. 构建过程中，AI 能通过 PIE 控制命令自行发现和修复至少一个运行时 bug（验证 feedback loop 有效性）
+3. 构建过程中，AI 能通过 PIE 控制命令自行发现和修复至少一个运行时 bug（验证 feedback loop 有效性）——**已达成：DeltaSeconds 为零的 bug 完全由 AI 通过 graph describe + 推理 + 修复 + 验证闭环解决**
 4. 整个过程可作为课程案例，展示 visibility / control / feedback loop 方法论的实际应用
