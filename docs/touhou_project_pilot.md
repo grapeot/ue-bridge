@@ -276,3 +276,48 @@ WASD 映射到 Axis2D 时，每个键需要不同的 modifier：
 2. 最终产物是一个可玩的一关弹幕 demo：玩家能移动、射击、躲避弹幕、打败 Boss
 3. 构建过程中，AI 能通过 PIE 控制命令自行发现和修复至少一个运行时 bug（验证 feedback loop 有效性）——**已达成：DeltaSeconds 为零的 bug 完全由 AI 通过 graph describe + 推理 + 修复 + 验证闭环解决**
 4. 整个过程可作为课程案例，展示 visibility / control / feedback loop 方法论的实际应用
+
+## 从 Demo 到可玩游戏的 Gap 清单
+
+### 已验证工作的
+
+- Player WASD 移动（Enhanced Input + Axis2D + Swizzle/Negate modifiers）
+- Boss 螺旋弹幕（Timer + BeginDeferredActorSpawnFromClass + 角度递增）
+- 固定 top-down 相机（SetViewTarget 到独立 CameraActor）
+- 碰撞 Blueprint 逻辑（ActorBeginOverlap → HP/Lives 减少，已搭建未验证）
+- HUD Widget 资产（WBP_TouhouHUD，已创建未显示）
+- Enhanced Input 注册（BeginPlay → Cast PlayerController → AddMappingContext）
+
+### 剩余 Gap（按优先级排序）
+
+#### 1. 相机调成竖屏正交（高优先级）
+
+现在是透视相机，视野比例不对。东方 Project 是竖屏正交。set_pin_default 对 class reference pin 不工作，无法 spawn BP_TouhouCamera（已有正交设置）。需要 spawn 后修改运行时 camera 属性，或新增 set_pie_actor_property 命令。
+
+#### 2. 玩家射击（高优先级）
+
+按 Z 键从 Player 位置 spawn BP_Bullet，Direction 朝 Boss 方向。用 BeginDeferredActorSpawnFromClass 绕过 SpawnActorFromClass crash。
+
+#### 3. 碰撞检测生效（高优先级）
+
+SphereComponent 默认可能不触发 overlap event。需要设置 bGenerateOverlapEvents=true 和 collision response。
+
+#### 4. HUD 显示（中优先级）
+
+BeginPlay 里 CreateWidget + AddToViewport。文本绑定到 Score/Lives/BombCount 变量。
+
+#### 5. Boss 死亡 / Game Over（中优先级）
+
+HP <= 0 → Boss 消失。Lives <= 0 → Game Over 文本。
+
+#### 6. 弹幕 pattern 丰富化（低优先级）
+
+扇形弹、环形弹。需要 Blueprint ForLoop，bridge 可以做但复杂。
+
+#### 7. 子弹清理（低优先级）
+
+飞出视野的子弹需要 DestroyActor。BP_Bullet Tick 里检查距离。
+
+### 最快可玩路径
+
+射击（2）→ 碰撞（3）→ Boss 死亡（5）= 完整 gameplay loop：射击 → 打 Boss → Boss 减血 → Boss 死 → 赢。
