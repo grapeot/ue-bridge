@@ -8,6 +8,7 @@
 #include "LevelEditorViewport.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
+#include "EngineUtils.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/DirectionalLight.h"
 #include "Engine/PointLight.h"
@@ -3533,6 +3534,225 @@ TSharedPtr<FJsonObject> FNewLevelAction::ExecuteInternal(const TSharedPtr<FJsonO
 	Result->SetStringField(TEXT("world_name"), NewWorld->GetName());
 
 	UE_LOG(LogMCP, Log, TEXT("Created new level: %s (saved=%s)"), *FullPath, bSaved ? TEXT("true") : TEXT("false"));
+
+	return CreateSuccessResponse(Result);
+}
+
+// ============================================================================
+// FSimulateKeyAction — Simulate keyboard input via Slate
+// ============================================================================
+
+#include "Framework/Application/SlateApplication.h"
+
+bool FSimulateKeyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
+{
+	if (!Params->HasField(TEXT("key")))
+	{
+		OutError = TEXT("Missing 'key' parameter");
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FSimulateKeyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	FString KeyName = Params->GetStringField(TEXT("key"));
+	FString Action = GetOptionalString(Params, TEXT("action"), TEXT("tap"));
+	double Duration = 0.1;
+	Params->TryGetNumberField(TEXT("duration"), Duration);
+
+	// Resolve key name to FKey
+	FKey Key = FKey(*KeyName);
+	if (!Key.IsValid())
+	{
+		return CreateErrorResponse(FString::Printf(TEXT("Invalid key name: %s"), *KeyName));
+	}
+
+	uint32 KeyCode = 0;
+	uint32 CharCode = 0;
+	// Map common keys to char codes
+	if (KeyName.Len() == 1)
+	{
+		CharCode = KeyName[0];
+	}
+
+	FModifierKeysState ModifierKeys;
+
+	bool bPressed = (Action == TEXT("press") || Action == TEXT("tap"));
+	bool bReleased = (Action == TEXT("release") || Action == TEXT("tap"));
+
+	if (bPressed)
+	{
+		FKeyEvent KeyDownEvent(Key, ModifierKeys, 0, false, KeyCode, CharCode);
+		FSlateApplication::Get().ProcessKeyDownEvent(KeyDownEvent);
+	}
+
+	if (bReleased && Action == TEXT("tap"))
+	{
+		// For tap, process release after a brief delay on the game thread
+		// Since we can't truly sleep here, just process both immediately
+		FKeyEvent KeyUpEvent(Key, ModifierKeys, 0, false, KeyCode, CharCode);
+		FSlateApplication::Get().ProcessKeyUpEvent(KeyUpEvent);
+	}
+	else if (bReleased)
+	{
+		FKeyEvent KeyUpEvent(Key, ModifierKeys, 0, false, KeyCode, CharCode);
+		FSlateApplication::Get().ProcessKeyUpEvent(KeyUpEvent);
+	}
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("key"), KeyName);
+	Result->SetStringField(TEXT("action"), Action);
+	return CreateSuccessResponse(Result);
+}
+
+// ============================================================================
+// FExecuteConsoleCommandAction — Run console command in editor or PIE
+// ============================================================================
+
+bool FExecuteConsoleCommandAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
+{
+	if (!Params->HasField(TEXT("command")))
+	{
+		OutError = TEXT("Missing 'command' parameter");
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FExecuteConsoleCommandAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	FString Command = Params->GetStringField(TEXT("command"));
+	bool bUsePIE = true;
+	Params->TryGetBoolField(TEXT("pie"), bUsePIE);
+
+	UWorld* TargetWorld = nullptr;
+	if (bUsePIE && GEditor && GEditor->PlayWorld)
+	{
+		TargetWorld = GEditor->PlayWorld;
+	}
+	else if (GEditor)
+	{
+		TargetWorld = GEditor->GetEditorWorldContext().World();
+	}
+
+	if (!TargetWorld)
+	{
+		return CreateErrorResponse(TEXT("No world available"));
+	}
+
+	GEngine->Exec(TargetWorld, *Command);
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("command"), Command);
+	Result->SetBoolField(TEXT("pie_world"), TargetWorld == GEditor->PlayWorld);
+	Result->SetStringField(TEXT("world"), TargetWorld->GetName());
+	return CreateSuccessResponse(Result);
+}
+
+// ============================================================================
+// FGetPIEActorsAction — List actors in PIE world
+// ============================================================================
+
+TSharedPtr<FJsonObject> FGetPIEActorsAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	if (!GEditor || !GEditor->PlayWorld)
+	{
+		return CreateErrorResponse(TEXT("No PIE session running"));
+	}
+
+	FString ClassFilter = GetOptionalString(Params, TEXT("class_filter"));
+	FString NameFilter = GetOptionalString(Params, TEXT("name_filter"));
+	UWorld* PIEWorld = GEditor->PlayWorld;
+
+	TArray<TSharedPtr<FJsonValue>> ActorArray;
+	for (TActorIterator<AActor> It(PIEWorld); It; ++It)
+	{
+		AActor* Actor = *It;
+		if (!Actor) continue;
+
+		FString ActorName = Actor->GetActorNameOrLabel();
+		FString ClassName = Actor->GetClass()->GetName();
+
+		if (!ClassFilter.IsEmpty() && !ClassName.Contains(ClassFilter)) continue;
+		if (!NameFilter.IsEmpty() && !ActorName.Contains(NameFilter)) continue;
+
+		TSharedPtr<FJsonObject> ActorObj = MakeShared<FJsonObject>();
+		ActorObj->SetStringField(TEXT("name"), ActorName);
+		ActorObj->SetStringField(TEXT("class"), ClassName);
+
+		FVector Loc = Actor->GetActorLocation();
+		TArray<TSharedPtr<FJsonValue>> LocArr;
+		LocArr.Add(MakeShared<FJsonValueNumber>(Loc.X));
+		LocArr.Add(MakeShared<FJsonValueNumber>(Loc.Y));
+		LocArr.Add(MakeShared<FJsonValueNumber>(Loc.Z));
+		ActorObj->SetArrayField(TEXT("location"), LocArr);
+
+		ActorArray.Add(MakeShared<FJsonValueObject>(ActorObj));
+	}
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetNumberField(TEXT("count"), ActorArray.Num());
+	Result->SetArrayField(TEXT("actors"), ActorArray);
+	return CreateSuccessResponse(Result);
+}
+
+// ============================================================================
+// FGetPIEActorPropertyAction — Read actor property in PIE world
+// ============================================================================
+
+bool FGetPIEActorPropertyAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
+{
+	if (!Params->HasField(TEXT("name")))
+	{
+		OutError = TEXT("Missing 'name' parameter");
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FGetPIEActorPropertyAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	if (!GEditor || !GEditor->PlayWorld)
+	{
+		return CreateErrorResponse(TEXT("No PIE session running"));
+	}
+
+	FString ActorName = Params->GetStringField(TEXT("name"));
+	UWorld* PIEWorld = GEditor->PlayWorld;
+
+	AActor* FoundActor = nullptr;
+	for (TActorIterator<AActor> It(PIEWorld); It; ++It)
+	{
+		if ((*It)->GetActorNameOrLabel().Contains(ActorName))
+		{
+			FoundActor = *It;
+			break;
+		}
+	}
+
+	if (!FoundActor)
+	{
+		return CreateErrorResponse(FString::Printf(TEXT("Actor '%s' not found in PIE world"), *ActorName));
+	}
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("name"), FoundActor->GetActorNameOrLabel());
+	Result->SetStringField(TEXT("class"), FoundActor->GetClass()->GetName());
+
+	FVector Loc = FoundActor->GetActorLocation();
+	TArray<TSharedPtr<FJsonValue>> LocArr;
+	LocArr.Add(MakeShared<FJsonValueNumber>(Loc.X));
+	LocArr.Add(MakeShared<FJsonValueNumber>(Loc.Y));
+	LocArr.Add(MakeShared<FJsonValueNumber>(Loc.Z));
+	Result->SetArrayField(TEXT("location"), LocArr);
+
+	FVector Vel = FoundActor->GetVelocity();
+	TArray<TSharedPtr<FJsonValue>> VelArr;
+	VelArr.Add(MakeShared<FJsonValueNumber>(Vel.X));
+	VelArr.Add(MakeShared<FJsonValueNumber>(Vel.Y));
+	VelArr.Add(MakeShared<FJsonValueNumber>(Vel.Z));
+	Result->SetArrayField(TEXT("velocity"), VelArr);
 
 	return CreateSuccessResponse(Result);
 }

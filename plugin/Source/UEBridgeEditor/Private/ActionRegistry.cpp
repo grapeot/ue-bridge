@@ -66,6 +66,10 @@ void RegisterEditorActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandl
 	ActionHandlers.Add(TEXT("open_asset_editor"), MakeShared<FOpenAssetEditorAction>());
 	ActionHandlers.Add(TEXT("new_level"), MakeShared<FNewLevelAction>());
 	ActionHandlers.Add(TEXT("take_screenshot"), MakeShared<FTakeScreenshotAction>());
+	ActionHandlers.Add(TEXT("simulate_key"), MakeShared<FSimulateKeyAction>());
+	ActionHandlers.Add(TEXT("execute_console_command"), MakeShared<FExecuteConsoleCommandAction>());
+	ActionHandlers.Add(TEXT("get_pie_actors"), MakeShared<FGetPIEActorsAction>());
+	ActionHandlers.Add(TEXT("get_pie_actor_property"), MakeShared<FGetPIEActorPropertyAction>());
 }
 
 void RegisterLayoutActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandlers)

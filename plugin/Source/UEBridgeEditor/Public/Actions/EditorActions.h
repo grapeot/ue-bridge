@@ -641,6 +641,83 @@ protected:
 };
 
 // =========================================================================
+// P7: Input Simulation
+// =========================================================================
+
+/**
+ * FSimulateKeyAction
+ * Simulates a key press/release via Slate, works with Enhanced Input.
+ * Params:
+ *   key (string, required) - Key name (e.g. "W", "A", "SpaceBar", "LeftShift")
+ *   action (string, optional, default "press") - "press", "release", or "tap" (press+release)
+ *   duration (float, optional, default 0.1) - For "tap", seconds to hold before release
+ */
+class UEBRIDGEEDITOR_API FSimulateKeyAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
+	virtual FString GetActionName() const override { return TEXT("simulate_key"); }
+};
+
+// =========================================================================
+// P7: Console Command + PIE World Query
+// =========================================================================
+
+/**
+ * FExecuteConsoleCommandAction
+ * Executes a console command in the editor or PIE world.
+ * Params:
+ *   command (string, required) - Console command to execute
+ *   pie (bool, optional, default true) - Execute in PIE world if running
+ */
+class UEBRIDGEEDITOR_API FExecuteConsoleCommandAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
+	virtual FString GetActionName() const override { return TEXT("execute_console_command"); }
+};
+
+/**
+ * FGetPIEActorsAction
+ * Lists actors in the PIE world (not the editor world).
+ * Params:
+ *   class_filter (string, optional) - Filter by class name
+ *   name_filter (string, optional) - Filter by actor name substring
+ */
+class UEBRIDGEEDITOR_API FGetPIEActorsAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override { return true; }
+	virtual FString GetActionName() const override { return TEXT("get_pie_actors"); }
+};
+
+/**
+ * FGetPIEActorPropertyAction
+ * Reads a property from an actor in the PIE world.
+ * Params:
+ *   name (string, required) - Actor name (substring match)
+ *   property_name (string, optional) - Specific property to read
+ */
+class UEBRIDGEEDITOR_API FGetPIEActorPropertyAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
+	virtual FString GetActionName() const override { return TEXT("get_pie_actor_property"); }
+};
+
+// =========================================================================
 // P7: Viewport Screenshot
 // =========================================================================
 
