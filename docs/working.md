@@ -165,3 +165,8 @@
 - Discovery: PlayerCameraManager always follows possessed pawn's CameraComponent. Only SetViewTarget to a separate actor can break this
 - Discovery: set_pin_default doesn't work for TSubclassOf (class reference) pins. CameraActor class was set successfully via some path but shows empty in pin query
 - Confirmed: Player WASD movement working (position changes verified via get_pie_actor_property), fixed camera at (0,150,500), Boss spiral bullets, all in same frame
+- Critical recurring bug: deleting camera MakeVector nodes repeatedly breaks movement MakeVector because deletion heuristic (X not connected) matches both. Root cause: camera and movement shared same node type, no reliable way to distinguish them. Fix: always verify movement chain after any camera node changes
+- Discovery: set_pin_default cannot set enum pins (ECameraProjectionMode). Workaround: set via CDO (set_component_property) which persists across restarts but may be reset by compile
+- Discovery: SetProjectionMode and SetOrthoWidth exist as Blueprint-callable functions on CameraComponent, but enum pin values can't be set via bridge
+- Orthographic camera working via CDO + SetAbsolute/SetWorldLocation/SetWorldRotation in BeginPlay. OrthoWidth=3000 shows full play area
+- Game viewport needs manual focus (click) before WASD works — simulate_key doesn't give viewport focus
