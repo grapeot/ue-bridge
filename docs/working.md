@@ -10,6 +10,11 @@
 - Added `Engine/InheritableComponentHandler.h` include for UE5.7 `FComponentKey` and `UInheritableComponentHandler` APIs.
 - Verified: `CharacterMesh0.AnimClass` set to `ABP_Unarmed` and `AnimationMode` set to `AnimationBlueprint` now persist across editor restart. Walk/run animations confirmed working in PIE after clean restart.
 - Remaining gap: `ABP_Unarmed` does not contain a crouch state in its state machine, so pressing C changes camera height (gameplay state) but the mesh does not visually crouch. Adding AnimBP state machine manipulation to the C++ plugin is a future work item.
+- Added AnimBP state-machine editing MVP to the C++ plugin: new commands `list_anim_states`, `add_anim_state`, `add_anim_transition`, `set_anim_transition_rule`, and `set_anim_state_animation`.
+- Added `plugin/Source/UEBridgeEditor/Public/Actions/AnimGraphActions.h` and `Private/Actions/AnimGraphActions.cpp`, plus `AnimGraph` module dependency and action registration in `ActionRegistry.cpp`.
+- Added `docs/animbp_state_machine_mvp_plan.md` to document the MVP scope: existing state machine only, regular states only, bool-driven transition rules only, and single `UAnimSequence` playback inside a state.
+- Verified end-to-end on `ABP_Unarmed`: listed the `Locomotion` state machine, added `Crouch` state, added `Idle -> Crouch` and `Crouch -> Idle` transitions, wired both transition rules to `IsCrouching`, assigned a placeholder animation asset, then compiled successfully with 0 errors / 0 warnings.
+- Important constraint: the new commands currently resolve `blueprint_name` using the same lookup path as other blueprint actions, so the short asset name (`ABP_Unarmed`) works reliably while full package paths may not.
 - Removed obsolete `combat_game/tools/ue_editor/` legacy directory; confirmed zero references remain.
 
 ### 2026-03-26
