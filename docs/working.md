@@ -2,7 +2,22 @@
 
 ## Changelog
 
+### 2026-04-01
+
+- **Bug fix: `set_inherited_component_property` changes were not persisting across editor restarts.** Root cause: the original implementation modified the CDO (transient in-memory object) without ensuring the Blueprint's package was marked dirty. CDO modifications are lost when UE regenerates the CDO from serialized data on restart.
+- Fix in `BlueprintActions.cpp`: for components with SCS/UCS keys, the code now routes through `UInheritableComponentHandler` (UE5.7's serialised component template mechanism). For C++ native components without SCS/UCS keys (e.g. `ACharacter::CharacterMesh0`), the code falls back to CDO modification but explicitly calls `Blueprint->Status = BS_Dirty`, `Blueprint->MarkPackageDirty()`, and `Blueprint->PostEditChange()` to ensure the package is tracked for saving.
+- Key insight: `compile()` internally calls `Context.SaveDirtyPackages()`, which persists changes. The `save_all` command's return value only reflects `FEditorFileUtils::GetDirtyPackages()` (UE global dirty list), not the bridge's internal dirty tracking. This meant saves were succeeding all along but the `saved_count: 0` return was misleading.
+- Added `Engine/InheritableComponentHandler.h` include for UE5.7 `FComponentKey` and `UInheritableComponentHandler` APIs.
+- Verified: `CharacterMesh0.AnimClass` set to `ABP_Unarmed` and `AnimationMode` set to `AnimationBlueprint` now persist across editor restart. Walk/run animations confirmed working in PIE after clean restart.
+- Remaining gap: `ABP_Unarmed` does not contain a crouch state in its state machine, so pressing C changes camera height (gameplay state) but the mesh does not visually crouch. Adding AnimBP state machine manipulation to the C++ plugin is a future work item.
+- Removed obsolete `combat_game/tools/ue_editor/` legacy directory; confirmed zero references remain.
+
 ### 2026-03-26
+
+- Follow-up on CharacterActionRoom crouch debugging: the bridge did **not** need a new C++ capability for this case. `set_inherited_component_property` already supports setting `AnimClass` on inherited components via class properties; the real mistake was targeting the Character Blueprint CDO instead of the inherited mesh component
+- Verified the correct fix path: set `BP_ThirdPersonCharacter` inherited component `CharacterMesh0.AnimClass` to `/Game/Characters/Mannequins/Anims/Unarmed/ABP_Unarmed.ABP_Unarmed_C`, then compile/save/restart editor before PIE verification
+- Important lesson: for visual animation issues, first distinguish between gameplay state changes (e.g. crouch capsule/camera lowering) and animation presentation changes. If gameplay state changes but the mesh pose does not, inspect the skeletal mesh component's animation class before assuming a bridge/plugin gap
+- Removed the obsolete legacy Python directory `self_learning/combat_game/tools/ue_editor`; the maintained sources of truth remain `self_learning/ue_bridge_skill/python/` and `self_learning/ue_bridge_skill/plugin/`
 
 - Added `docs/touhou_project_pilot.md`: PRD + RFC for building a Touhou-style bullet hell game to validate AI end-to-end game production via UE Bridge
 - Key discovery during Phase 0 planning: C++ plugin already has PIE commands (start_pie, stop_pie, get_pie_state) and comprehensive UMG Widget actions (35+ commands). The gap is Python wrapper + CLI + tests, not C++ implementation

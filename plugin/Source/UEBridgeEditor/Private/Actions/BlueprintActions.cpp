@@ -7,6 +7,7 @@
 #include "Engine/BlueprintGeneratedClass.h"
 #include "Engine/SimpleConstructionScript.h"
 #include "Engine/SCS_Node.h"
+#include "Engine/InheritableComponentHandler.h"
 #include "Engine/World.h"
 #include "Engine/StaticMesh.h"
 #include "GameFramework/Actor.h"
@@ -884,10 +885,45 @@ TSharedPtr<FJsonObject> FSetInheritedComponentPropertyAction::ExecuteInternal(co
 		);
 	}
 
-	// Set the property
+	// Use InheritableComponentTemplates so changes survive restart.
+	// CDO is transient; the template map is serialised with the Blueprint.
+	// For UE5.7, the handler lives on the BlueprintGeneratedClass.
+	UActorComponent* TargetComponent = nullptr;
+	UBlueprintGeneratedClass* BPGC = Cast<UBlueprintGeneratedClass>(Blueprint->GeneratedClass);
+	if (BPGC)
+	{
+		UInheritableComponentHandler* Handler = BPGC->GetInheritableComponentHandler(false);
+		if (Handler)
+		{
+			FComponentKey Key = Handler->FindKey(FName(*FoundComponent->GetName()));
+			if (Key.IsValid())
+			{
+				TargetComponent = Handler->GetOverridenComponentTemplate(Key);
+				if (!TargetComponent)
+				{
+					TargetComponent = Handler->CreateOverridenComponentTemplate(Key);
+				}
+			}
+		}
+	}
+
+	// Fallback: if the component is a C++ native component (no SCS/UCS key),
+	// set the property on the CDO directly.  CDO->Modify() alone does not mark
+	// the Blueprint's package dirty (CDO is transient), so we also explicitly
+	// mark the Blueprint's outermost package and set its status to BS_Dirty
+	// to ensure save_all will persist the change.
+	if (!TargetComponent)
+	{
+		TargetComponent = FoundComponent;
+		TargetComponent->Modify();
+		Blueprint->Status = BS_Dirty;
+		Blueprint->MarkPackageDirty();
+		Blueprint->PostEditChange();
+	}
+
 	TSharedPtr<FJsonValue> JsonValue = Params->Values.FindRef(TEXT("property_value"));
 	FString ErrorMessage;
-	if (!FUEBridgeCommonUtils::SetObjectProperty(FoundComponent, PropertyName, JsonValue, ErrorMessage))
+	if (!FUEBridgeCommonUtils::SetObjectProperty(TargetComponent, PropertyName, JsonValue, ErrorMessage))
 	{
 		return CreateErrorResponse(ErrorMessage, TEXT("property_set_failed"));
 	}
