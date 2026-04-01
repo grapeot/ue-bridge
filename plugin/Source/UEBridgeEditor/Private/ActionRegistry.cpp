@@ -10,6 +10,7 @@
 #include "Actions/MaterialActions.h"
 #include "Actions/LayoutActions.h"
 #include "Actions/EditorDiffActions.h"
+#include "Actions/AnimGraphActions.h"
 
 namespace
 {
@@ -219,6 +220,15 @@ void RegisterDiffActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandler
 	ActionHandlers.Add(TEXT("diff_against_depot"), MakeShared<FDiffAgainstDepotAction>());
 	ActionHandlers.Add(TEXT("get_asset_history"), MakeShared<FGetAssetHistoryAction>());
 }
+
+void RegisterAnimGraphActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandlers)
+{
+	ActionHandlers.Add(TEXT("list_anim_states"), MakeShared<FListAnimStatesAction>());
+	ActionHandlers.Add(TEXT("add_anim_state"), MakeShared<FAddAnimStateAction>());
+	ActionHandlers.Add(TEXT("add_anim_transition"), MakeShared<FAddAnimTransitionAction>());
+	ActionHandlers.Add(TEXT("set_anim_transition_rule"), MakeShared<FSetAnimTransitionRuleAction>());
+	ActionHandlers.Add(TEXT("set_anim_state_animation"), MakeShared<FSetAnimStateAnimationAction>());
+}
 }
 
 void FUEEditorActionRegistry::RegisterDefaultActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandlers)
@@ -231,4 +241,5 @@ void FUEEditorActionRegistry::RegisterDefaultActions(TMap<FString, TSharedRef<FE
 	RegisterUMGActions(ActionHandlers);
 	RegisterMaterialActions(ActionHandlers);
 	RegisterDiffActions(ActionHandlers);
+	RegisterAnimGraphActions(ActionHandlers);
 }

@@ -43,6 +43,7 @@ public class UEBridgeEditor : ModuleRules
 			"ModelViewViewModel",           // MVVM runtime types (EMVVMBindingMode, EMVVMExecutionMode)
 			"ModelViewViewModelBlueprint",  // MVVM editor-time binding API (UMVVMBlueprintView, etc.)
 			"FieldNotification",            // INotifyFieldValueChanged interface
+			"AnimGraph",               // AnimBP state machine node classes (UAnimStateNode, UAnimStateTransitionNode, etc.)
 		});
 
 		// RTTI disabled on Mac to avoid typeinfo linker errors with engine modules
