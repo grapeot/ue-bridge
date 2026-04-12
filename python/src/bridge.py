@@ -626,7 +626,7 @@ class UEBridge:
     # -------------------------------------------------------------------------
 
     def create_material(self, name: str, path: str | None = None) -> dict:
-        params: dict[str, Any] = {"name": name}
+        params: dict[str, Any] = {"material_name": name}
         if path:
             params["path"] = path
         return self._cmd("create_material", params)
@@ -634,7 +634,7 @@ class UEBridge:
     def create_colored_material(self, name: str,
                                 color: tuple[float, float, float, float] = (1, 1, 1, 1),
                                 path: str | None = None) -> dict:
-        params: dict[str, Any] = {"name": name, "color": list(color)}
+        params: dict[str, Any] = {"material_name": name, "color": list(color)}
         if path:
             params["path"] = path
         return self._cmd("create_colored_material", params)
@@ -781,7 +781,7 @@ class UEBridge:
                          canvas_name: str) -> dict:
         return self._cmd("add_canvas_panel_to_widget", {
             "widget_name": widget_name,
-            "canvas_name": canvas_name,
+            "canvas_panel_name": canvas_name,
         })
 
     def add_vertical_box(self, widget_name: str,
@@ -889,7 +889,7 @@ class UEBridge:
                          children: list[str]) -> dict:
         return self._cmd("reparent_widgets", {
             "widget_name": widget_name,
-            "target_parent": target_parent,
+            "target_container_name": target_parent,
             "children": children,
         })
 
