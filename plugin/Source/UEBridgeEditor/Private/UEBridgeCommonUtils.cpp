@@ -2,6 +2,7 @@
 // Refactored and extended in 2026 by Yan Wang.
 
 #include "UEBridgeCommonUtils.h"
+#include "Actions/EditorAction.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Engine/Blueprint.h"
 #include "Engine/BlueprintGeneratedClass.h"
@@ -165,32 +166,40 @@ UEdGraph* FUEBridgeCommonUtils::FindGraphByName(UBlueprint* Blueprint, const FSt
 		return nullptr;
 	}
 
-	// If no graph name specified, return the event graph (default behavior)
 	if (GraphName.IsEmpty())
 	{
 		return FindOrCreateEventGraph(Blueprint);
 	}
 
-	// First check if it's a function graph
-	UEdGraph* FunctionGraph = FindFunctionGraph(Blueprint, GraphName);
-	if (FunctionGraph)
+	for (UEdGraph* Graph : Blueprint->FunctionGraphs)
 	{
-		return FunctionGraph;
-	}
-
-	// Check ubergraph pages (event graphs can have different names)
-	for (UEdGraph* Graph : Blueprint->UbergraphPages)
-	{
-		if (Graph->GetFName() == FName(*GraphName) || Graph->GetName() == GraphName)
+		if (Graph && (Graph->GetFName() == FName(*GraphName) || Graph->GetName() == GraphName))
 		{
 			return Graph;
 		}
 	}
 
-	// Check macro graphs
+	for (UEdGraph* Graph : Blueprint->UbergraphPages)
+	{
+		if (Graph && (Graph->GetFName() == FName(*GraphName) || Graph->GetName() == GraphName))
+		{
+			return Graph;
+		}
+	}
+
 	for (UEdGraph* Graph : Blueprint->MacroGraphs)
 	{
-		if (Graph->GetFName() == FName(*GraphName) || Graph->GetName() == GraphName)
+		if (Graph && (Graph->GetFName() == FName(*GraphName) || Graph->GetName() == GraphName))
+		{
+			return Graph;
+		}
+	}
+
+	TArray<UEdGraph*> AllGraphs;
+	Blueprint->GetAllGraphs(AllGraphs);
+	for (UEdGraph* Graph : AllGraphs)
+	{
+		if (Graph && (Graph->GetFName() == FName(*GraphName) || Graph->GetName() == GraphName))
 		{
 			return Graph;
 		}

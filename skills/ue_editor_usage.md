@@ -263,6 +263,92 @@ New C++ plugin capabilities (e.g., a new action) require command-line compilatio
 
 Different GameModes use different Character Blueprints. Check World Settings or use `get_blueprint_summary` to trace GameMode -> Default Pawn Class before editing.
 
+### DO NOT use `set_object_property` on AnimBP CDO properties
+
+`set_object_property` creates variable-set nodes in the **EventGraph** rather than modifying the CDO directly. For AnimInstance properties (like `RootMotionMode`), this corrupts the AnimBP: each call adds a new `Set RootMotionMode` node to the graph, the blueprint accumulates compile errors, and there is no undo. The only fix is to manually delete every corrupted node via `delete_blueprint_node`.
+
+**Wrong way**: `set_object_property` on an AnimBP for `RootMotionMode`.
+
+**Safer way**: add a real function call node in `Event Blueprint Initialize Animation` and call `SetRootMotionMode(IgnoreRootMotion)`.
+
+This is persistent at the blueprint logic level and survives editor restarts because it is part of the graph, not an external console-side state:
+
+```python
+node = ue.raw_command("add_blueprint_function_node", {
+    "blueprint_name": "ABP_Unarmed",
+    "graph_name": "EventGraph",
+    "target": "self",
+    "function_name": "SetRootMotionMode",
+    "x": 160,
+    "y": -760,
+})
+
+ue.raw_command("set_node_pin_default", {
+    "blueprint_name": "ABP_Unarmed",
+    "node_id": node["node_id"],
+    "pin_name": "Value",
+    "default_value": "IgnoreRootMotion",
+})
+
+ue.raw_command("connect_blueprint_nodes", {
+    "blueprint_name": "ABP_Unarmed",
+    "source_node_id": "<BlueprintInitializeAnimation node>",
+    "source_pin": "then",
+    "target_node_id": node["node_id"],
+    "target_pin": "execute",
+})
+```
+
+**Fallback / temporary runtime workaround**: use the console command, which can be useful for quick diagnosis but is a worse long-term fix:
+
+```python
+ue.raw_command("execute_console_command", {
+    "command": "AnimInstance.RootMotionMode IgnoreRootMotion"
+})
+```
+
+The console command is useful to confirm root motion is the problem. The function-node approach is the actual durable fix.
+
+### Animation assets with root motion cause uncontrolled character movement
+
+Many locomotion animations (dash, sprint, attack, vault) bake translational displacement into the root bone. When UE extracts root motion from these clips, it applies the baked displacement to the character's capsule component every frame. The character will fly across the map at the animation's velocity.
+
+**Symptoms**: Character lunges or shoots forward the instant a state plays a root-motion clip. The displacement is proportional to the clip's baked velocity, not a small jitter.
+
+**Prevention**:
+
+1. Never use dash/sprint/attack animations as placeholder poses for stationary states (crouch, idle, etc.). Visual similarity is misleading; what matters is whether the clip's root bone translates.
+2. If you must use a movement clip in a stationary state, suppress root motion globally:
+   ```python
+   ue.raw_command("execute_console_command", {
+       "command": "AnimInstance.RootMotionMode IgnoreRootMotion"
+   })
+   ```
+3. Engine plugin animation assets (e.g. MoverExamples) may not be loadable in project-local AnimBPs even if the skeleton name matches. Always test compilation immediately after assigning a new animation asset.
+
+### AnimBP state machine editing requires the AnimBP to be open
+
+The `list_anim_states`, `add_anim_state`, `add_anim_transition`, `set_anim_transition_rule`, and `set_anim_state_animation` commands operate on the AnimBP's in-memory state machine graph. If the AnimBP has not been loaded into an asset editor, the commands will fail with "state machine not found." Always call `open_asset_editor` first:
+
+```python
+ue.raw_command("open_asset_editor", {
+    "asset_path": "/Game/Characters/Mannequins/Anims/Unarmed/ABP_Unarmed.ABP_Unarmed"
+})
+```
+
+After opening, the short asset name (e.g. `ABP_Unarmed`) works reliably as `blueprint_name` for all AnimBP commands. Full package paths may not resolve.
+
+### AnimBP `compile` return value can be misleading
+
+The `compile_blueprint` command returns `saved_packages_count: 0` even when saves succeed. The bridge's internal dirty tracking and UE's `FEditorFileUtils::GetDirtyPackages()` are separate systems. Trust the `compiled: true` / `error_count: 0` fields, not `saved_packages_count`.
+
+### Content directory is not in git
+
+UE project `Content/` folders are typically gitignored (binary `.uasset` files). If a bridge operation corrupts an asset, there is no `git checkout` recovery path. Mitigations:
+
+1. Before risky operations, consider manually duplicating the `.uasset` file as a backup.
+2. If `set_object_property` corrupts an AnimBP, recover by finding and deleting all injected nodes via `find_blueprint_nodes` + `delete_blueprint_node`, then recompile.
+
 ## Complete Example: Add Crouch to a Character
 
 ```python

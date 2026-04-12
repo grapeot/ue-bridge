@@ -228,6 +228,7 @@ void RegisterAnimGraphActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHa
 	ActionHandlers.Add(TEXT("add_anim_transition"), MakeShared<FAddAnimTransitionAction>());
 	ActionHandlers.Add(TEXT("set_anim_transition_rule"), MakeShared<FSetAnimTransitionRuleAction>());
 	ActionHandlers.Add(TEXT("set_anim_state_animation"), MakeShared<FSetAnimStateAnimationAction>());
+	ActionHandlers.Add(TEXT("apply_crouch_pose_fix"), MakeShared<FApplyCrouchPoseFixAction>());
 }
 }
 

@@ -60,3 +60,13 @@ protected:
 	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
 	virtual FString GetActionName() const override { return TEXT("set_anim_state_animation"); }
 };
+
+class UEBRIDGEEDITOR_API FApplyCrouchPoseFixAction : public FBlueprintAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
+	virtual FString GetActionName() const override { return TEXT("apply_crouch_pose_fix"); }
+};
