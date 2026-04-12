@@ -297,58 +297,16 @@ UBlueprint* FEditorAction::FindBlueprint(const FString& BlueprintName, FString& 
 
 UEdGraph* FEditorAction::FindGraph(UBlueprint* Blueprint, const FString& GraphName, FString& OutError) const
 {
-	if (!Blueprint)
+	UEdGraph* Graph = FUEBridgeCommonUtils::FindGraphByName(Blueprint, GraphName);
+	if (!Graph && !Blueprint)
 	{
 		OutError = TEXT("Blueprint is null");
-		return nullptr;
 	}
-
-	// If no graph specified, return event graph
-	if (GraphName.IsEmpty())
+	else if (!Graph)
 	{
-		for (UEdGraph* Graph : Blueprint->UbergraphPages)
-		{
-			if (Graph && Graph->GetFName() == TEXT("EventGraph"))
-			{
-				return Graph;
-			}
-		}
-		// Fallback
-		if (Blueprint->UbergraphPages.Num() > 0)
-		{
-			return Blueprint->UbergraphPages[0];
-		}
+		OutError = FString::Printf(TEXT("Graph '%s' not found in Blueprint '%s'"), *GraphName, *Blueprint->GetName());
 	}
-
-	// Search function graphs
-	for (UEdGraph* Graph : Blueprint->FunctionGraphs)
-	{
-		if (Graph && Graph->GetFName().ToString() == GraphName)
-		{
-			return Graph;
-		}
-	}
-
-	// Search ubergraph pages
-	for (UEdGraph* Graph : Blueprint->UbergraphPages)
-	{
-		if (Graph && Graph->GetFName().ToString() == GraphName)
-		{
-			return Graph;
-		}
-	}
-
-	// Search macro graphs
-	for (UEdGraph* Graph : Blueprint->MacroGraphs)
-	{
-		if (Graph && Graph->GetFName().ToString() == GraphName)
-		{
-			return Graph;
-		}
-	}
-
-	OutError = FString::Printf(TEXT("Graph '%s' not found in Blueprint '%s'"), *GraphName, *Blueprint->GetName());
-	return nullptr;
+	return Graph;
 }
 
 UEdGraphNode* FEditorAction::FindNode(UEdGraph* Graph, const FGuid& NodeId, FString& OutError) const

@@ -4,6 +4,9 @@
 #include "Animation/AnimSequence.h"
 #include "AnimGraphNode_StateMachineBase.h"
 #include "AnimGraphNode_SequencePlayer.h"
+#include "AnimGraphNode_StateResult.h"
+#include "AnimGraphNode_ModifyBone.h"
+#include "BoneControllers/AnimNode_ModifyBone.h"
 #include "AnimStateEntryNode.h"
 #include "AnimStateNode.h"
 #include "AnimStateNodeBase.h"
@@ -521,6 +524,127 @@ TSharedPtr<FJsonObject> FListAnimStatesAction::ExecuteInternal(const TSharedPtr<
 	UE_LOG(LogMCP, Log, TEXT("UEBridgeEditor: Listed %d states and %d transitions in state machine '%s' for AnimBP '%s'"),
 		States.Num(), Transitions.Num(), *StateMachineGraph->GetName(), *Blueprint->GetName());
 
+	return CreateSuccessResponse(Result);
+}
+
+bool FApplyCrouchPoseFixAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
+{
+	return ValidateBlueprint(Params, Context, OutError);
+}
+
+TSharedPtr<FJsonObject> FApplyCrouchPoseFixAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	UBlueprint* Blueprint = GetTargetBlueprint(Params, Context);
+	FString Error;
+	UAnimBlueprint* AnimBlueprint = ResolveAnimBlueprint(Blueprint, Error);
+	if (!AnimBlueprint)
+	{
+		return CreateErrorResponse(Error, TEXT("invalid_blueprint_type"));
+	}
+
+	const FString StateMachineName = GetOptionalString(Params, TEXT("state_machine_name"), TEXT("Locomotion"));
+	const FString StateName = GetOptionalString(Params, TEXT("state_name"), TEXT("Crouch"));
+
+	UAnimationStateMachineGraph* StateMachineGraph = GetStateMachineGraph(AnimBlueprint, StateMachineName, Error);
+	if (!StateMachineGraph)
+	{
+		return CreateErrorResponse(Error, TEXT("state_machine_not_found"));
+	}
+
+	UAnimStateNode* StateNode = FindStateNodeByName(StateMachineGraph, StateName);
+	if (!StateNode)
+	{
+		return CreateErrorResponse(FString::Printf(TEXT("State '%s' not found"), *StateName), TEXT("state_not_found"));
+	}
+
+	UEdGraph* StateGraph = StateNode->GetBoundGraph();
+	if (!StateGraph)
+	{
+		return CreateErrorResponse(TEXT("State graph is invalid"), TEXT("state_graph_invalid"));
+	}
+
+	UAnimGraphNode_SequencePlayer* SequencePlayer = nullptr;
+	UAnimGraphNode_StateResult* ResultNode = nullptr;
+	TArray<UEdGraphNode*> NodesToRemove;
+
+	for (UEdGraphNode* Node : StateGraph->Nodes)
+	{
+		if (UAnimGraphNode_SequencePlayer* SP = Cast<UAnimGraphNode_SequencePlayer>(Node))
+		{
+			SequencePlayer = SP;
+		}
+		else if (UAnimGraphNode_StateResult* SR = Cast<UAnimGraphNode_StateResult>(Node))
+		{
+			ResultNode = SR;
+		}
+		else if (Node)
+		{
+			NodesToRemove.Add(Node);
+		}
+	}
+
+	if (!SequencePlayer || !ResultNode)
+	{
+		return CreateErrorResponse(TEXT("Could not find SequencePlayer or ResultNode in state graph"), TEXT("nodes_not_found"));
+	}
+
+	UEdGraphPin* ResultInputPin = FindFirstInputPin(ResultNode);
+	if (ResultInputPin)
+	{
+		ResultInputPin->BreakAllPinLinks();
+	}
+
+	for (UEdGraphNode* Node : NodesToRemove)
+	{
+		if (!Node)
+		{
+			continue;
+		}
+
+		Node->BreakAllNodeLinks();
+		StateGraph->RemoveNode(Node);
+	}
+
+	UAnimGraphNode_ModifyBone* PelvisNode = NewObject<UAnimGraphNode_ModifyBone>(StateGraph);
+	StateGraph->AddNode(PelvisNode, false, false);
+	PelvisNode->CreateNewGuid();
+	PelvisNode->PostPlacedNewNode();
+	PelvisNode->AllocateDefaultPins();
+	PelvisNode->NodePosX = 300;
+	PelvisNode->NodePosY = 0;
+	PelvisNode->Node.BoneToModify.BoneName = FName(TEXT("pelvis"));
+	PelvisNode->Node.Translation = FVector(0.0f, 0.0f, -45.0f);
+	PelvisNode->Node.TranslationMode = BMM_Additive;
+	PelvisNode->Node.TranslationSpace = BCS_ComponentSpace;
+
+	UAnimGraphNode_ModifyBone* SpineNode = NewObject<UAnimGraphNode_ModifyBone>(StateGraph);
+	StateGraph->AddNode(SpineNode, false, false);
+	SpineNode->CreateNewGuid();
+	SpineNode->PostPlacedNewNode();
+	SpineNode->AllocateDefaultPins();
+	SpineNode->NodePosX = 600;
+	SpineNode->NodePosY = 0;
+	SpineNode->Node.BoneToModify.BoneName = FName(TEXT("spine_01"));
+	SpineNode->Node.Rotation = FRotator(15.0f, 0.0f, 0.0f);
+	SpineNode->Node.RotationMode = BMM_Additive;
+	SpineNode->Node.RotationSpace = BCS_ParentBoneSpace;
+
+	const UEdGraphSchema* Schema = StateGraph->GetSchema();
+	UEdGraphPin* SP_Output = FindFirstOutputPin(SequencePlayer);
+	UEdGraphPin* Pelvis_Input = FindFirstInputPin(PelvisNode);
+	UEdGraphPin* Pelvis_Output = FindFirstOutputPin(PelvisNode);
+	UEdGraphPin* Spine_Input = FindFirstInputPin(SpineNode);
+	UEdGraphPin* Spine_Output = FindFirstOutputPin(SpineNode);
+
+	if (SP_Output && Pelvis_Input) Schema->TryCreateConnection(SP_Output, Pelvis_Input);
+	if (Pelvis_Output && Spine_Input) Schema->TryCreateConnection(Pelvis_Output, Spine_Input);
+	if (Spine_Output && ResultInputPin) Schema->TryCreateConnection(Spine_Output, ResultInputPin);
+
+	StateGraph->NotifyGraphChanged();
+	MarkBlueprintModified(Blueprint, Context);
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("message"), TEXT("Crouch pose fix applied successfully"));
 	return CreateSuccessResponse(Result);
 }
 

@@ -491,31 +491,12 @@ UEdGraph* FUEEditorContext::GetGraphByNameOrCurrent(const FString& GraphName) co
 		return nullptr;
 	}
 
-	// If name is empty, use current graph
 	if (GraphName.IsEmpty())
 	{
 		return GetCurrentGraph();
 	}
 
-	// Search function graphs
-	for (UEdGraph* Graph : BP->FunctionGraphs)
-	{
-		if (Graph && Graph->GetFName().ToString() == GraphName)
-		{
-			return Graph;
-		}
-	}
-
-	// Search ubergraph pages
-	for (UEdGraph* Graph : BP->UbergraphPages)
-	{
-		if (Graph && Graph->GetFName().ToString() == GraphName)
-		{
-			return Graph;
-		}
-	}
-
-	return nullptr;
+	return FUEBridgeCommonUtils::FindGraphByName(BP, GraphName);
 }
 
 FGuid FUEEditorContext::ResolveNodeId(const FString& NodeIdOrAlias) const
