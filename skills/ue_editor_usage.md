@@ -390,3 +390,126 @@ with UEBridge() as ue:
         if m["action_name"] == "IA_Crouch":
             print(f'Verified: {m["action_name"]} -> {m["key"]} triggers={m["action_triggers"]}')
 ```
+
+## Complete Example: Textured Card Display Scene
+
+```python
+from ue_bridge import UEBridge
+
+with UEBridge() as ue:
+    # 1. Create new empty level
+    ue.raw_command("new_level", {
+        "level_name": "CardShowcase",
+        "path": "/Game/Maps",
+        "template": "Empty",
+    })
+
+    # 2. Create Unlit material with texture
+    #    (texture must be imported first — UE auto-detects PNGs in Content/)
+    mat = "M_Card"
+    ue.create_material(mat)
+    ue.raw_command("set_material_property", {
+        "material_name": mat,
+        "property_name": "ShadingModel",
+        "property_value": "Unlit",
+    })
+    ue.raw_command("add_material_expression", {
+        "material_name": mat,
+        "expression_class": "TextureSample",
+        "node_name": "CardArt",
+        "x": -300, "y": 0,
+        "properties": {"Texture": "/Game/CardArt/T_Card.T_Card"},
+    })
+    ue.raw_command("connect_to_material_output", {
+        "material_name": mat,
+        "source_node": "CardArt",
+        "source_output": "RGB",
+        "material_property": "EmissiveColor",
+    })
+    ue.compile_material(mat)
+
+    # 3. Create card Blueprint with mesh + material
+    bp = "BP_Card"
+    ue.create_blueprint(bp, parent_class="Actor", path="/Game/Cards")
+    ue.add_component(bp, "StaticMeshComponent", "CardMesh")
+    ue.set_static_mesh_properties(bp, "CardMesh",
+        static_mesh="/Engine/BasicShapes/Cube.Cube",
+        materials=[f"/Game/Materials/{mat}.{mat}"])
+    ue.compile(bp)
+
+    # 4. Spawn and orient card
+    #    Scale (0.7, 0.03, 1.0) = width, THIN, height (portrait card)
+    #    Yaw=90 rotates face toward camera at -X
+    ue.spawn_blueprint_actor(bp, "Card_0", location=(0, 0, 100))
+    full_name = [a["name"] for a in ue.get_actors() if "Card_0" in a["name"]][0]
+    ue.set_actor_transform(full_name,
+        location=(0, 0, 100),
+        rotation=(0, 90, 0),
+        scale=(0.7, 0.03, 1.0))
+    ue.raw_command("apply_material_to_actor", {
+        "actor_name": full_name,
+        "material_path": f"/Game/Materials/{mat}.{mat}",
+    })
+
+    # 5. SpectatorPawn GameMode (fly camera, no gravity)
+    gm = "BP_ShowcaseGameMode"
+    ue.create_blueprint(gm, parent_class="GameModeBase", path="/Game/Showcase")
+    ue.set_blueprint_property(gm, "DefaultPawnClass", "/Script/Engine.SpectatorPawn")
+    ue.compile(gm)
+    ue.set_actor_property("WorldSettings", "DefaultGameMode",
+        "/Game/Showcase/BP_ShowcaseGameMode.BP_ShowcaseGameMode_C")
+
+    ue.save_all()
+```
+
+## Recipes
+
+### Unlit textured material (guaranteed visibility in any lighting)
+
+```python
+ue.create_material("M_Name")
+ue.raw_command("set_material_property", {
+    "material_name": "M_Name", "property_name": "ShadingModel", "property_value": "Unlit"})
+ue.raw_command("add_material_expression", {
+    "material_name": "M_Name", "expression_class": "TextureSample",
+    "node_name": "Tex", "x": -300, "y": 0,
+    "properties": {"Texture": "/Game/Textures/T_Foo.T_Foo"}})
+ue.raw_command("connect_to_material_output", {
+    "material_name": "M_Name", "source_node": "Tex",
+    "source_output": "RGB", "material_property": "EmissiveColor"})
+ue.compile_material("M_Name")
+```
+
+### Card orientation (portrait, facing -X camera)
+
+Scale `(width, 0.03, height)` with `Yaw=90`. The thin Y dimension faces the camera. Fan spread: `Yaw = 90 + offset`.
+
+### SpectatorPawn for empty levels
+
+Prevents character falling in levels without floors. WASD to fly, right-click + drag to look.
+
+```python
+ue.create_blueprint("BP_GM", parent_class="GameModeBase", path="/Game/")
+ue.set_blueprint_property("BP_GM", "DefaultPawnClass", "/Script/Engine.SpectatorPawn")
+ue.compile("BP_GM")
+ue.set_actor_property("WorldSettings", "DefaultGameMode", "/Game/BP_GM.BP_GM_C")
+```
+
+### Apply material to scene actor (bypasses Blueprint)
+
+`set_static_mesh_properties` only works on Blueprint components. For scene actors, use:
+
+```python
+ue.raw_command("apply_material_to_actor", {
+    "actor_name": full_name,  # must include UAID suffix
+    "material_path": "/Game/Materials/M_Foo.M_Foo",
+})
+```
+
+### Actor names have UAID suffixes
+
+`spawn_blueprint_actor("BP_Foo", "MyActor")` creates `MyActor_UAID_XXXX`. Use `get_actors()` + prefix match to find the full name. `find_actors()` pattern matching is unreliable.
+
+### spawn_blueprint_actor does not apply scale
+
+Always call `set_actor_transform()` after spawning to set scale. The scale parameter in `spawn_blueprint_actor` is ignored.
