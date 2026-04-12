@@ -462,6 +462,99 @@ with UEBridge() as ue:
     ue.save_all()
 ```
 
+## Complete Example: Cycling Card Selection with Scale Feedback
+
+Wire Z/X keys to cycle through cards, scaling the selected one up. Uses the "set-all-then-highlight" pattern to avoid Branch merging issues.
+
+```python
+from ue_bridge import UEBridge
+
+with UEBridge() as ue:
+    bp = "BP_ThirdPersonPlayerController"  # Enhanced Input MUST be here, not in Pawn
+    SELECTED = "0.9, 0.04, 1.3"
+    NORMAL = "0.7, 0.03, 1.0"
+    card_classes = [
+        "/Game/Cards/BP_Card_0.BP_Card_0_C",
+        "/Game/Cards/BP_Card_1.BP_Card_1_C",
+        "/Game/Cards/BP_Card_2.BP_Card_2_C",
+    ]
+
+    # Variable to track selection
+    ue.add_variable(bp, "CurrentCard", "int", default_value=0)
+
+    # Create input: Z=next, X=prev (avoid Q/E — SpectatorPawn uses them)
+    for ia, key in [("IA_NextCard", "Z"), ("IA_PrevCard", "X")]:
+        ue.create_input_action(ia, value_type="Digital")
+        ue.add_key_mapping("IMC_Default", ia, key)
+
+    def build_chain(ia_name, delta, y_base):
+        # Input -> compute (CurrentCard + delta) % 3 -> set variable
+        ia = ue.add_enhanced_input_action_node(bp, ia_name, position=(-600, y_base))
+        get_cur = ue.add_variable_get(bp, "CurrentCard", position=(-400, y_base + 200))
+
+        add_n = ue.raw_command("add_blueprint_function_node", {
+            "blueprint_name": bp, "function_name": "Add_IntInt",
+            "target": "KismetMathLibrary", "x": -200, "y": y_base + 200,
+        })["node_id"]
+        ue.connect(get_cur, "CurrentCard", add_n, "A", blueprint_name=bp)
+        ue.set_pin_default(bp, add_n, "B", str(delta))
+
+        mod_n = ue.raw_command("add_blueprint_function_node", {
+            "blueprint_name": bp, "function_name": "Percent_IntInt",
+            "target": "KismetMathLibrary", "x": 0, "y": y_base + 200,
+        })["node_id"]
+        ue.connect(add_n, "ReturnValue", mod_n, "A", blueprint_name=bp)
+        ue.set_pin_default(bp, mod_n, "B", "3")
+
+        set_cur = ue.add_variable_set(bp, "CurrentCard", position=(200, y_base))
+        ue.connect(mod_n, "ReturnValue", set_cur, "CurrentCard", blueprint_name=bp)
+        ue.connect(ia, "Started", set_cur, "execute", blueprint_name=bp)
+
+        # Pass 1: set ALL cards to NORMAL scale
+        prev, pin = set_cur, "then"
+        for i, cc in enumerate(card_classes):
+            get_a = ue.add_function_node(bp, "GetActorOfClass",
+                target="GameplayStatics", position=(500 + i*400, y_base))
+            ue.set_pin_default(bp, get_a, "ActorClass", cc)
+            set_s = ue.add_function_node(bp, "SetActorScale3D", position=(700 + i*400, y_base))
+            ue.set_pin_default(bp, set_s, "NewScale3D", NORMAL)
+            ue.connect(get_a, "ReturnValue", set_s, "self", blueprint_name=bp)
+            ue.connect(prev, pin, get_a, "execute", blueprint_name=bp)
+            ue.connect(get_a, "then", set_s, "execute", blueprint_name=bp)
+            prev, pin = set_s, "then"
+
+        # Pass 2: Branch per card — if CurrentCard==i, scale SELECTED
+        for i, cc in enumerate(card_classes):
+            x = 1900 + i * 800
+            get_c = ue.add_variable_get(bp, "CurrentCard", position=(x - 200, y_base + 200))
+            eq = ue.raw_command("add_blueprint_function_node", {
+                "blueprint_name": bp, "function_name": "EqualEqual_IntInt",
+                "target": "KismetMathLibrary", "x": x, "y": y_base + 200,
+            })["node_id"]
+            ue.connect(get_c, "CurrentCard", eq, "A", blueprint_name=bp)
+            ue.set_pin_default(bp, eq, "B", str(i))
+
+            br = ue.add_branch_node(bp, position=(x + 200, y_base))
+            ue.connect(eq, "ReturnValue", br, "Condition", blueprint_name=bp)
+
+            ga = ue.add_function_node(bp, "GetActorOfClass",
+                target="GameplayStatics", position=(x + 400, y_base - 150))
+            ue.set_pin_default(bp, ga, "ActorClass", cc)
+            ss = ue.add_function_node(bp, "SetActorScale3D", position=(x + 600, y_base - 150))
+            ue.set_pin_default(bp, ss, "NewScale3D", SELECTED)
+            ue.connect(ga, "ReturnValue", ss, "self", blueprint_name=bp)
+            ue.connect(br, "then", ga, "execute", blueprint_name=bp)
+            ue.connect(ga, "then", ss, "execute", blueprint_name=bp)
+
+            ue.connect(prev, pin, br, "execute", blueprint_name=bp)
+            prev, pin = br, "else"  # chain via False path
+
+    build_chain("IA_NextCard", 1, 2000)    # Z = forward
+    build_chain("IA_PrevCard", 2, 4000)    # X = backward (+2 mod 3 = -1)
+    ue.compile(bp)
+    ue.save_all()
+```
+
 ## Recipes
 
 ### Unlit textured material (guaranteed visibility in any lighting)
@@ -506,10 +599,70 @@ ue.raw_command("apply_material_to_actor", {
 })
 ```
 
-### Actor names have UAID suffixes
+### Actor names have UAID suffixes (editor only)
 
-`spawn_blueprint_actor("BP_Foo", "MyActor")` creates `MyActor_UAID_XXXX`. Use `get_actors()` + prefix match to find the full name. `find_actors()` pattern matching is unreliable.
+`spawn_blueprint_actor("BP_Foo", "MyActor")` creates `MyActor_UAID_XXXX` in the editor. Use `get_actors()` + prefix match to find the full name. `find_actors()` pattern matching is unreliable.
+
+**Exception**: During PIE, actor names do NOT have UAID suffixes. `get_pie_actors()` returns clean names like `CardActor_0`. `set_actor_transform()` works with these clean names during PIE.
 
 ### spawn_blueprint_actor does not apply scale
 
 Always call `set_actor_transform()` after spawning to set scale. The scale parameter in `spawn_blueprint_actor` is ignored.
+
+### connect() requires blueprint_name
+
+`ue.connect(source, pin, target, pin)` without `blueprint_name` fails with "Source or target node not found". Always pass `blueprint_name=bp` explicitly.
+
+### Enhanced Input must be wired in PlayerController, not Pawn
+
+SpectatorPawn subclasses do NOT receive Enhanced Input Action events in their EventGraph. The events silently don't fire. Wire Enhanced Input handlers in the **PlayerController** Blueprint instead (e.g., `BP_ThirdPersonPlayerController`).
+
+### SpectatorPawn consumes WASD, Q, E, C keys
+
+When using SpectatorPawn, avoid binding gameplay actions to: W, A, S, D (movement), Q/E (up/down), C (may conflict with crouch from inherited IMC bindings), arrow keys, mouse buttons. Safe keys: Z, X, V, F, G, H, number keys (use `One`, `Two`, `Three` for main keyboard — not `1`, `2`, `3` which map to numpad).
+
+### set_blueprint_property for CDO properties (not set_object_property)
+
+`set_object_property` injects Set nodes into the EventGraph instead of modifying the CDO. Use `set_blueprint_property` for DefaultPawnClass, PlayerControllerClass, and similar class-default properties on GameMode/PlayerController Blueprints.
+
+### take_screenshot needs viewport refresh
+
+After `set_viewport_transform`, the viewport render doesn't update immediately. Call `select_actors` on a visible actor before `take_screenshot` to force a redraw. Otherwise screenshot may show stale/white content.
+
+### Material expression API details
+
+- `add_material_expression` `expression_class` must be a **short name**: `TextureSample`, `VectorParameter`, `ScalarParameter`, `Constant`, `Add`, `Multiply` — NOT `MaterialExpressionConstant3Vector`
+- `add_material_expression` requires `node_name` as **input** (you name the node), not returned
+- `set_material_expression_property` `property_value` must be a **string** (uses UE reflection parsing). For LinearColor: `"(R=1.0,G=0.5,B=0.0,A=1.0)"`
+- `connect_material_expressions` connects between expression nodes. `connect_to_material_output` connects to main material inputs (BaseColor, EmissiveColor, etc.)
+- Material default path is `/Game/Materials/`. Reference format: `/Game/Materials/M_Foo.M_Foo`
+
+### execute_console_command: avoid Python scripting
+
+`execute_console_command` with `py "import unreal; ..."` crashes UE (access violation). Do NOT use for Python scripting. Use dedicated bridge commands or manual editor operations instead.
+
+### CreateWidget is a K2Node
+
+`CreateWidget` cannot be created via `add_function_node` — it's a special UK2Node, not a regular function. UMG widgets must be displayed via Blueprint wiring (BeginPlay → CreateWidget → AddToViewport) in a Blueprint that already has the K2Node, or use PrintString as a runtime text display fallback.
+
+### Math and logic nodes target KismetMathLibrary
+
+Arithmetic and comparison nodes use `target='KismetMathLibrary'`:
+```python
+ue.raw_command("add_blueprint_function_node", {
+    "blueprint_name": bp,
+    "function_name": "Add_IntInt",        # also: Percent_IntInt, EqualEqual_IntInt
+    "target": "KismetMathLibrary",
+    "x": 0, "y": 0,
+})
+```
+
+### GetActorOfClass + SetActorScale3D work in PIE
+
+Both `GetActorOfClass` (target `GameplayStatics`) and `SetActorScale3D` work as Blueprint function nodes and execute correctly during PIE. `set_actor_transform` also works during PIE for direct actor manipulation from the bridge.
+
+### Branch nodes break sequential exec chains
+
+A Branch node has `then` (True) and `else` (False) outputs. You cannot reconnect both paths to the same downstream node. Pattern for "do something conditional for each item in a list":
+1. Set ALL items to default state first (sequential chain)
+2. Then check condition for each item and only modify the matching one (Branch per item, chain via `else` pin)
