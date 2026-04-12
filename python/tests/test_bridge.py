@@ -588,7 +588,7 @@ class TestUMGWidgetWrappers:
 
         assert mock.send_command.call_args[0] == (
             "add_canvas_panel_to_widget",
-            {"widget_name": "WBP_HUD", "canvas_name": "MainCanvas"},
+            {"widget_name": "WBP_HUD", "canvas_panel_name": "MainCanvas"},
         )
 
     def test_add_vertical_box(self):
@@ -684,7 +684,7 @@ class TestUMGWidgetWrappers:
             "reparent_widgets",
             {
                 "widget_name": "WBP_HUD",
-                "target_parent": "MainCanvas",
+                "target_container_name": "MainCanvas",
                 "children": ["ScoreText", "BossHP"],
             },
         )
@@ -703,3 +703,52 @@ class TestUMGWidgetWrappers:
                 "component_name": "MyScrollBox",
             },
         )
+
+
+class TestParamNameMatching:
+    """Verify Python param names match C++ expectations exactly.
+
+    These tests catch the class of bug where bridge.py sends a different
+    param key than the C++ action expects (e.g., "name" vs "material_name").
+    """
+
+    def test_create_material_sends_material_name(self):
+        ue, mock = make_bridge_with_mock()
+        ue.create_material("M_Test")
+        params = mock.send_command.call_args[0][1]
+        assert "material_name" in params
+        assert params["material_name"] == "M_Test"
+        assert "name" not in params
+
+    def test_create_colored_material_sends_material_name(self):
+        ue, mock = make_bridge_with_mock()
+        ue.create_colored_material("M_Red", color=(1, 0, 0, 1))
+        params = mock.send_command.call_args[0][1]
+        assert "material_name" in params
+        assert params["material_name"] == "M_Red"
+        assert "name" not in params
+        assert params["color"] == [1, 0, 0, 1]
+
+    def test_create_colored_material_with_path(self):
+        ue, mock = make_bridge_with_mock()
+        ue.create_colored_material("M_Blue", color=(0, 0, 1, 1), path="/Game/Mats")
+        params = mock.send_command.call_args[0][1]
+        assert params["material_name"] == "M_Blue"
+        assert params["path"] == "/Game/Mats"
+
+    def test_add_canvas_panel_sends_canvas_panel_name(self):
+        ue, mock = make_bridge_with_mock()
+        ue.add_canvas_panel("WBP_HUD", "MainCanvas")
+        params = mock.send_command.call_args[0][1]
+        assert "canvas_panel_name" in params
+        assert params["canvas_panel_name"] == "MainCanvas"
+        assert "canvas_name" not in params
+
+    def test_reparent_widgets_sends_target_container_name(self):
+        ue, mock = make_bridge_with_mock()
+        ue.reparent_widgets("WBP_HUD", "MainCanvas", ["Text1", "Text2"])
+        params = mock.send_command.call_args[0][1]
+        assert "target_container_name" in params
+        assert params["target_container_name"] == "MainCanvas"
+        assert "target_parent" not in params
+        assert params["children"] == ["Text1", "Text2"]
