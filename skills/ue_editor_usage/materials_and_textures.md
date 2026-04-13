@@ -34,13 +34,32 @@ ue.raw_command("apply_material_to_actor", {
 
 ## 纹理导入
 
-Bridge 没有 `import_asset` 命令。`execute_console_command` 配合 `ContentBrowser.ImportFiles`、`Asset.ImportDir`、`FbxAutomation.ImportDir` 均无效。
+Bridge 提供 `import_asset` 命令，可以将外部文件（PNG、JPG、TGA、BMP、EXR 等图片格式）直接导入为 UE 资产，无需用户手动在编辑器中操作。
 
-推荐流程：用脚本将 PNG 文件复制到项目的 `Content/<subfolder>/` 目录（编辑器运行状态下）。UE 检测到新文件后会弹出导入对话框。此时需要提示用户在 UE 中点击 "Import All"。导入完成后用 `list_assets` 确认纹理资产已就绪，再继续后续的材质创建操作。
+```python
+# 单个文件导入
+result = ue.import_asset(
+    source_path="/absolute/path/to/card.png",  # 必须是绝对路径
+    destination_path="/Game/CardArt",           # UE Content 路径
+    asset_name="T_Card_0",                      # 可选，覆盖导入后的资产名
+)
+print(result)
+# {'source_path': '...', 'destination_path': '/Game/CardArt',
+#  'imported_asset_path': '/Game/CardArt/T_Card_0.T_Card_0',
+#  'asset_name': 'T_Card_0', 'asset_class': 'Texture2D'}
 
-如果 PNG 在编辑器启动前就放入了 `Content/`，UE 启动时不一定能检测到。删除后重新复制（编辑器运行中）可触发检测。
+# 批量导入
+result = ue.import_assets([
+    {"source_path": "/path/a.png", "destination_path": "/Game/Art"},
+    {"source_path": "/path/b.png", "destination_path": "/Game/Art"},
+])
+# {'total': 2, 'succeeded': 2, 'failed': 0, 'results': [...]}
+```
 
-UE 5.7 更新：实测发现 UE 5.7 在项目打开时会自动导入 `Content/` 子目录中的 PNG，至少对全新项目是这样。具体行为可能取决于该子目录是否已有对应 `.uasset`。建议编辑器加载后用 `list_assets` 验证，不要假定任何一种行为。
+注意事项：
+- 首次导入可正常工作；对已存在的同名资产重复导入可能触发 access violation（crash prevention 会阻止崩溃但返回错误）。导入前用 `list_assets` 检查目标路径下是否已有同名资产。
+- 非图片格式（FBX 等）走的是 `IAssetTools::ImportAssets` 通用路径，行为可能与图片导入不同。
+- 文件名必须是 ASCII 安全的（如 `T_Card_0.png`）。中文或 Unicode 文件名可能导致导入失败。
 
 ## Unlit 材质配方
 
@@ -124,4 +143,4 @@ ue.raw_command("set_material_expression_property", {
 
 ### 中文文件名问题
 
-纹理 PNG 放入 `Content/` 前应重命名为 ASCII 安全的文件名（如 `T_Card_0.png`）。UE 资产路径内部使用 ASCII，中文或 Unicode 文件名可能导致导入失败或资产引用异常。
+纹理 PNG 应使用 ASCII 安全的文件名（如 `T_Card_0.png`），无论是通过 `import_asset` 导入还是手动放入 `Content/`。UE 资产路径内部使用 ASCII，中文或 Unicode 文件名可能导致导入失败或资产引用异常。

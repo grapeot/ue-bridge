@@ -734,6 +734,40 @@ protected:
 };
 
 // =========================================================================
+// P7: Asset Import
+// =========================================================================
+
+/**
+ * FImportAssetAction
+ * Imports external files (PNG, FBX, WAV, etc.) into the project using UE AssetImportTask.
+ * Params:
+ *   source_path (string, required) - Absolute OS path to the source file
+ *   destination_path (string, optional, default "/Game") - Content path for the imported asset
+ *   asset_name (string, optional) - Override name for the imported asset (without extension)
+ *   replace_existing (bool, optional, default true) - Whether to replace existing assets
+ *   automated (bool, optional, default true) - Skip import dialogs
+ *   save (bool, optional, default true) - Save the imported asset after import
+ * Returns:
+ *   imported_asset_path, asset_name, success
+ *
+ * For batch import, use:
+ *   items: [{source_path, destination_path, asset_name, ...}, ...]
+ */
+class UEBRIDGEEDITOR_API FImportAssetAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
+	virtual FString GetActionName() const override { return TEXT("import_asset"); }
+
+private:
+	/** Import a single file and return its result JSON */
+	TSharedPtr<FJsonObject> ImportSingleAsset(const TSharedPtr<FJsonObject>& ItemParams) const;
+};
+
+// =========================================================================
 // P7: Viewport Screenshot
 // =========================================================================
 
