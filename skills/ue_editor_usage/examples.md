@@ -50,7 +50,7 @@ with UEBridge() as ue:
 
 ## 示例二：纹理卡牌展示场景
 
-演示能力：创建关卡、创建 Unlit 材质并连接纹理节点、创建带网格和材质的 Actor 蓝图、生成 Actor 并设置变换、配置 SpectatorPawn 游戏模式实现自由飞行摄像机。
+演示能力：创建关卡、导入纹理、创建 Lit 材质并连接纹理节点、创建带网格的 Actor 蓝图、生成 Actor 并用 `apply_material_to_actor` 赋予材质、添加光源、配置 SpectatorPawn 游戏模式。
 
 ```python
 from ue_bridge import UEBridge
@@ -63,54 +63,65 @@ with UEBridge() as ue:
         "template": "Empty",
     })
 
-    # 2. 创建 Unlit 材质并连接纹理
-    #    （纹理需先导入，UE 会自动识别 Content/ 目录下的 PNG 文件）
+    # 2. 导入纹理（PNG 文件名必须为 ASCII）
+    ue.import_asset("/path/to/T_Card.png",
+        destination_path="/Game/CardArt", asset_name="T_Card")
+
+    # 3. 创建 Lit 材质并连接纹理到 BaseColor
+    #    （使用默认 Lit ShadingModel，配合场景光源，比 Unlit 更稳定）
     mat = "M_Card"
     ue.create_material(mat)
-    ue.raw_command("set_material_property", {
-        "material_name": mat,
-        "property_name": "ShadingModel",
-        "property_value": "Unlit",
-    })
+
+    # 创建 TextureSample 节点（不带 properties，避免静默失败）
     ue.raw_command("add_material_expression", {
         "material_name": mat,
         "expression_class": "TextureSample",
         "node_name": "CardArt",
         "x": -300, "y": 0,
-        "properties": {"Texture": "/Game/CardArt/T_Card.T_Card"},
+    })
+
+    # 用 get_material_summary 获取节点名，再设置纹理
+    summary = ue.raw_command("get_material_summary", {"material_name": mat})
+    node_name = summary["expressions"][0]["node_name"]
+    ue.raw_command("set_material_expression_property", {
+        "material_name": mat, "node_name": node_name,
+        "property_name": "Texture",
+        "property_value": "/Game/CardArt/T_Card.T_Card",
     })
     ue.raw_command("connect_to_material_output", {
-        "material_name": mat,
-        "source_node": "CardArt",
-        "source_output": "RGB",
-        "material_property": "EmissiveColor",
+        "material_name": mat, "source_node": node_name,
+        "source_output": "RGB", "material_property": "BaseColor",
     })
     ue.compile_material(mat)
 
-    # 3. 创建卡牌蓝图，添加网格组件并赋予材质
+    # 4. 创建卡牌蓝图，添加网格组件（不通过 materials 参数设材质）
     bp = "BP_Card"
     ue.create_blueprint(bp, parent_class="Actor", path="/Game/Cards")
     ue.add_component(bp, "StaticMeshComponent", "CardMesh")
     ue.set_static_mesh_properties(bp, "CardMesh",
-        static_mesh="/Engine/BasicShapes/Cube.Cube",
-        materials=[f"/Game/Materials/{mat}.{mat}"])
+        static_mesh="/Engine/BasicShapes/Cube.Cube")
     ue.compile(bp)
 
-    # 4. 生成卡牌并调整变换
+    # 5. 生成卡牌、设置变换、应用材质
     #    Scale (0.7, 0.03, 1.0) = 宽度, 极薄厚度, 高度（竖向卡牌）
     #    Yaw=90 让卡面朝向 -X 方向的摄像机
     ue.spawn_blueprint_actor(bp, "Card_0", location=(0, 0, 100))
-    full_name = [a["name"] for a in ue.get_actors() if "Card_0" in a["name"]][0]
+    full_name = [a["name"] for a in ue.get_actors()
+                 if a["name"].startswith("Card_0")][0]
     ue.set_actor_transform(full_name,
         location=(0, 0, 100),
         rotation=(0, 90, 0),
         scale=(0.7, 0.03, 1.0))
+    # 用 apply_material_to_actor 对实例赋予材质（推荐方式，PIE 中也有效）
     ue.raw_command("apply_material_to_actor", {
         "actor_name": full_name,
         "material_path": f"/Game/Materials/{mat}.{mat}",
     })
 
-    # 5. 配置 SpectatorPawn 游戏模式（自由飞行摄像机，无重力）
+    # 6. 添加光源（Lit 材质需要场景光照）
+    ue.spawn_actor("DirectionalLight", "MainLight", location=(0, 0, 500))
+
+    # 7. 配置 SpectatorPawn 游戏模式（自由飞行摄像机，无重力）
     gm = "BP_ShowcaseGameMode"
     ue.create_blueprint(gm, parent_class="GameModeBase", path="/Game/Showcase")
     ue.set_blueprint_property(gm, "DefaultPawnClass", "/Script/Engine.SpectatorPawn")

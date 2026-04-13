@@ -21,16 +21,16 @@ ue.compile_material("M_Red")
 
 ### 场景 Actor 上应用材质
 
-`set_static_mesh_properties` 只对 Blueprint 组件生效。场景中的 Actor 用以下方式：
+**`apply_material_to_actor` 是推荐的材质赋值方式**，编辑器和 PIE 中都能正常工作。
 
 ```python
 ue.raw_command("apply_material_to_actor", {
-    "actor_name": full_name,  # 必须包含 UAID 后缀
+    "actor_name": full_name,  # 包含 UAID 后缀的完整名称
     "material_path": "/Game/Materials/M_Foo.M_Foo",
 })
 ```
 
-注意：`apply_material_to_actor` 只影响编辑器中的 Actor 实例。PIE 运行时，Actor 从 Blueprint CDO 生成，可能仍使用默认材质。如果创建时已通过 `set_static_mesh_properties` 的 `materials` 参数设置了材质，CDO 中就已经是正确的。`apply_material_to_actor` 适合作为编辑器视口的视觉修正，不应作为主要材质赋值路径。
+`set_static_mesh_properties` 的 `materials` 参数在 Blueprint CDO 上可能不生效（API 返回成功，编译通过，但渲染时仍为默认材质）。推荐流程：先 `spawn_blueprint_actor` 放置 Actor，再用 `apply_material_to_actor` 对每个实例逐个应用材质。实测 PIE 中实例材质覆盖会被保留，正常渲染。
 
 ## 纹理导入
 
@@ -61,9 +61,9 @@ result = ue.import_assets([
 - 非图片格式（FBX 等）走的是 `IAssetTools::ImportAssets` 通用路径，行为可能与图片导入不同。
 - 文件名必须是 ASCII 安全的（如 `T_Card_0.png`）。中文或 Unicode 文件名可能导致导入失败。
 
-## Unlit 材质配方
+## Unlit 材质配方（不推荐用于生产）
 
-在任意光照条件下保证材质可见的完整流程：
+Unlit 材质不依赖光源即可显示纹理，但存在 auto-exposure 过曝和截图不可靠等问题。推荐使用默认 Lit 材质 + 场景光照（添加 DirectionalLight 即可），将纹理连接到 BaseColor 而非 EmissiveColor。以下为 Unlit 方案仅供快速原型使用：
 
 ```python
 ue.create_material("M_Name")
@@ -107,9 +107,13 @@ r.DefaultFeature.AutoExposure=0
 
 ## 截图
 
-`take_screenshot` 捕获视口缓冲区，但截图结果可能比用户在屏幕上看到的明显偏暗，尤其在暗场景中使用 Unlit Emissive 材质时。这是视口显示管线和截图捕获路径之间的 tonemapping/HDR 渲染差异。不要仅凭截图亮度判断材质是否正确，有疑问时请用户确认屏幕上的实际效果。
+`take_screenshot` 捕获视口缓冲区，但在 macOS 上**极不可靠**：
 
-另外，`set_viewport_transform` 之后视口渲染不会立即更新。在 `take_screenshot` 之前对可见 Actor 调用 `select_actors` 可以强制刷新，否则截图可能显示过期或白屏内容。
+- 空关卡（无背景）中截图可能**全白过曝**，即使用户屏幕上能正常看到内容
+- 有背景的关卡中截图可能**偏暗**
+- `set_viewport_transform` + `select_actors` 强制刷新后仍然不可靠
+
+这是视口显示管线和截图捕获路径之间的 tonemapping/HDR 渲染差异。**不要依赖截图来验证材质、光照或场景是否正确**。应该直接在编辑器 viewport 中目视确认，或在 PIE 中通过日志和 Actor 属性检查验证。截图仅适合有成熟光照管线的完整场景，不适合快速原型验证。
 
 ## 踩坑记录
 
