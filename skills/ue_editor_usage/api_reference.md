@@ -30,6 +30,8 @@ ue-bridge start-pie                              # 启动 PIE（默认: Selected
 ue-bridge start-pie --mode Simulate               # 以 Simulate 模式启动
 ue-bridge stop-pie                                # 停止 PIE
 ue-bridge pie-state                               # 查询 PIE 状态（Running/Stopped）
+ue-bridge import-asset --source /path/to/file.png --destination /Game/Art
+ue-bridge import-asset --source /path/to/file.png --destination /Game/Art --asset-name T_MyTex
 ue-bridge raw get_context
 ue-bridge raw compile_blueprint --params '{"blueprint_name":"BP_Foo"}'
 ```
@@ -51,6 +53,20 @@ with UEBridge() as ue:
 ```
 
 始终使用上下文管理器（`with`）以确保连接正确关闭。
+
+### 资产导入
+
+```python
+# 导入单个文件（支持 PNG/JPG/TGA/BMP/EXR 等图片格式）
+result = ue.import_asset("/path/to/card.png", destination_path="/Game/CardArt", asset_name="T_Card")
+# -> {'imported_asset_path': '/Game/CardArt/T_Card.T_Card', 'asset_name': 'T_Card', 'asset_class': 'Texture2D', ...}
+
+# 批量导入
+result = ue.import_assets([
+    {"source_path": "/path/a.png", "destination_path": "/Game/Art"},
+    {"source_path": "/path/b.png", "destination_path": "/Game/Art"},
+])
+```
 
 ### 场景操作
 

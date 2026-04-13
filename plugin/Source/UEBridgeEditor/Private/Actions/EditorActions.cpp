@@ -35,6 +35,8 @@
 #include "AssetToolsModule.h"
 #include "IAssetTools.h"
 #include "EditorAssetLibrary.h"
+#include "AssetImportTask.h"
+#include "Factories/TextureFactory.h"
 #include "ImageUtils.h"
 #include "Misc/Base64.h"
 #include "Misc/PackageName.h"
@@ -3963,5 +3965,226 @@ TSharedPtr<FJsonObject> FOpenAssetEditorAction::ExecuteInternal(const TSharedPtr
 	Result->SetStringField(TEXT("editor_name"), EditorName);
 	Result->SetBoolField(TEXT("focused"), bFocus);
 
+	return CreateSuccessResponse(Result);
+}
+
+
+// =========================================================================
+// import_asset
+// =========================================================================
+
+bool FImportAssetAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
+{
+	// Batch mode: items array
+	const TArray<TSharedPtr<FJsonValue>>* Items = nullptr;
+	if (Params->TryGetArrayField(TEXT("items"), Items))
+	{
+		if (Items->Num() == 0)
+		{
+			OutError = TEXT("'items' array is empty");
+			return false;
+		}
+		return true;
+	}
+
+	// Single mode: source_path required
+	FString SourcePath;
+	if (!Params->TryGetStringField(TEXT("source_path"), SourcePath) || SourcePath.IsEmpty())
+	{
+		OutError = TEXT("'source_path' is required (absolute OS path to the file to import)");
+		return false;
+	}
+	return true;
+}
+
+
+TSharedPtr<FJsonObject> FImportAssetAction::ImportSingleAsset(const TSharedPtr<FJsonObject>& ItemParams) const
+{
+	FString SourcePath;
+	ItemParams->TryGetStringField(TEXT("source_path"), SourcePath);
+
+	FString DestinationPath = TEXT("/Game");
+	ItemParams->TryGetStringField(TEXT("destination_path"), DestinationPath);
+
+	FString AssetName;
+	ItemParams->TryGetStringField(TEXT("asset_name"), AssetName);
+
+	bool bReplaceExisting = true;
+	ItemParams->TryGetBoolField(TEXT("replace_existing"), bReplaceExisting);
+
+	bool bAutomated = true;
+	ItemParams->TryGetBoolField(TEXT("automated"), bAutomated);
+
+	bool bSave = true;
+	ItemParams->TryGetBoolField(TEXT("save"), bSave);
+
+	// Verify source file exists
+	if (!FPaths::FileExists(SourcePath))
+	{
+		TSharedPtr<FJsonObject> ErrResult = MakeShared<FJsonObject>();
+		ErrResult->SetStringField(TEXT("source_path"), SourcePath);
+		ErrResult->SetBoolField(TEXT("success"), false);
+		ErrResult->SetStringField(TEXT("error"), FString::Printf(TEXT("Source file not found: %s"), *SourcePath));
+		return ErrResult;
+	}
+
+	// Determine the asset name
+	FString FinalAssetName = AssetName.IsEmpty()
+		? FPaths::GetBaseFilename(SourcePath)
+		: AssetName;
+
+	// Build the full package path
+	FString PackagePath = DestinationPath / FinalAssetName;
+
+	// Check if the asset already exists
+	if (!bReplaceExisting && UEditorAssetLibrary::DoesAssetExist(PackagePath))
+	{
+		UObject* Existing = UEditorAssetLibrary::LoadAsset(PackagePath);
+		TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+		Result->SetStringField(TEXT("source_path"), SourcePath);
+		Result->SetBoolField(TEXT("success"), true);
+		Result->SetStringField(TEXT("imported_asset_path"), Existing ? Existing->GetPathName() : PackagePath);
+		Result->SetStringField(TEXT("asset_name"), FinalAssetName);
+		Result->SetStringField(TEXT("note"), TEXT("Asset already exists, replace_existing=false"));
+		return Result;
+	}
+
+	// Determine file extension to pick the right factory
+	FString Extension = FPaths::GetExtension(SourcePath).ToLower();
+
+	UObject* ImportedObject = nullptr;
+
+	if (Extension == TEXT("png") || Extension == TEXT("jpg") ||
+	    Extension == TEXT("jpeg") || Extension == TEXT("bmp") ||
+	    Extension == TEXT("tga") || Extension == TEXT("exr") ||
+	    Extension == TEXT("hdr"))
+	{
+		// --- Texture import via factory ---
+		UPackage* Package = CreatePackage(*PackagePath);
+		if (!Package)
+		{
+			TSharedPtr<FJsonObject> ErrResult = MakeShared<FJsonObject>();
+			ErrResult->SetStringField(TEXT("source_path"), SourcePath);
+			ErrResult->SetBoolField(TEXT("success"), false);
+			ErrResult->SetStringField(TEXT("error"), FString::Printf(
+				TEXT("Failed to create package at %s"), *PackagePath));
+			return ErrResult;
+		}
+
+		// Load file data
+		TArray<uint8> FileData;
+		if (!FFileHelper::LoadFileToArray(FileData, *SourcePath))
+		{
+			TSharedPtr<FJsonObject> ErrResult = MakeShared<FJsonObject>();
+			ErrResult->SetStringField(TEXT("source_path"), SourcePath);
+			ErrResult->SetBoolField(TEXT("success"), false);
+			ErrResult->SetStringField(TEXT("error"), TEXT("Failed to read source file"));
+			return ErrResult;
+		}
+
+		UTextureFactory* Factory = NewObject<UTextureFactory>();
+		Factory->AddToRoot();
+		Factory->SuppressImportOverwriteDialog();
+
+		const uint8* BufferPtr = FileData.GetData();
+		const uint8* BufferEnd = BufferPtr + FileData.Num();
+		ImportedObject = Factory->FactoryCreateBinary(
+			UTexture2D::StaticClass(),
+			Package,
+			*FinalAssetName,
+			RF_Public | RF_Standalone,
+			nullptr,
+			*Extension,
+			BufferPtr,
+			BufferEnd,
+			GWarn
+		);
+
+		Factory->RemoveFromRoot();
+
+		if (ImportedObject)
+		{
+			// Notify asset registry
+			FAssetRegistryModule::AssetCreated(ImportedObject);
+			Package->MarkPackageDirty();
+
+			if (bSave)
+			{
+				FSavePackageArgs SaveArgs;
+				SaveArgs.TopLevelFlags = RF_Public | RF_Standalone;
+				UPackage::SavePackage(Package, ImportedObject,
+					*FPackageName::LongPackageNameToFilename(PackagePath, FPackageName::GetAssetPackageExtension()),
+					SaveArgs);
+			}
+		}
+	}
+	else
+	{
+		// --- Generic import via IAssetTools::ImportAssets for non-texture files ---
+		IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools")).Get();
+		TArray<FString> FilesToImport;
+		FilesToImport.Add(SourcePath);
+		TArray<UObject*> Imported = AssetTools.ImportAssets(FilesToImport, DestinationPath, nullptr, true);
+		if (Imported.Num() > 0)
+		{
+			ImportedObject = Imported[0];
+		}
+	}
+
+	// Build result
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("source_path"), SourcePath);
+	Result->SetStringField(TEXT("destination_path"), DestinationPath);
+
+	if (ImportedObject)
+	{
+		Result->SetBoolField(TEXT("success"), true);
+		Result->SetStringField(TEXT("imported_asset_path"), ImportedObject->GetPathName());
+		Result->SetStringField(TEXT("asset_name"), ImportedObject->GetName());
+		Result->SetStringField(TEXT("asset_class"), ImportedObject->GetClass()->GetName());
+	}
+	else
+	{
+		Result->SetBoolField(TEXT("success"), false);
+		Result->SetStringField(TEXT("error"), TEXT("Import failed: factory returned null"));
+	}
+
+	return Result;
+}
+
+
+TSharedPtr<FJsonObject> FImportAssetAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	// Check for batch mode
+	const TArray<TSharedPtr<FJsonValue>>* Items = nullptr;
+	if (Params->TryGetArrayField(TEXT("items"), Items))
+	{
+		TArray<TSharedPtr<FJsonValue>> ResultsArray;
+		int32 SuccessCount = 0;
+		int32 FailCount = 0;
+
+		for (const TSharedPtr<FJsonValue>& Item : *Items)
+		{
+			const TSharedPtr<FJsonObject>* ItemObj = nullptr;
+			if (Item->TryGetObject(ItemObj))
+			{
+				TSharedPtr<FJsonObject> ItemResult = ImportSingleAsset(*ItemObj);
+				bool bSuccess = false;
+				ItemResult->TryGetBoolField(TEXT("success"), bSuccess);
+				if (bSuccess) SuccessCount++; else FailCount++;
+				ResultsArray.Add(MakeShared<FJsonValueObject>(ItemResult));
+			}
+		}
+
+		TSharedPtr<FJsonObject> BatchResult = MakeShared<FJsonObject>();
+		BatchResult->SetNumberField(TEXT("total"), Items->Num());
+		BatchResult->SetNumberField(TEXT("succeeded"), SuccessCount);
+		BatchResult->SetNumberField(TEXT("failed"), FailCount);
+		BatchResult->SetArrayField(TEXT("results"), ResultsArray);
+		return CreateSuccessResponse(BatchResult);
+	}
+
+	// Single mode
+	TSharedPtr<FJsonObject> Result = ImportSingleAsset(Params);
 	return CreateSuccessResponse(Result);
 }

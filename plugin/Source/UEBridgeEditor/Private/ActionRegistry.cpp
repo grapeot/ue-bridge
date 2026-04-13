@@ -72,6 +72,7 @@ void RegisterEditorActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandl
 	ActionHandlers.Add(TEXT("execute_console_command"), MakeShared<FExecuteConsoleCommandAction>());
 	ActionHandlers.Add(TEXT("get_pie_actors"), MakeShared<FGetPIEActorsAction>());
 	ActionHandlers.Add(TEXT("get_pie_actor_property"), MakeShared<FGetPIEActorPropertyAction>());
+	ActionHandlers.Add(TEXT("import_asset"), MakeShared<FImportAssetAction>());
 }
 
 void RegisterLayoutActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandlers)

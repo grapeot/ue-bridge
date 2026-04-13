@@ -233,6 +233,49 @@ class UEBridge:
         data = self._cmd("list_assets", params)
         return data.get("assets", [])
 
+    def import_asset(self, source_path: str,
+                     destination_path: str = "/Game",
+                     asset_name: str | None = None,
+                     replace_existing: bool = True,
+                     automated: bool = True,
+                     save: bool = True) -> dict:
+        """Import an external file (PNG, FBX, WAV, etc.) into the project.
+
+        Args:
+            source_path: Absolute OS path to the source file.
+            destination_path: Content path for the imported asset (default /Game).
+            asset_name: Override name for the imported asset (without extension).
+            replace_existing: Whether to replace existing assets (default True).
+            automated: Skip import dialogs (default True).
+            save: Save the imported asset after import (default True).
+
+        Returns:
+            Dict with imported_asset_path, asset_name, asset_class, success.
+        """
+        params: dict[str, Any] = {
+            "source_path": source_path,
+            "destination_path": destination_path,
+            "replace_existing": replace_existing,
+            "automated": automated,
+            "save": save,
+        }
+        if asset_name:
+            params["asset_name"] = asset_name
+        return self._cmd("import_asset", params)
+
+    def import_assets(self, items: list[dict]) -> dict:
+        """Batch import multiple external files.
+
+        Args:
+            items: List of dicts, each with at minimum 'source_path'.
+                   Optional keys: destination_path, asset_name,
+                   replace_existing, automated, save.
+
+        Returns:
+            Dict with total, succeeded, failed, results.
+        """
+        return self._cmd("import_asset", {"items": items})
+
     # -------------------------------------------------------------------------
     # Scene / Actors
     # -------------------------------------------------------------------------

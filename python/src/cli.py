@@ -79,6 +79,15 @@ def cmd_list_assets(ue: UEBridge, args):
     _json_out({"count": len(assets), "assets": assets})
 
 
+def cmd_import_asset(ue: UEBridge, args):
+    result = ue.import_asset(
+        source_path=args.source,
+        destination_path=args.destination,
+        asset_name=args.asset_name,
+    )
+    _json_out(result)
+
+
 def cmd_get_actors(ue: UEBridge, args):
     actors = ue.get_actors()
     _json_out({"count": len(actors), "actors": actors})
@@ -186,6 +195,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("list-assets", help="List assets")
     p.add_argument("--path", default="/Game/")
 
+    p = sub.add_parser("import-asset", help="Import external file into project")
+    p.add_argument("--source", required=True, help="Absolute OS path to source file")
+    p.add_argument("--destination", default="/Game", help="Content path (default /Game)")
+    p.add_argument("--asset-name", default=None, help="Override asset name")
+
     sub.add_parser("get-actors", help="List level actors")
 
     p = sub.add_parser("find-actors", help="Find actors by name pattern")
@@ -258,6 +272,7 @@ COMMAND_MAP = {
     "doctor": cmd_doctor,
     "verify": cmd_verify,
     "list-assets": cmd_list_assets,
+    "import-asset": cmd_import_asset,
     "get-actors": cmd_get_actors,
     "find-actors": cmd_find_actors,
     "compile": cmd_compile,

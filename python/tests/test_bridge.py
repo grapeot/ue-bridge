@@ -705,6 +705,76 @@ class TestUMGWidgetWrappers:
         )
 
 
+class TestImportAsset:
+    """Verify import_asset parameter handling."""
+
+    def test_import_asset_default_params(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True,
+            "source_path": "/tmp/test.png",
+            "imported_asset_path": "/Game/test",
+            "asset_name": "test",
+            "asset_class": "Texture2D",
+        }
+
+        result = ue.import_asset("/tmp/test.png")
+
+        params = mock.send_command.call_args[0][1]
+        assert params["source_path"] == "/tmp/test.png"
+        assert params["destination_path"] == "/Game"
+        assert params["replace_existing"] is True
+        assert params["automated"] is True
+        assert params["save"] is True
+        assert "asset_name" not in params
+
+    def test_import_asset_with_all_options(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.import_asset(
+            "/tmp/card.png",
+            destination_path="/Game/Textures",
+            asset_name="T_Card",
+            replace_existing=False,
+            automated=False,
+            save=False,
+        )
+
+        params = mock.send_command.call_args[0][1]
+        assert params["source_path"] == "/tmp/card.png"
+        assert params["destination_path"] == "/Game/Textures"
+        assert params["asset_name"] == "T_Card"
+        assert params["replace_existing"] is False
+        assert params["automated"] is False
+        assert params["save"] is False
+
+    def test_import_assets_batch(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {
+            "success": True, "total": 2, "succeeded": 2, "failed": 0,
+        }
+
+        items = [
+            {"source_path": "/tmp/a.png", "destination_path": "/Game/Art"},
+            {"source_path": "/tmp/b.png", "destination_path": "/Game/Art"},
+        ]
+        result = ue.import_assets(items)
+
+        params = mock.send_command.call_args[0][1]
+        assert "items" in params
+        assert len(params["items"]) == 2
+        assert result["total"] == 2
+
+    def test_import_asset_sends_correct_command(self):
+        ue, mock = make_bridge_with_mock()
+        mock.send_command.return_value = {"success": True}
+
+        ue.import_asset("/tmp/file.fbx", destination_path="/Game/Meshes")
+
+        assert mock.send_command.call_args[0][0] == "import_asset"
+
+
 class TestParamNameMatching:
     """Verify Python param names match C++ expectations exactly.
 
