@@ -12,19 +12,28 @@
 ue.create_material("M_Name")
 ue.raw_command("set_material_property", {
     "material_name": "M_Name", "property_name": "ShadingModel", "property_value": "Unlit"})
+
+# 创建 TextureSample 节点（不带 properties，避免静默失败）
 ue.raw_command("add_material_expression", {
     "material_name": "M_Name", "expression_class": "TextureSample",
-    "node_name": "Tex", "x": -300, "y": 0,
-    "properties": {"Texture": "/Game/Textures/T_Foo.T_Foo"}})
+    "node_name": "Tex", "x": -300, "y": 0})
+
+# 用 get_material_summary 获取内部节点名，再设置纹理
+summary = ue.raw_command("get_material_summary", {"material_name": "M_Name"})
+internal_name = summary["expressions"][0]["node_name"]  # 如 "$expr_0"
+ue.raw_command("set_material_expression_property", {
+    "material_name": "M_Name", "node_name": internal_name,
+    "property_name": "Texture", "property_value": "/Game/Textures/T_Foo.T_Foo"})
+
 ue.raw_command("connect_to_material_output", {
-    "material_name": "M_Name", "source_node": "Tex",
+    "material_name": "M_Name", "source_node": internal_name,
     "source_output": "RGB", "material_property": "EmissiveColor"})
 ue.compile_material("M_Name")
 ```
 
 ### 卡牌竖版朝向（面向 -X 摄像机）
 
-Scale 设为 `(width, 0.03, height)`，其中 Y 维度极薄作为厚度。Yaw 设为 90 度让薄面朝向摄像机。如果需要扇形排列多张卡牌，在 90 度基础上加偏移：`Yaw = 90 + offset`。
+使用 `Cube` 基础网格（不要用 `Plane`，Plane 面朝 +Z 上方，Yaw 旋转无法使其面向摄像机）。Scale 设为 `(width, 0.03, height)`，其中 Y 维度极薄作为厚度。Yaw 设为 90 度让薄面朝向摄像机。如果需要扇形排列多张卡牌，在 90 度基础上加偏移：`Yaw = 90 + offset`。
 
 ### SpectatorPawn 用于空关卡
 
@@ -275,9 +284,33 @@ r.DefaultFeature.AutoExposure=0
 
 自定义 GameMode 使用 `SpectatorPawn` 为 DefaultPawnClass、`BP_FirstPersonPlayerController` 为 PlayerControllerClass 时，模板的 BeginPlay 中 `AddMappingContext` 节点可能在 local player subsystem 就绪之前触发，产生 "Accessed None trying to read property CallFunc_GetLocalPlayerSubsystem_ReturnValue" 错误。Enhanced Input 键位映射通常仍然有效（IMC 会在后续帧注册），但日志中会有噪音警告。
 
-### add_material_expression 引用不存在的纹理会崩溃
+### add_material_expression 的 properties 对纹理不可靠
 
-`add_material_expression` 的 `properties` 中引用不存在的纹理资产（如 `{"Texture": "/Game/Foo/T_Bar.T_Bar"}`）会导致 access violation 崩溃（可安全恢复）。在引用纹理前先用 `list_assets` 确认资产已导入。安全模式：先创建 TextureSample 节点（不带 `properties`），再用 `set_material_expression_property` 设置 Texture。
+`add_material_expression` 的 `properties` 字段设置 Texture 引用（如 `{"Texture": "/Game/CardArt/T_Card_0.T_Card_0"}`）行为不稳定：引用不存在的纹理会崩溃（access violation），引用存在的纹理也可能静默失败（编译通过但渲染为灰白格子图案）。
+
+推荐的两步安全写法：
+
+```python
+# 第一步：创建 TextureSample 节点（不带 properties）
+ue.raw_command("add_material_expression", {
+    "material_name": mat, "expression_class": "TextureSample",
+    "node_name": "MyTex", "x": -300, "y": 0,
+})
+
+# 第二步：用 get_material_summary 找到内部节点名，再设置 Texture
+summary = ue.raw_command("get_material_summary", {"material_name": mat})
+internal_name = summary["expressions"][0]["node_name"]  # 通常是 "$expr_0"
+ue.raw_command("set_material_expression_property", {
+    "material_name": mat, "node_name": internal_name,
+    "property_name": "Texture", "property_value": "/Game/CardArt/T_Card_0.T_Card_0",
+})
+```
+
+注意：`add_material_expression` 中你传的 `node_name` 是用户标签，但 `set_material_expression_property` 需要 `get_material_summary` 返回的内部名称（如 `$expr_0`）。两者不是同一个名字空间。
+
+### 卡牌用 Cube 不用 Plane
+
+UE 的 `Plane` 基础网格朝向 +Z（面朝上方），用 Yaw 旋转无法使其面向摄像机。做卡牌等扁平物体应使用 `Cube`，通过 scale 把一个维度压扁：Scale `(宽度, 0.03, 高度)` 创建极薄的卡牌形状，Yaw 旋转控制朝向。
 
 ### Enhanced Input 必须在 PlayerController 中接线
 

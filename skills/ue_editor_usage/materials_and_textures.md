@@ -50,12 +50,21 @@ UE 5.7 更新：实测发现 UE 5.7 在项目打开时会自动导入 `Content/`
 ue.create_material("M_Name")
 ue.raw_command("set_material_property", {
     "material_name": "M_Name", "property_name": "ShadingModel", "property_value": "Unlit"})
+
+# 创建 TextureSample 节点（不带 properties，避免静默失败）
 ue.raw_command("add_material_expression", {
     "material_name": "M_Name", "expression_class": "TextureSample",
-    "node_name": "Tex", "x": -300, "y": 0,
-    "properties": {"Texture": "/Game/Textures/T_Foo.T_Foo"}})
+    "node_name": "Tex", "x": -300, "y": 0})
+
+# 用 get_material_summary 获取内部节点名，再设置纹理
+summary = ue.raw_command("get_material_summary", {"material_name": "M_Name"})
+internal_name = summary["expressions"][0]["node_name"]  # 如 "$expr_0"
+ue.raw_command("set_material_expression_property", {
+    "material_name": "M_Name", "node_name": internal_name,
+    "property_name": "Texture", "property_value": "/Game/Textures/T_Foo.T_Foo"})
+
 ue.raw_command("connect_to_material_output", {
-    "material_name": "M_Name", "source_node": "Tex",
+    "material_name": "M_Name", "source_node": internal_name,
     "source_output": "RGB", "material_property": "EmissiveColor"})
 ue.compile_material("M_Name")
 ```
@@ -85,11 +94,29 @@ r.DefaultFeature.AutoExposure=0
 
 ## 踩坑记录
 
-### 引用不存在的纹理会崩溃
+### add_material_expression 的 properties 对纹理不可靠
 
-`add_material_expression` 设置 `properties: {"Texture": "/Game/Foo/T_Bar.T_Bar"}` 时，如果纹理资产不存在，会触发 access violation 崩溃（可安全捕获）。必须先通过 `list_assets` 确认纹理已导入，再在材质表达式中引用。
+`add_material_expression` 的 `properties` 字段设置 Texture 行为不稳定：引用不存在的纹理会崩溃（access violation），引用存在的纹理也可能静默失败（渲染为灰白格子图案）。
 
-安全写法：先创建 TextureSample 节点（不带 `properties` 字段），确认纹理资产存在后再用 `set_material_expression_property` 设置 Texture 属性。
+推荐两步安全写法：
+
+```python
+# 第一步：创建节点（不带 properties）
+ue.raw_command("add_material_expression", {
+    "material_name": mat, "expression_class": "TextureSample",
+    "node_name": "MyTex", "x": -300, "y": 0,
+})
+
+# 第二步：用 get_material_summary 获取内部节点名
+summary = ue.raw_command("get_material_summary", {"material_name": mat})
+internal_name = summary["expressions"][0]["node_name"]  # 如 "$expr_0"
+ue.raw_command("set_material_expression_property", {
+    "material_name": mat, "node_name": internal_name,
+    "property_name": "Texture", "property_value": "/Game/CardArt/T_Card_0.T_Card_0",
+})
+```
+
+关键点：`add_material_expression` 中传的 `node_name` 是用户标签，`set_material_expression_property` 需要 `get_material_summary` 返回的内部名称（如 `$expr_0`）。两者不是同一个名字空间。
 
 ### `get_material_summary` 不显示纹理引用
 
