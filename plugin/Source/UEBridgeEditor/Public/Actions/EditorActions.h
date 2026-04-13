@@ -640,6 +640,22 @@ protected:
 	virtual FString GetActionName() const override { return TEXT("new_level"); }
 };
 
+/**
+ * FOpenLevelAction
+ * Opens an existing level in the editor (switches the active map).
+ * Params:
+ *   level_path (string, required) - Asset path of the level (e.g. "/Game/Maps/CardShowcase")
+ */
+class UEBRIDGEEDITOR_API FOpenLevelAction : public FEditorAction
+{
+public:
+	virtual TSharedPtr<FJsonObject> ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context) override;
+
+protected:
+	virtual bool Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError) override;
+	virtual FString GetActionName() const override { return TEXT("open_level"); }
+};
+
 // =========================================================================
 // P7: Input Simulation
 // =========================================================================

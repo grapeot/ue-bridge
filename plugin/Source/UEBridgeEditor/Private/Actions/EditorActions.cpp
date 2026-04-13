@@ -3539,6 +3539,55 @@ TSharedPtr<FJsonObject> FNewLevelAction::ExecuteInternal(const TSharedPtr<FJsonO
 }
 
 // ============================================================================
+// FOpenLevelAction — Open an existing level in the editor
+// ============================================================================
+
+bool FOpenLevelAction::Validate(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context, FString& OutError)
+{
+	if (!Params->HasField(TEXT("level_path")))
+	{
+		OutError = TEXT("'level_path' is required (e.g. '/Game/Maps/CardShowcase')");
+		return false;
+	}
+	return true;
+}
+
+TSharedPtr<FJsonObject> FOpenLevelAction::ExecuteInternal(const TSharedPtr<FJsonObject>& Params, FUEEditorContext& Context)
+{
+	FString LevelPath = Params->GetStringField(TEXT("level_path"));
+
+	// Convert asset path to filename
+	FString Filename = FPackageName::LongPackageNameToFilename(LevelPath, FPackageName::GetMapPackageExtension());
+
+	// Verify the file exists before loading
+	if (!IFileManager::Get().FileExists(*Filename))
+	{
+		return CreateErrorResponse(FString::Printf(TEXT("Level file not found: %s (resolved to %s)"), *LevelPath, *Filename));
+	}
+
+	// Load the map using FEditorFileUtils — this is the standard editor API
+	// that switches the active level, preserving all placed actors
+	bool bSuccess = FEditorFileUtils::LoadMap(Filename, /*LoadAsTemplate=*/false, /*bShowProgress=*/true);
+
+	if (!bSuccess)
+	{
+		return CreateErrorResponse(FString::Printf(TEXT("Failed to load level: %s"), *LevelPath));
+	}
+
+	UWorld* LoadedWorld = GEditor->GetEditorWorldContext().World();
+	FString WorldName = LoadedWorld ? LoadedWorld->GetName() : TEXT("Unknown");
+
+	TSharedPtr<FJsonObject> Result = MakeShared<FJsonObject>();
+	Result->SetStringField(TEXT("level_path"), LevelPath);
+	Result->SetStringField(TEXT("filename"), Filename);
+	Result->SetStringField(TEXT("world_name"), WorldName);
+
+	UE_LOG(LogMCP, Log, TEXT("Loaded level: %s (world=%s)"), *LevelPath, *WorldName);
+
+	return CreateSuccessResponse(Result);
+}
+
+// ============================================================================
 // FSimulateKeyAction — Simulate keyboard input via Slate
 // ============================================================================
 
@@ -3781,7 +3830,6 @@ TSharedPtr<FJsonObject> FTakeScreenshotAction::ExecuteInternal(const TSharedPtr<
 	FString OutputPath = Params->GetStringField(TEXT("output_path"));
 
 	// Use the editor viewport (safe, works in both editor and PIE modes)
-	// During PIE, the editor viewport still shows the scene
 	FViewport* Viewport = nullptr;
 
 	if (GEditor && GEditor->GetActiveViewport())
@@ -3802,9 +3850,14 @@ TSharedPtr<FJsonObject> FTakeScreenshotAction::ExecuteInternal(const TSharedPtr<
 		return CreateErrorResponse(TEXT("Viewport has zero size"));
 	}
 
-	// ReadPixels on editor viewport is safe from game thread
+	// Apply linear-to-gamma correction so the captured image matches
+	// what the user sees on screen. Without this, Unlit/Emissive materials
+	// in dark scenes appear much darker in the saved PNG because ReadPixels
+	// returns linear-space data by default.
+	FReadSurfaceDataFlags ReadFlags(RCM_UNorm, CubeFace_MAX);
+	ReadFlags.SetLinearToGamma(true);
 	TArray<FColor> Bitmap;
-	bool bReadOk = Viewport->ReadPixels(Bitmap);
+	bool bReadOk = Viewport->ReadPixels(Bitmap, ReadFlags);
 	if (!bReadOk || Bitmap.Num() == 0)
 	{
 		return CreateErrorResponse(TEXT("Failed to read viewport pixels"));

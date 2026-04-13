@@ -66,6 +66,7 @@ void RegisterEditorActions(TMap<FString, TSharedRef<FEditorAction>>& ActionHandl
 	ActionHandlers.Add(TEXT("get_outliner_tree"), MakeShared<FGetOutlinerTreeAction>());
 	ActionHandlers.Add(TEXT("open_asset_editor"), MakeShared<FOpenAssetEditorAction>());
 	ActionHandlers.Add(TEXT("new_level"), MakeShared<FNewLevelAction>());
+	ActionHandlers.Add(TEXT("open_level"), MakeShared<FOpenLevelAction>());
 	ActionHandlers.Add(TEXT("take_screenshot"), MakeShared<FTakeScreenshotAction>());
 	ActionHandlers.Add(TEXT("simulate_key"), MakeShared<FSimulateKeyAction>());
 	ActionHandlers.Add(TEXT("execute_console_command"), MakeShared<FExecuteConsoleCommandAction>());

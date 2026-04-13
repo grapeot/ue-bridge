@@ -678,6 +678,17 @@ class UEBridge:
             "template": template,
         })
 
+    def open_level(self, level_path: str) -> dict:
+        """Open an existing level in the editor.
+
+        Args:
+            level_path: Asset path of the level (e.g. "/Game/Maps/CardShowcase").
+
+        Returns:
+            dict with level_path, filename, world_name fields.
+        """
+        return self._cmd("open_level", {"level_path": level_path})
+
     # -------------------------------------------------------------------------
     # PIE (Play In Editor)
     # -------------------------------------------------------------------------

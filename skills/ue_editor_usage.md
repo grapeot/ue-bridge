@@ -482,8 +482,8 @@ with UEBridge() as ue:
     # Variable to track selection
     ue.add_variable(bp, "CurrentCard", "int", default_value=0)
 
-    # Create input: Z=next, X=prev (avoid Q/E — SpectatorPawn uses them)
-    for ia, key in [("IA_NextCard", "Z"), ("IA_PrevCard", "X")]:
+    # Create input: Z=prev (left), X=next (right) — avoid Q/E (SpectatorPawn uses them)
+    for ia, key in [("IA_PrevCard", "Z"), ("IA_NextCard", "X")]:
         ue.create_input_action(ia, value_type="Digital")
         ue.add_key_mapping("IMC_Default", ia, key)
 
@@ -504,7 +504,7 @@ with UEBridge() as ue:
             "target": "KismetMathLibrary", "x": 0, "y": y_base + 200,
         })["node_id"]
         ue.connect(add_n, "ReturnValue", mod_n, "A", blueprint_name=bp)
-        ue.set_pin_default(bp, mod_n, "B", "3")
+        ue.set_pin_default(bp, mod_n, "B", str(len(card_classes)))
 
         set_cur = ue.add_variable_set(bp, "CurrentCard", position=(200, y_base))
         ue.connect(mod_n, "ReturnValue", set_cur, "CurrentCard", blueprint_name=bp)
@@ -549,8 +549,8 @@ with UEBridge() as ue:
             ue.connect(prev, pin, br, "execute", blueprint_name=bp)
             prev, pin = br, "else"  # chain via False path
 
-    build_chain("IA_NextCard", 1, 2000)    # Z = forward
-    build_chain("IA_PrevCard", 2, 4000)    # X = backward (+2 mod 3 = -1)
+    build_chain("IA_PrevCard", len(card_classes) - 1, 2000)  # Z = left (previous)
+    build_chain("IA_NextCard", 1, 4000)                      # X = right (next)
     ue.compile(bp)
     ue.save_all()
 ```
@@ -617,6 +617,35 @@ Always call `set_actor_transform()` after spawning to set scale. The scale param
 
 SpectatorPawn subclasses do NOT receive Enhanced Input Action events in their EventGraph. The events silently don't fire. Wire Enhanced Input handlers in the **PlayerController** Blueprint instead (e.g., `BP_ThirdPersonPlayerController`).
 
+### PlayerController must add IMC to Enhanced Input Subsystem at BeginPlay
+
+Creating Input Actions and adding key mappings to an IMC is not enough — the IMC must be registered with `EnhancedInputLocalPlayerSubsystem` at runtime. Without this, Enhanced Input Action events silently don't fire. Add this to the PlayerController's BeginPlay chain:
+
+```python
+# Get the subsystem
+get_sub = ue.raw_command("add_blueprint_get_subsystem_node", {
+    "blueprint_name": pc,
+    "subsystem_class": "EnhancedInputLocalPlayerSubsystem",
+    "x": -350, "y": 600,
+})
+
+# Call AddMappingContext
+add_mc = ue.raw_command("add_blueprint_function_node", {
+    "blueprint_name": pc,
+    "function_name": "AddMappingContext",
+    "target": "EnhancedInputLocalPlayerSubsystem",
+    "x": -100, "y": 600,
+})
+ue.set_pin_default(pc, add_mc["node_id"], "MappingContext",
+    "/Game/Input/IMC_Default.IMC_Default")
+ue.connect(get_sub["node_id"], "ReturnValue", add_mc["node_id"], "self", blueprint_name=pc)
+
+# Wire into BeginPlay: BeginPlay -> AddMappingContext -> rest of chain
+ue.connect(begin_play_id, "then", add_mc["node_id"], "execute", blueprint_name=pc)
+```
+
+**This is the most common reason Enhanced Input "doesn't work" in a custom PlayerController.** The ThirdPerson template's PC does this automatically, but freshly created PlayerController Blueprints do not.
+
 ### SpectatorPawn consumes WASD, Q, E, C keys
 
 When using SpectatorPawn, avoid binding gameplay actions to: W, A, S, D (movement), Q/E (up/down), C (may conflict with crouch from inherited IMC bindings), arrow keys, mouse buttons. Safe keys: Z, X, V, F, G, H, number keys (use `One`, `Two`, `Three` for main keyboard — not `1`, `2`, `3` which map to numpad).
@@ -666,3 +695,77 @@ Both `GetActorOfClass` (target `GameplayStatics`) and `SetActorScale3D` work as 
 A Branch node has `then` (True) and `else` (False) outputs. You cannot reconnect both paths to the same downstream node. Pattern for "do something conditional for each item in a list":
 1. Set ALL items to default state first (sequential chain)
 2. Then check condition for each item and only modify the matching one (Branch per item, chain via `else` pin)
+
+### No `import_asset` command — texture import requires manual step
+
+The bridge has no `import_asset` or equivalent. PNG/texture files placed in `Content/` are NOT automatically imported as uasset by UE. `execute_console_command` with `ContentBrowser.ImportFiles`, `Asset.ImportDir`, or `FbxAutomation.ImportDir` do not work either.
+
+**Workaround**: Copy PNG files into the project's `Content/<subfolder>/` while the editor is running. UE will detect the new files and show an import dialog. The user clicks "Import All". After import, `list_assets` will show the textures.
+
+**Important**: If PNGs are placed before the editor opens, UE will NOT detect them on startup. Delete and re-copy while the editor is running to trigger detection.
+
+### `add_material_expression` crashes when referencing non-existent textures
+
+`add_material_expression` with `properties: {"Texture": "/Game/Foo/T_Bar.T_Bar"}` causes an access violation crash (safely caught) if the texture asset does not exist yet. Always verify the texture is imported (`list_assets`) before referencing it in a material expression.
+
+**Safe pattern**: Create the TextureSample node without the `properties` field, then use `set_material_expression_property` to set the Texture after confirming the asset exists.
+
+### Object reference pins cannot be set via `set_pin_default` or `set_node_pin_default`
+
+`set_pin_default` and `set_node_pin_default` silently fail on object reference pins (e.g., `MappingContext` on `AddMappingContext`). The command returns success and `get_node_pins` shows the pin default as empty. Compilation succeeds but the pin has no value at runtime.
+
+**Workaround**: Use a PlayerController that already has the object reference wired in (e.g., `BP_FirstPersonPlayerController` from the template). Do not create a new PlayerController that needs manual `AddMappingContext` wiring.
+
+### Auto-exposure blows out Unlit Emissive materials in dark scenes
+
+In an empty level with no light sources, UE auto-exposure adapts to the darkness and massively amplifies any Emissive output, making cards appear washed out or pure white. Fix by disabling auto-exposure in `DefaultEngine.ini`:
+
+```ini
+[/Script/Engine.RendererSettings]
+r.DefaultFeature.AutoExposure=0
+```
+
+Requires editor restart. Alternative: add a PostProcessVolume with manual exposure settings (cannot be done via bridge — `spawn_actor` does not support `PostProcessVolume`).
+
+### `get_material_summary` does not show TextureSample texture references
+
+The `properties` field in `get_material_summary` expressions is always empty `{}` for TextureSample nodes, even when a valid texture is assigned via `add_material_expression`. The texture IS set — the material compiles and renders correctly — but you cannot verify it through the bridge API.
+
+### `.uproject` must declare the UEBridgeEditor plugin
+
+Placing the plugin in `Plugins/UEBridgeEditor/` is not sufficient — the `.uproject` file must also list it in the `Plugins` array:
+```json
+{
+    "Name": "UEBridgeEditor",
+    "Enabled": true
+}
+```
+Without this declaration, UE loads the project but does not start the bridge TCP listener on port 55558.
+
+### `new_level` overwrites existing levels with the same name
+
+`new_level` with a `level_name` that already exists will create a **fresh empty level**, destroying all actors that were placed in the previous version. There is no `open_level` or `load_level` command in the bridge. To reopen an existing level after an editor restart, use `new_level` only if you're prepared to re-populate it, or set `EditorStartupMap` in `DefaultEngine.ini` to your target level so the editor opens it automatically.
+
+### `take_screenshot` may appear darker than the live viewport
+
+`take_screenshot` captures the viewport buffer but the result may appear significantly darker than what the user sees on screen, especially with Unlit Emissive materials in dark scenes. This is a tonemapping/HDR rendering difference between the viewport display pipeline and the screenshot capture path. Do not use screenshot brightness as the sole indicator of material correctness — ask the user to confirm what they see on screen if in doubt.
+
+### Auto-exposure config requires editor restart
+
+The `r.DefaultFeature.AutoExposure=0` setting in `DefaultEngine.ini` only takes effect after restarting the UE Editor. Changing the file while the editor is running has no effect on the current session. Plan for a restart after modifying renderer settings.
+
+### Texture import auto-detects PNGs placed before editor launch (contradicts earlier finding)
+
+Despite the earlier note that PNGs placed before the editor opens are NOT auto-detected, in practice UE 5.7 **does** auto-import PNGs found in `Content/` subdirectories on project open, at least for fresh projects. The behavior may depend on whether the `Content/` subfolder already has a corresponding `.uasset` or not. Verify with `list_assets` after editor load rather than assuming either behavior.
+
+### Chinese/Unicode filenames in Content/ may cause issues
+
+Rename texture PNGs to ASCII-safe names (e.g., `T_Card_0.png`) before placing them in `Content/` for import. UE asset paths use ASCII internally and Unicode filenames can cause import failures or asset reference issues.
+
+### `apply_material_to_actor` only affects scene actor instances
+
+`apply_material_to_actor` sets the material on the editor-level actor instance (the one visible in the level editor). During PIE, actors are spawned from their Blueprint CDO, which may still have the default material. If the Blueprint's `set_static_mesh_properties` with `materials` parameter was used during creation, the CDO should already have the correct material. Use `apply_material_to_actor` as a visual fix for the editor viewport, not as the primary material assignment path.
+
+### SpectatorPawn + FirstPerson PlayerController causes AddMappingContext warnings
+
+When using a custom GameMode with `SpectatorPawn` as DefaultPawnClass and `BP_FirstPersonPlayerController` as PlayerControllerClass, the template's BeginPlay `AddMappingContext` node may fire before the local player subsystem is ready, producing runtime errors like "Accessed None trying to read property CallFunc_GetLocalPlayerSubsystem_ReturnValue". Despite these errors, Enhanced Input key mappings typically still work because the IMC gets registered on a subsequent frame. These warnings are cosmetic but noisy.

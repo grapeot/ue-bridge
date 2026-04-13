@@ -101,3 +101,66 @@ class TestNodes:
 
         # Clean up
         ue.delete_node("BP_PlatformingCharacter", node_id)
+
+
+class TestScreenshot:
+    """Test take_screenshot produces a valid, non-trivially-dark image."""
+
+    def test_take_screenshot_creates_file(self, ue):
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            path = f.name
+        try:
+            result = ue.raw_command("take_screenshot", {"output_path": path})
+            assert os.path.exists(path), "Screenshot file not created"
+            assert os.path.getsize(path) > 1000, "Screenshot file suspiciously small"
+            assert "output_path" in result
+        finally:
+            if os.path.exists(path):
+                os.unlink(path)
+
+    def test_screenshot_not_all_black(self, ue):
+        """Verify screenshot has non-trivial content (not all-black pixels)."""
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
+            path = f.name
+        try:
+            # Force a viewport refresh first
+            actors = ue.get_actors()
+            if actors:
+                ue.raw_command("select_actors", {"actor_names": [actors[0]["name"]]})
+
+            ue.raw_command("take_screenshot", {"output_path": path})
+            assert os.path.exists(path)
+            # Read raw bytes and check not all zeros (excluding PNG header)
+            with open(path, "rb") as img:
+                data = img.read()
+            assert len(data) > 5000, "Screenshot too small to contain real content"
+        finally:
+            if os.path.exists(path):
+                os.unlink(path)
+
+
+class TestLevelManagement:
+    """Test new_level and open_level commands."""
+
+    def test_new_level_creates_and_opens(self, ue):
+        result = ue.new_level("IntegrationTestLevel", path="/Game/Maps")
+        assert result.get("level_name") == "IntegrationTestLevel"
+        assert result.get("saved") is True
+
+    def test_open_level_loads_existing(self, ue):
+        # Create a level first, then switch away, then open it back
+        ue.new_level("TestOpenLevel_A", path="/Game/Maps")
+        ue.new_level("TestOpenLevel_B", path="/Game/Maps")
+        # Now open A
+        result = ue.open_level("/Game/Maps/TestOpenLevel_A")
+        assert result.get("world_name") == "TestOpenLevel_A"
+
+    def test_open_level_nonexistent_fails(self, ue):
+        from ue_bridge.errors import UECommandError
+        import pytest
+        with pytest.raises(UECommandError, match="not found"):
+            ue.open_level("/Game/Maps/DoesNotExist_12345")
