@@ -1,109 +1,110 @@
-# Skill: UE Editor Automation — Installation
+# UE 编辑器自动化 — 安装指南
 
-## Prerequisites
+## 前置条件
 
-- macOS or Windows
+- macOS 或 Windows
 - Unreal Engine 5.7+
 - Python 3.10+
-- UE Editor running with the bridge plugin enabled
+- UE Editor 运行中且 bridge 插件已启用
 
-## Repo Layout
-
-This skill lives in `ue_bridge_skill/`. The key directories:
+## 目录结构
 
 ```
 ue_bridge_skill/
-  plugin/           C++ UE plugin (copy into your project's Plugins/)
-  python/           Python library (install with pip)
-  skills/           AI-facing documentation (this file)
-  scripts/          Platform-specific setup helpers
+  plugin/           C++ UE 插件（复制到项目的 Plugins/ 下）
+  python/           Python 库（pip install -e .）
+  skills/           AI 使用文档（本文件）
+  scripts/          平台相关安装辅助脚本
+  hosts/            内置验证用宿主项目
 ```
 
-## Installation
+## 安装步骤
 
-This markdown guide is the primary installation surface for AI agents. The setup scripts are convenience helpers, not exhaustive error-handling wrappers. If a step fails, inspect the exact failure and continue from there instead of assuming the script can recover automatically.
+### 第一步：安装 C++ 插件
 
-### Step 1: Install the C++ plugin
-
-**macOS** — use the setup script:
+**macOS** — 使用安装脚本：
 
 ```bash
 cd ue_bridge_skill
 ./scripts/setup.sh /path/to/your/UE/project
 ```
 
-The script copies the plugin into your project's `Plugins/` directory, patches the RTTI build flag for macOS compatibility, and compiles using UE 5.7's build tools.
+脚本会把插件复制到项目的 `Plugins/` 目录、修补 macOS 兼容性的 RTTI 编译标志、用 UE 5.7 的构建工具编译插件。
 
-**Windows** — copy manually:
-
-```
-Copy ue_bridge_skill/plugin/ → <YourProject>/Plugins/
-```
-
-Then restart the UE Editor.
-
-### Step 2: Verify the plugin from the CLI
-
-Do not rely on manual GUI inspection as the primary signal. Prefer the structured checks after installing the Python package:
+如果脚本找不到 RunUBT，需要手动编译：
 
 ```bash
-ue-bridge doctor
-ue-bridge verify
+"/Users/Shared/Epic Games/UE_5.7/Engine/Build/BatchFiles/RunUBT.sh" \
+  <项目名>Editor Mac Development \
+  -Project="/path/to/your/project.uproject" \
+  -TargetType=Editor
 ```
 
-These checks are the source of truth for installation readiness.
+注意：`setup.sh` 使用 `rsync -a` 会保留源文件时间戳。如果 UE 认为代码没变而跳过编译，用 `touch` 更新源文件时间戳后重新编译。
 
-### Step 3: Install the Python library
+**Windows** — 手动复制：
+
+```
+复制 ue_bridge_skill/plugin/ → <你的项目>/Plugins/UEBridgeEditor/
+```
+
+然后重启 UE Editor。
+
+**关键**：`.uproject` 文件必须声明插件，否则 UE 不会启动 TCP 监听：
+
+```json
+{
+    "Name": "UEBridgeEditor",
+    "Enabled": true
+}
+```
+
+### 第二步：安装 Python 库
 
 ```bash
 cd ue_bridge_skill/python
 pip install -e ".[dev]"
 ```
 
-This installs the `ue-bridge` package in editable mode with test dependencies. It provides:
+安装完成后可用：
 
-- **Python import**: `from ue_bridge import UEBridge`
-- **CLI command**: `ue-bridge` (available after install)
-- **Module invocation**: `python3 -m ue_bridge` (canonical) or `python3 -m src` (legacy compatibility)
+- **Python 导入**：`from ue_bridge import UEBridge`
+- **CLI 命令**：`ue-bridge`
+- **模块调用**：`python3 -m ue_bridge`（规范路径）或 `python3 -m src`（兼容路径）
 
-### Step 4: Confirm end-to-end connectivity
+### 第三步：验证连接
 
 ```bash
-ue-bridge doctor
-ue-bridge verify
+ue-bridge doctor   # 结构化诊断：连接、编辑器上下文、就绪状态、日志
+ue-bridge verify   # 严格就绪门槛，不通过则 exit code 非零
 ```
 
-Use the two commands differently:
+`verify` 通过即安装完成。
 
-- `ue-bridge doctor` returns a structured diagnosis report across connection, editor context, readiness, and logs
-- `ue-bridge verify` is the final gate and exits non-zero unless the bridge is actually ready to use
+### 可选：使用内置宿主项目验证
 
-If `verify` succeeds, installation is complete.
+如果想用最小化的维护项目而不是自己的项目来验证：
 
-### Optional: Use the repo-contained host for validation
-
-If you want a minimal maintained host project instead of wiring your own project first, use:
-
-```text
+```bash
+# 内置宿主项目
 hosts/UEBridgeHost/UEBridgeHost.uproject
-```
 
-You can run the full end-to-end validation flow from the repo root:
-
-```bash
+# 端到端验证流程
 scripts/run_python_unreal_integration.sh hosts/UEBridgeHost/UEBridgeHost.uproject
 ```
 
-## Troubleshooting
+## 常见问题
 
-**"Cannot connect to Unreal Editor"**: UE Editor is not running, or the bridge plugin is not enabled.
+**"Cannot connect to Unreal Editor"**：UE Editor 没运行，或 bridge 插件未启用。检查 `.uproject` 是否声明了 `UEBridgeEditor` 插件。
 
-**"Connection refused on port 55558"**: The plugin's local command server may not have started. Re-run `ue-bridge doctor` after the editor finishes loading.
+**"Connection refused on port 55558"**：插件的 TCP 服务器可能还没启动。等编辑器完全加载后再试 `ue-bridge doctor`。
 
-**`doctor` succeeds but `verify` fails**: The editor is reachable, but not fully initialized. Wait for asset registry loading to finish, then run `ue-bridge verify` again.
+**`doctor` 通过但 `verify` 失败**：编辑器可达但 Asset Registry 还没加载完。等几秒再试。
 
-**Python import errors**: Ensure you ran `pip install -e .` from the `python/` directory. The package name is `ue-bridge` and the canonical import is `from ue_bridge import UEBridge`.
+**Python import 报错**：确认在 `python/` 目录执行了 `pip install -e .`。包名是 `ue-bridge`，规范导入路径是 `from ue_bridge import UEBridge`。
 
-**macOS RTTI build error**: The setup script patches `bUseRTTI=false` automatically. If building manually, ensure `.uplugin` or `.Build.cs` has `bUseRTTI = false`.
+**macOS RTTI 编译错误**：安装脚本会自动修补 `bUseRTTI=false`。如果手动编译，需确保 `.Build.cs` 中有 `bUseRTTI = false`。
 
-**Windows plugin not loading**: Ensure the plugin folder is present under `<YourProject>/Plugins/` and restart the editor after copying.
+**编译后新功能不生效**：`setup.sh` 的 `rsync -a` 保留时间戳，UE 的增量编译会跳过"未修改"的文件。解决方法：`touch` 所有 `.cpp`/`.h` 文件后重新编译，或删除 `Intermediate/` 和 `Binaries/` 目录让 UE 强制全量重编。
+
+**Windows 插件不加载**：确认插件目录在 `<项目>/Plugins/UEBridgeEditor/` 下，且重启了编辑器。
