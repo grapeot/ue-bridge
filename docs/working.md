@@ -2,6 +2,14 @@
 
 ## Changelog
 
+### 2026-04-13
+
+- **New feature: `open_level` command** — opens an existing level in the editor without overwriting it. Uses `FEditorFileUtils::LoadMap()` under the hood. Registered in ActionRegistry, added Python method `ue.open_level("/Game/Maps/MyLevel")`, and integration tests for success + nonexistent-level error case
+- **Bug fix: `take_screenshot` now produces images matching screen brightness** — replaced `ReadPixels()` (which returns pre-tonemapped linear data, appearing much darker for Unlit/Emissive materials) with `FScreenshotRequest::RequestScreenshot()` which goes through UE's full rendering pipeline (tonemapping, gamma correction, color grading). Falls back to `ReadPixels()` if the async request times out
+- Added integration tests for `take_screenshot` (file creation, non-trivial content) and `open_level` (round-trip create→switch→open, nonexistent error)
+- **Card Showcase demo**: end-to-end AI-built card game prototype using ue-bridge. 3 textured cards in fan layout, Z/X key cycling with scale feedback, SpectatorPawn camera, Unlit emissive materials. Demonstrates full workflow: plugin install → texture import → material creation → Blueprint construction → Enhanced Input wiring → PIE verification
+- Updated `ue_editor_usage.md` with new learnings: `new_level` overwrites existing levels, `take_screenshot` darkness root cause, auto-exposure requires restart, texture import auto-detection in UE 5.7, Chinese filenames, `apply_material_to_actor` scope, SpectatorPawn + AddMappingContext warnings
+
 ### 2026-04-01
 
 - **Bug fix: `set_inherited_component_property` changes were not persisting across editor restarts.** Root cause: the original implementation modified the CDO (transient in-memory object) without ensuring the Blueprint's package was marked dirty. CDO modifications are lost when UE regenerates the CDO from serialized data on restart.
